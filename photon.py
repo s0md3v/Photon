@@ -38,6 +38,24 @@ target = sys.argv[1]
 name = target.split('.')[1]
 storage.add(target)
 
+def zap(url):
+    try:
+        response = br.open(url+'/robots.txt').read().split('\n')
+        for line in response:
+            if 'Allow:' in line or 'Disallow:' in line and not line.endswith('/'):
+                storage.add(target + line.strip('Allow: ').strip('Disallow: '))
+        print '%s Links retrieved from robots.txt: %s' % (info, len(storage) - 1)
+    except:
+        pass
+    try:
+        response = br.open(url+'/sitemap.xml').read()
+        matches = re.findall(r'<loc>[^<]*</loc>', response)
+        print '%s Links retrieved from sitemap.xml: %s' % (info, len(matches))
+        for match in matches:
+            storage.add(match.split('<loc>')[1][:-6])
+    except:
+        pass
+
 def get_links(url):
     try:
         response = br.open(url).read()
@@ -84,6 +102,7 @@ def initiate():
     t1.join() #Joins both
     t2.join() #of the threads
 
+zap(target)
 get_links(target)
 print '%s URLs to crawl: %i' % (info, len(storage))
 approx = (len(storage)/20)
