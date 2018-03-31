@@ -1,11 +1,20 @@
 # Photon
-Web crawler made for hackers by a hacker.
+Photon crawls a website for webpages, javascript files and endpoints present in javascript files.
 
 ![Photon demo](https://i.imgur.com/E9ij1jf.png)
 
 ### Usage
+Crawling a website is this simple:
 ```
 python photon.py http://example.com
+```
+You can also use a cookie:
+```
+python photon.py http://example.com --cookie="your_cookie_here"
+```
+Delaying requests is also possible as follows:
+```
+python photon.py http://example.com --delay=1.5
 ```
 
 ### Features
