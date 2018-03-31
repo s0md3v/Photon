@@ -37,7 +37,7 @@ br.set_handle_equiv(True) # I don't know what it does, but its some good shit
 br.set_handle_redirect(True) # Follow redirects
 br.set_handle_referer(True) # Include referrer
 
-delay = 0
+delay = 0.5
 if args.delay:
     delay = args.delay
 
@@ -53,7 +53,7 @@ scripts = set()
 params = set()
 endpoints = set()
 
-name = target.split('.')[1]
+name = target.split('.')[0]
 storage.add(target)
 
 def zap(url):
@@ -189,3 +189,4 @@ with open('%s/fuzzable.txt' % name, 'w+') as f:
 with open('%s/endpoints.txt' % name, 'w+') as f:
     for x in params:
         f.write(x + '\n')
+print '%s Results saved in \033[;1m%s\033[0m directory' % (good, name)
