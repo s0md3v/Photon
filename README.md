@@ -16,6 +16,10 @@ Delaying requests is also possible as follows:
 ```
 python photon.py http://example.com --delay=1.5
 ```
+**Photon** stores results in a directory whose name depends on target. But you can also specify an output directory.
+```
+python photon.py http://example.com --output=results
+```
 
 ### Features
 - [x] Extract URLs
