@@ -53,7 +53,7 @@ scripts = set()
 params = set()
 endpoints = set()
 
-name = target.split('.')[1]
+name = target.split('.')[0].strip('www.').strip('http').strip('https').strip('://')
 storage.add(target)
 
 def zap(url):
