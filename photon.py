@@ -1,9 +1,10 @@
 #!/usr/bin/env python2
 import mechanize
 import threading
-import sys
+import argparse
 import time
 import re
+import os
 
 white = '\033[1;97m'
 green = '\033[1;32m'
@@ -20,21 +21,38 @@ print '''%s      ____  __          __
      / %s__%s \/ /_  ____  / /_____  ____ 
     / %s/_/%s / __ \/ %s__%s \/ __/ %s__%s \/ __ \\
    / ____/ / / / %s/_/%s / /_/ %s/_/%s / / / /
-  /_/   /_/ /_/\____/\__/\____/_/ /_/ \n''' % (red, white, red, white, red, white, red, white, red, white, red, white, red)
+  /_/   /_/ /_/\____/\__/\____/_/ /_/ %s\n''' % (red, white, red, white, red, white, red, white, red, white, red, white, red, end)
 
-storage = set()
-scripts = set()
-params = set()
+
+parser = argparse.ArgumentParser()
+parser.add_argument('target', help="target website")
+parser.add_argument('--cookie', help="cookie", dest='cookie')
+parser.add_argument('--delay', help="request delay", dest='delay', type=float)
+args = parser.parse_args()
+target = args.target
 
 br = mechanize.Browser() # Just shortening the calling function
 br.set_handle_robots(False) # Don't follow robots.txt
 br.set_handle_equiv(True) # I don't know what it does, but its some good shit
 br.set_handle_redirect(True) # Follow redirects
 br.set_handle_referer(True) # Include referrer
-br.addheaders = [('User-agent', 'Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.0.1) Gecko/2008071615 Fedora/3.0.1-1.fc9 Firefox/3.0.1'),
+
+delay = 0
+if args.delay:
+    delay = args.delay
+
+if args.cookie:
+    br.addheaders = [('User-agent', 'Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.0.1) Gecko/2008071615 Fedora/3.0.1-1.fc9 Firefox/3.0.1'),
+('Accept-Encoding', 'deflate'), ('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'), ('Cookie', args.cookie)]
+else:
+    br.addheaders = [('User-agent', 'Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.0.1) Gecko/2008071615 Fedora/3.0.1-1.fc9 Firefox/3.0.1'),
 ('Accept-Encoding', 'deflate'), ('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8')]
 
-target = sys.argv[1]
+storage = set()
+scripts = set()
+params = set()
+endpoints = set()
+
 name = target.split('.')[1]
 storage.add(target)
 
@@ -85,15 +103,42 @@ def get_links(url):
     except:
         storage.remove(url)
 
+def jscanner(url):
+    try:
+        response = br.open(url).read()
+        matches = re.findall(r'"/.*"|/\'.*\'|"http.*"|\'http.*\'', response)
+        for match in matches:
+            if r'[}{><"\']' not in match:
+                endpoints.add(match.split(match[-1:])[1])
+    except:
+        pass
+
+def jsinit():
+    database = list(scripts.copy())
+    def part1():
+        for url in database[:len(scripts)/2]:
+            time.sleep(delay)
+            jscanner(url)
+    def part2():
+        for url in database[len(scripts)/2:]:
+            time.sleep(delay)
+            jscanner(url)
+    t1 = threading.Thread(target=part1) #Calls the part1 function via a thread
+    t2 = threading.Thread(target=part2) #Calls the part2 function via a thread
+    t1.start() #starts thread 1
+    t2.start() #starts thread 2
+    t1.join() #Joins both
+    t2.join() #of the threads
+
 def initiate():
     database = list(storage.copy())
     def part1():
         for url in database[:len(storage)/2]:
-            time.sleep(1.5)
+            time.sleep(delay)
             get_links(url)
     def part2():
         for url in database[len(storage)/2:]:
-            time.sleep(1.5)
+            time.sleep(delay)
             get_links(url)
     t1 = threading.Thread(target=part1) #Calls the part1 function via a thread
     t2 = threading.Thread(target=part2) #Calls the part2 function via a thread
@@ -104,42 +149,43 @@ def initiate():
 
 zap(target)
 get_links(target)
-print '%s URLs to crawl: %i' % (info, len(storage))
+print '%s Links to crawl: %i' % (info, len(storage))
 approx = (len(storage)/20)
+
 if approx > 0:
     print '%s Time required: ~%i minutes' % (info, approx)
 else:
     print '%s Time required: ~1 minute' % info
+
 initiate()
 
-print '%s-%s' % (red, end) * 60
+print '%s Total URLs found: %i' % (good, len(storage))
+print '%s Fuzzable URLs found: %i' % (good, len(params))
+print '%s JavaScript files found: %i' % (good, len(scripts))
+print '%s Scanning JavaScript files for endpoints' % run
 
-print '%s URLs found: %i' % (info, len(storage))
-for x in storage:
-    print x
+approx = (len(scripts)/200)
+if approx > 0:
+    print '%s Time required: ~%i minutes' % (info, approx)
+else:
+    print '%s Time required: ~1 minute' % info
 
-print '%s-%s' % (red, end) * 60
+jsinit()
 
-print '%s JavaScript files found:' % info
-for x in scripts:
-    print x
+print '%s Enpoints found: %i' % (good, len(endpoints))
 
-print '%s-%s' % (red, end) * 60
-
-print '%s Fuzzable URLs found:' % info
-for x in params:
-    print x
-
-choice = raw_input('Would you like to save the results? [Y/n]').lower()
-if choice != 'n':
-    with open('%s-links.txt' % name, 'w+') as f:
-        for x in storage:
+if os.path.exists(name):
+    os.system('rm -r %s' % name)
+os.system('mkdir %s' % name)
+with open('%s/links.txt' % name, 'w+') as f:
+    for x in storage:
             f.write(x + '\n')
-
-    with open('%s-js.txt' % name, 'w+') as f:
-        for x in scripts:
+with open('%s/js.txt' % name, 'w+') as f:
+    for x in scripts:
             f.write(x + '\n')
-
-    with open('%s-fuzzable.txt' % name, 'w+') as f:
-        for x in params:
-            f.write(x + '\n')
+with open('%s/fuzzable.txt' % name, 'w+') as f:
+    for x in params:
+        f.write(x + '\n')
+with open('%s/endpoints.txt' % name, 'w+') as f:
+    for x in params:
+        f.write(x + '\n')
