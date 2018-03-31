@@ -1,7 +1,7 @@
 # Photon
 Web crawler made for hackers by a hacker.
 
-![Photon demo](https://i.imgur.com/iluKkeg.png)
+![Photon demo](https://i.imgur.com/E9ij1jf.png)
 
 ### Usage
 ```
