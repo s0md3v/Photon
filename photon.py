@@ -29,7 +29,10 @@ parser.add_argument('target', help="target website")
 parser.add_argument('--cookie', help="cookie", dest='cookie')
 parser.add_argument('--delay', help="request delay", dest='delay', type=float)
 args = parser.parse_args()
+
 target = args.target
+if 'http' not in target:
+    target = 'http://' + target
 
 br = mechanize.Browser() # Just shortening the calling function
 br.set_handle_robots(False) # Don't follow robots.txt
@@ -54,6 +57,8 @@ params = set()
 endpoints = set()
 
 name = target.split('.')[0].strip('www.').strip('http').strip('https').strip('://')
+if name == '':
+    name = 'result%i' % len(target)
 storage.add(target)
 
 def zap(url):
