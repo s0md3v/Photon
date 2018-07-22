@@ -45,6 +45,8 @@ args = parser.parse_args()
 
 if args.root:
     main_inp = args.root
+    if main_inp.endswith('/'):
+        main_inp = main_inp[:-1]
 else:
     print ('\n' + parser.format_help().lower())
     quit()
