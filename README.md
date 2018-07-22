@@ -4,7 +4,7 @@ Photon is a lightning fast web crawler which extracts URLs, files, intel & endpo
 
 ![demo](https://image.ibb.co/bTNwBy/Screenshot_2018_07_22_12_07_30.png)
 
-Yep, I am using 100 threads and Photon won't complain about it because its in Ninja Mode.
+Yep, I am using 100 threads and Photon won't complain about it because its in Ninja Mode :sunglasses:
 
 ## Why Photon?
 
@@ -86,5 +86,6 @@ Lets you add custom seeds, sperated by commas.
 
 `python photon -u http://example.com -s "http://example.com/portals.html,http://example.com/blog/2018"`
 
-### License
+### Contribution & License
+Apart from reporting bugs and stuff, please help me add more "APIs" to make the Ninja Mode more powerful.\
 **Photon** is licensed under [GPL v3.0 license](https://www.gnu.org/licenses/gpl-3.0.en.html).
