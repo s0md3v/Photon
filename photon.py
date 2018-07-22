@@ -324,8 +324,8 @@ flash(jscanner, scripts)
 
 # Step 4. Save the results
 if os.path.exists(name):
-    os.system('rm -r %s' % name)
-os.system('mkdir %s' % name)
+    os.rmdir(name)
+os.mkdir(name)
 
 with open('%s/links.txt' % name, 'w+') as f:
     for x in storage:
