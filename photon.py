@@ -22,7 +22,11 @@ import argparse
 import threading
 from requests import get, post
 from re import search, findall
-from urllib.parse import urlparse
+#from urllib.parse import urlparse
+try:
+    from urllib.parse import urlparse
+except ImportError:
+     from urlparse import urlparse
 
 print ('''%s      ____  __          __            
      / %s__%s \/ /_  ____  / /_____  ____ 
