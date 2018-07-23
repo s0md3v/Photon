@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 # Let's import what we need
 import os
@@ -349,17 +350,17 @@ os.mkdir(name) # create a new directory
 
 with open('%s/links.txt' % name, 'w+') as f:
     for x in storage:
-            f.write(x + '\n')
+        f.write(x + '\n')
 f.close()
 
 with open('%s/robots.txt' % name, 'w+') as f:
     for x in storage:
-            f.write(x + '\n')
+        f.write(x + '\n')
 f.close()
 
 with open('%s/scripts.txt' % name, 'w+') as f:
     for x in scripts:
-            f.write(x + '\n')
+        f.write(x + '\n')
 f.close()
 
 with open('%s/fuzzable.txt' % name, 'w+') as f:
