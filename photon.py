@@ -11,7 +11,10 @@ import argparse
 import threading
 from requests import get, post
 from re import search, findall
-from urllib.parse import urlparse
+try:
+    from urllib.parse import urlparse # for python3
+except ImportError:
+    from urlparse import urlparse # for python2
 
 colors = True # Output should be colored
 machine = sys.platform # Detecting the os of current system
