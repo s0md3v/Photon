@@ -350,7 +350,7 @@ diff = (now  - then) # finds total time taken
 
 def timer(diff):
     minutes, seconds = divmod(diff, 60) # Changes seconds into minutes and seconds
-    time_per_request = diff / len(processed) # Finds average time taken by requests
+    time_per_request = diff / float(len(processed)) # Finds average time taken by requests
     return minutes, seconds, time_per_request
 time_taken = timer(diff)
 minutes = time_taken[0]
@@ -421,7 +421,7 @@ good, len(scripts), good, len(external),
 (('%s-%s' % (red, end)) * 50)))
 
 print ('%s Total time taken: %i:%i' % (info, minutes, seconds))
-print ('%s Average request time: %i' % (info, time_per_request))
+print ('%s Average request time: %s' % (info, str(time_per_request)[:4]))
 
 if not colors: # if colors are disabled
     print ('%s Results saved in %s directory' % (good, name))
