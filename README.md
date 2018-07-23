@@ -40,6 +40,8 @@ Specifies the URL to crawl.
 
 `python photon.py -u http://example.com`
 
+If you feel like the crawling is taking too long or you just don't want to crawl anymore, just press `ctrl + c` in your terminal and Photon will skip the rest of URLs.
+
 #### `-l --level`
 
 It specifies how much deeper should photon crawl.
