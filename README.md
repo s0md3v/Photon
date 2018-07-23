@@ -23,7 +23,7 @@ The extracted information is saved in an organized manner.\
 
 #### Intelligent Multi-Threading
 Here's a secret, most of the tools floating on the internet aren't properly multi-threaded even if they are supposed to. They either supply a list of items to threads which results in multiple threads accessing the same item or they simply put a thread lock and end up rendering multi-threading useless.\
-But Photon is different or should I say "genius"? Take a look at [this](https://github.com/s0md3v/Photon/blob/38f64100d101fce897b4e0a5cfafdaeb129491d2/photon.py#L282) and decide yourself.
+But Photon is different or should I say "genius"? Take a look at [this](https://github.com/s0md3v/Photon/blob/38f64100d101fce897b4e0a5cfafdaeb129491d2/photon.py#L282-L293) and decide yourself.
 
 #### Ninja Mode
 In Ninja Mode, 3 online services are used to make requests to the target on your behalf.\
