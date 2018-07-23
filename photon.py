@@ -48,12 +48,13 @@ urllib3.disable_warnings() # Disable SSL related warnings
 # Processing command line arguments
 parser = argparse.ArgumentParser()
 parser.add_argument('-u', '--url', help='root url', dest='root')
+parser.add_argument('-c', '--cookie', help='cookie', dest='cook')
+parser.add_argument('-r', '--regex', help='regex pattern', dest='regex')
+parser.add_argument('-s', '--seeds', help='additional seed urls', dest='seeds')
 parser.add_argument('-l', '--level', help='levels to crawl', dest='level', type=int)
 parser.add_argument('-t', '--threads', help='number of threads', dest='threads', type=int)
-parser.add_argument('-d', '--delay', help='delay between requests', dest='delay', type=int)
-parser.add_argument('-c', '--cookie', help='cookie', dest='cook')
-parser.add_argument('-s', '--seeds', help='additional seed urls', dest='seeds')
 parser.add_argument('-n', '--ninja', help='ninja mode', dest='ninja', action='store_true')
+parser.add_argument('-d', '--delay', help='delay between requests', dest='delay', type=int)
 args = parser.parse_args()
 
 if args.root: # if the user has supplied a url
@@ -85,6 +86,7 @@ if args.threads:
 files = set() # pdf, css, png etc.
 intel = set() # emails, website accounts, aws buckets etc.
 robots = set() # entries of robots.txt
+custom = set() # string extracted by custom regex pattern
 failed = set() # urls that photon failed to crawl
 storage = set() # urls that belong to the target i.e. in-scope
 scripts = set() # javascript files
@@ -265,7 +267,15 @@ def extractor(url):
             for x in match: # iterate over the match because it's a tuple
                 if x != '': # if the value isn't empty
                     intel.add(x) # add it to intel list
-    except: # if something bad happens
+
+        def regxy(pattern):
+            matches = findall(r'%s' % pattern, response)
+            for match in matches:
+                custom.add(match)
+        if args.regex:
+            regxy(args.regex)
+
+    except ImportError: # if something bad happens
         failed.add(url)
 
 ####
@@ -366,47 +376,42 @@ os.mkdir(name) # create a new directory
 with open('%s/links.txt' % name, 'w+') as f:
     for x in storage:
         f.write(x + '\n')
-f.close()
-
-with open('%s/robots.txt' % name, 'w+') as f:
-    for x in storage:
-        f.write(x + '\n')
-f.close()
-
-with open('%s/scripts.txt' % name, 'w+') as f:
-    for x in scripts:
-        f.write(x + '\n')
-f.close()
-
-with open('%s/fuzzable.txt' % name, 'w+') as f:
-    for x in fuzzable:
-        f.write(x + '\n')
-f.close()
-
-with open('%s/endpoints.txt' % name, 'w+') as f:
-    for x in endpoints:
-        f.write(x + '\n')
-f.close()
-
-with open('%s/failed.txt' % name, 'w+') as f:
-    for x in failed:
-        f.write(x + '\n')
-f.close()
-
-with open('%s/external.txt' % name, 'w+') as f:
-    for x in external:
-        f.write(x + '\n')
-f.close()
 
 with open('%s/files.txt' % name, 'w+') as f:
     for x in files:
         f.write(x + '\n')
-f.close()
 
 with open('%s/intel.txt' % name, 'w+') as f:
     for x in intel:
         f.write(x + '\n')
-f.close()
+
+with open('%s/robots.txt' % name, 'w+') as f:
+    for x in storage:
+        f.write(x + '\n')
+
+with open('%s/failed.txt' % name, 'w+') as f:
+    for x in failed:
+        f.write(x + '\n')
+
+with open('%s/custom.txt' % name, 'w+') as f:
+    for x in custom:
+        f.write(x + '\n')
+
+with open('%s/scripts.txt' % name, 'w+') as f:
+    for x in scripts:
+        f.write(x + '\n')
+
+with open('%s/fuzzable.txt' % name, 'w+') as f:
+    for x in fuzzable:
+        f.write(x + '\n')
+
+with open('%s/external.txt' % name, 'w+') as f:
+    for x in external:
+        f.write(x + '\n')
+
+with open('%s/endpoints.txt' % name, 'w+') as f:
+    for x in endpoints:
+        f.write(x + '\n')
 
 # Printing out results
 print ('''%s
@@ -415,11 +420,12 @@ print ('''%s
 %s Files: %i
 %s Endpoints: %i
 %s Fuzzable URLs: %i
+%s Custom strings: %i
 %s JavaScript Files: %i
 %s External References: %i
 %s''' % ((('%s-%s' % (red, end)) * 50), good, len(storage), good, 
-len(intel), good, len(files), good, len(endpoints), good, len(fuzzable),
-good, len(scripts), good, len(external),
+len(intel), good, len(files), good, len(endpoints), good, len(fuzzable), good,
+len(custom), good, len(scripts), good, len(external),
 (('%s-%s' % (red, end)) * 50)))
 
 print ('%s Total time taken: %i:%i' % (info, minutes, seconds))
