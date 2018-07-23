@@ -17,6 +17,7 @@ It extracts the following information:
 - Intel (emails, social media accounts, amazon buckets etc.)
 - Files (pdf, png, xml etc.)
 - JavaScript files & Endpoints present in them
+- Strings based on custom regex pattern
 
 The extracted information is saved in an organized manner.\
 ![save demo](https://image.ibb.co/ezTEyd/Screenshot_2018_07_22_12_24_44.png)
