@@ -275,7 +275,7 @@ def extractor(url):
         if args.regex:
             regxy(args.regex)
 
-    except ImportError: # if something bad happens
+    except: # if something bad happens
         failed.add(url)
 
 ####
