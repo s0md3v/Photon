@@ -321,6 +321,8 @@ def flash(function, links): # This shit is complicated, move on
         sys.stdout.flush()
     print ('')
 
+then = time.time() # records the time at which crawling started
+
 # Step 1. Extract urls from robots.txt & sitemap.xml
 zap(main_url)
 
@@ -343,6 +345,17 @@ for level in range(crawl_level):
 print ('%s Crawling %i JavaScript files' % (run, len(scripts)))
 flash(jscanner, scripts)
 
+now = time.time() # records the time at which crawling stopped
+diff = (now  - then) # finds total time taken
+
+def timer(diff):
+    minutes, seconds = divmod(diff, 60) # Changes seconds into minutes and seconds
+    time_per_request = diff / len(processed) # Finds average time taken by requests
+    return minutes, seconds, time_per_request
+time_taken = timer(diff)
+minutes = time_taken[0]
+seconds = time_taken[1]
+time_per_request = time_taken[2]
 # Step 4. Save the results
 if os.path.exists(name): # if the directory already exists
     shutil.rmtree(name, ignore_errors=True) # delete it, recursively
@@ -406,6 +419,9 @@ print ('''%s
 len(intel), good, len(files), good, len(endpoints), good, len(fuzzable),
 good, len(scripts), good, len(external),
 (('%s-%s' % (red, end)) * 50)))
+
+print ('%s Total time taken: %i:%i' % (info, minutes, seconds))
+print ('%s Average request time: %i' % (info, time_per_request))
 
 if not colors: # if colors are disabled
     print ('%s Results saved in %s directory' % (good, name))
