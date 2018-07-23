@@ -19,7 +19,7 @@ except ImportError:
 
 colors = True # Output should be colored
 machine = sys.platform # Detecting the os of current system
-if machine.startswith('os') or machine.startswith('win') or machine.startswith('darwin'):
+if machine.startswith('os') or machine.startswith('win') or machine.startswith('darwin') or machine.startswith('ios'):
     colors = False # Colors shouldn't be displayed in mac & windows
 if not colors:
     end = red = white = green = yellow = run = bad = good = info = que =  '' 
