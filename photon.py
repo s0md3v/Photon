@@ -1,21 +1,10 @@
 #!/usr/bin/env python3
 
-# Colors and shit bro
-end = '\033[1;m'
-red = '\033[91m'
-white = '\033[1;97m'
-green = '\033[1;32m'
-yellow = '\033[1;33m'
-run = '\033[1;97m[~]\033[1;m'
-bad = '\033[1;31m[-]\033[1;m'
-good = '\033[1;32m[+]\033[1;m'
-info = '\033[1;33m[!]\033[1;m'
-que =  '\033[1;34m[?]\033[1;m'
-
 # Let's import what we need
 import os
 import sys
 import time
+import shutil
 import random
 import urllib3
 import argparse
@@ -23,6 +12,24 @@ import threading
 from requests import get, post
 from re import search, findall
 from urllib.parse import urlparse
+
+colors = True
+machine = sys.platform
+if machine.startswith('os') or machine.startswith('win') or machine.startswith('darwin'):
+    colors = False
+if not colors:
+    end = red = white = green = yellow = run = bad = good = info = que =  '' 
+else:
+    end = '\033[1;m'
+    red = '\033[91m'
+    white = '\033[1;97m'
+    green = '\033[1;32m'
+    yellow = '\033[1;33m'
+    run = '\033[1;97m[~]\033[1;m'
+    bad = '\033[1;31m[-]\033[1;m'
+    good = '\033[1;32m[+]\033[1;m'
+    info = '\033[1;33m[!]\033[1;m'
+    que =  '\033[1;34m[?]\033[1;m'
 
 print ('''%s      ____  __          __            
      / %s__%s \/ /_  ____  / /_____  ____ 
@@ -98,8 +105,7 @@ else:
 
 storage.add(main_url)
 
-main_domain = urlparse(main_url).netloc # Extracts domain out of the url
-name = main_domain.split('.')[-2] # Extracts example out of example.com
+name = urlparse(main_url).netloc # Extracts domain out of the url
 
 ####
 # This function makes requests to webpage and returns response body
@@ -115,7 +121,7 @@ def requester(url):
     try:
         def normal(url):
             headers = {
-            'Host' : main_domain,
+            'Host' : name,
             'User-Agent' : random.choice(user_agents),
             'Accept' : 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
             'Accept-Language' : 'en-US,en;q=0.5',
@@ -324,7 +330,7 @@ flash(jscanner, scripts)
 
 # Step 4. Save the results
 if os.path.exists(name):
-    os.rmdir(name)
+    shutil.rmtree(name, ignore_errors=True)
 os.mkdir(name)
 
 with open('%s/links.txt' % name, 'w+') as f:
@@ -385,4 +391,7 @@ len(intel), good, len(files), good, len(endpoints), good, len(fuzzable),
 good, len(scripts), good, len(external),
 (('%s-%s' % (red, end)) * 50)))
 
-print ('%s Results saved in \033[;1m%s\033[0m directory' % (good, name))
+if not colors:
+    print ('%s Results saved in %s directory' % (good, name))
+else:
+    print ('%s Results saved in \033[;1m%s\033[0m directory' % (good, name))
