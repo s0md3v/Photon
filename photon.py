@@ -176,29 +176,31 @@ def requester(url):
 ####
 
 def zap(url):
-    response = requester(url + '/robots.txt') # makes request to robots.txt
-    if '<body' not in response: # making sure robots.txt isn't some fancy 404 page
-        matches = findall(r'Allow: (.*)|Disallow: (.*)', response) # If you know it, you know it
-        for match in matches: # iterating over the matches, match is a tuple here
-            match = match[0] + match[1] # one item in match will always be empty so will combine both items
-            if '/*/' not in match: # if the url doesn't use a wildcard
-                url = main_url + match
-                storage.add(url) # add the url to storage list for crawling
-                robots.add(url) # add the url to robots list
-                if '=' in url: # self-explanatory
-                    fuzzable.add(url) # add url to the fuzzable urls list
-        if len(matches) > 0: # if there are more than 0 matches
-            print ('%s URLs retrieved from robots.txt: %s' % (good, len(robots)))
-    
-    response = requester(url + '/sitemap.xml') # makes request to sitemap.xml
-    
-    if '<body' not in response: # making sure robots.txt isn't some fancy 404 page
-        matches = findall(r'<loc>[^<]*</loc>', response) # regex for extracting urls
-        if matches: # if there are any matches
-            print ('%s URLs retrieved from sitemap.xml: %s' % (good, len(matches)))
-            for match in matches:
-                storage.add(match.split('<loc>')[1][:-6]) #cleaning up the url & adding it to the storage list for crawling
-
+    try:
+        response = requester(url + '/robots.txt') # makes request to robots.txt
+        if '<body' not in response: # making sure robots.txt isn't some fancy 404 page
+            matches = findall(r'Allow: (.*)|Disallow: (.*)', response) # If you know it, you know it
+            for match in matches: # iterating over the matches, match is a tuple here
+                match = match[0] + match[1] # one item in match will always be empty so will combine both items
+                if '/*/' not in match: # if the url doesn't use a wildcard
+                    url = main_url + match
+                    storage.add(url) # add the url to storage list for crawling
+                    robots.add(url) # add the url to robots list
+                    if '=' in url: # self-explanatory
+                        fuzzable.add(url) # add url to the fuzzable urls list
+            if len(matches) > 0: # if there are more than 0 matches
+                print ('%s URLs retrieved from robots.txt: %s' % (good, len(robots)))
+        
+        response = requester(url + '/sitemap.xml') # makes request to sitemap.xml
+        
+        if '<body' not in response: # making sure robots.txt isn't some fancy 404 page
+            matches = findall(r'<loc>[^<]*</loc>', response) # regex for extracting urls
+            if matches: # if there are any matches
+                print ('%s URLs retrieved from sitemap.xml: %s' % (good, len(matches)))
+                for match in matches:
+                    storage.add(match.split('<loc>')[1][:-6]) #cleaning up the url & adding it to the storage list for crawling
+    except:
+        pass
 ####
 # This functions checks whether a url should be crawled or not
 ####
