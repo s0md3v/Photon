@@ -84,10 +84,10 @@ Default Value: `False`
 
 #### `-s --seeds`
 
-Lets you add custom seeds, sperated by commas.
+Lets you add custom seeds, seperated by commas.
 
 `python photon -u http://example.com -s "http://example.com/portals.html,http://example.com/blog/2018"`
 
 ### Contribution & License
-Apart from reporting bugs and stuff, please help me add more "APIs" to make the Ninja Mode more powerful.\
+Apart from reporting bugs and stuff, please help me add more "APIs" to make the Ninja Mode more powerful and decrease the load on those poor servers.\
 **Photon** is licensed under [GPL v3.0 license](https://www.gnu.org/licenses/gpl-3.0.en.html).
