@@ -172,7 +172,6 @@ def requester(url):
             #check if link is not broken
             if(response.status_code == codes.ok):
                return response.text  # return response body
-
             else:
                failed.add(url) # add it to the failed list
 
@@ -182,7 +181,6 @@ def requester(url):
             #check if link is not broken
             if(response.status_code == codes.ok):
                return response.text  # return response body
-
             else:
                failed.add(url) # add it to the failed list
 
