@@ -1,3 +1,10 @@
+#### v1.0.3
+- Introduced plugins
+- Added `dnsdumpster` plugin
+- Fixed non-ascii character handling, again
+- 404 pages are now added to `failed` list
+- Handling exceptions in `jscanner`
+
 #### v1.0.2
 - Proper handling of null response from `robots.txt` & `sitemap.xml`
 - Python2 compatibility
@@ -10,4 +17,4 @@
 - Cross platform file handling
 
 #### v1.0.0
-First stable release.
+- First stable release.
