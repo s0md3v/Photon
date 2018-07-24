@@ -43,7 +43,7 @@ Run Photon against a single website.
 
 Specifying a URL with it's schema i.e. `http(s)://` is optional but you **must** add `www.` if the website has it.
 
-Tip :bulb: : If you feel like the crawling is taking too long or you just don't want to crawl anymore, just press `ctrl + c` in your terminal and Photon will skip the rest of URLs.
+**Tip :bulb: :** If you feel like the crawling is taking too long or you just don't want to crawl anymore, just press `ctrl + c` in your terminal and Photon will skip the rest of URLs.
 
 #### `-l --level`
 
@@ -92,6 +92,18 @@ Default Value: `False`
 - [pixlr.com](https://pixlr.com/)
 
 Please help me add more "APIs" to reduce load on their servers and turn off this mode whenever not required.
+
+#### `--dns`
+
+Create an image displaying target domain's DNS data.
+
+`python photon.py -u http://example.com --dns`
+
+Sample Output:
+
+![dnsdumpster demo](https://image.ibb.co/bNyRjT/rocket_chat.png)
+
+**Tip :bulb: :** It doesn't work with subdomains. This plugin is in development and this issue will be fixed in a day or two.
 
 #### `-s --seeds`
 
