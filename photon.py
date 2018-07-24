@@ -391,43 +391,43 @@ os.mkdir(name) # create a new directory
 
 with open('%s/links.txt' % name, 'w+') as f:
     for x in storage:
-        f.write(x + '\n')
+        f.write(x.encode('utf-8') + '\n')
 
 with open('%s/files.txt' % name, 'w+') as f:
     for x in files:
-        f.write(x + '\n')
+        f.write(x.encode('utf-8') + '\n')
 
 with open('%s/intel.txt' % name, 'w+') as f:
     for x in intel:
-        f.write(x + '\n')
+        f.write(x.encode('utf-8') + '\n')
 
 with open('%s/robots.txt' % name, 'w+') as f:
     for x in storage:
-        f.write(x + '\n')
+        f.write(x.encode('utf-8') + '\n')
 
 with open('%s/failed.txt' % name, 'w+') as f:
     for x in failed:
-        f.write(x + '\n')
+        f.write(x.encode('utf-8') + '\n')
 
 with open('%s/custom.txt' % name, 'w+') as f:
     for x in custom:
-        f.write(x + '\n')
+        f.write(x.encode('utf-8') + '\n')
 
 with open('%s/scripts.txt' % name, 'w+') as f:
     for x in scripts:
-        f.write(x + '\n')
+        f.write(x.encode('utf-8') + '\n')
 
 with open('%s/fuzzable.txt' % name, 'w+') as f:
     for x in fuzzable:
-        f.write(x + '\n')
+        f.write(x.encode('utf-8') + '\n')
 
 with open('%s/external.txt' % name, 'w+') as f:
     for x in external:
-        f.write(x + '\n')
+        f.write(x.encode('utf-8') + '\n')
 
 with open('%s/endpoints.txt' % name, 'w+') as f:
     for x in endpoints:
-        f.write(x + '\n')
+        f.write(x.encode('utf-8') + '\n')
 
 # Printing out results
 print ('''%s
