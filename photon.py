@@ -10,7 +10,7 @@ import random
 import urllib3
 import argparse
 import threading
-from requests import get, post
+from requests import get, post, codes
 from re import search, findall
 try:
     from urllib.parse import urlparse # for python3
@@ -137,15 +137,15 @@ def requester(url):
             'Accept-Encoding' : 'gzip',
             'DNT' : '1',
             'Connection' : 'close'}
-            # make request and return response body
-            return get(url, cookies=cook, headers=headers, verify=False).text
+            # make request and return response
+            return get(url, cookies=cook, headers=headers, verify=False)
 
         # pixlr.com API
         def pixlr(url):
             if url == main_url:
                 url = main_url + '/' # because pixlr throws error if http://example.com is used
-            # make request and return response body
-            return get('https://pixlr.com/proxy/?url=' + url, headers={'Accept-Encoding' : 'gzip'}, verify=False).text
+            # make request and return response
+            return get('https://pixlr.com/proxy/?url=' + url, headers={'Accept-Encoding' : 'gzip'}, verify=False)
 
         # codebeautify.org API
         def code_beautify(url):
@@ -157,19 +157,33 @@ def requester(url):
             'Origin' : 'https://codebeautify.org',
             'Connection' : 'close'
             }
-            # make request and return response body
-            return post('https://codebeautify.com/URLService', headers=headers, data='path=' + url, verify=False).text
+            # make request and return response
+            return post('https://codebeautify.com/URLService', headers=headers, data='path=' + url, verify=False)
 
         # www.photopea.com API
         def photopea(url):
-            # make request and return response body
-            return get('https://www.photopea.com/mirror.php?url=' + url, verify=False).text
+            # make request and return response
+            return get('https://www.photopea.com/mirror.php?url=' + url, verify=False)
 
         if ninja: # if the ninja mode is enabled
             # select a random request function i.e. random API
-            return random.choice([photopea, normal, pixlr, code_beautify])(url)
+            response = random.choice([photopea, normal, pixlr, code_beautify])(url)
+            
+            #check if link is not broken
+            if(response.status_code == codes.ok):
+               return response.text  # return response body
+            else:
+               failed.add(url) # add it to the failed list
+
         else:
-            return normal(url)
+            response = normal(url)
+
+            #check if link is not broken
+            if(response.status_code == codes.ok):
+               return response.text  # return response body
+            else:
+               failed.add(url) # add it to the failed list
+
     except: # if photon fails to connect to the url
         failed.add(url) # add it to the failed list
 
