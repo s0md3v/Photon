@@ -193,7 +193,7 @@ def requester(url):
 
 def zap(url):
     try:
-        response = requester(url + '/robots.txt') # makes request to robots.txt
+        response = requester(url + '/robots.txt').text # makes request to robots.txt
         if '<body' not in response: # making sure robots.txt isn't some fancy 404 page
             matches = findall(r'Allow: (.*)|Disallow: (.*)', response) # If you know it, you know it
             for match in matches: # iterating over the matches, match is a tuple here
@@ -207,7 +207,7 @@ def zap(url):
             if len(matches) > 0: # if there are more than 0 matches
                 print ('%s URLs retrieved from robots.txt: %s' % (good, len(robots)))
         
-        response = requester(url + '/sitemap.xml') # makes request to sitemap.xml
+        response = requester(url + '/sitemap.xml').text # makes request to sitemap.xml
         
         if '<body' not in response: # making sure robots.txt isn't some fancy 404 page
             matches = findall(r'<loc>[^<]*</loc>', response) # regex for extracting urls
