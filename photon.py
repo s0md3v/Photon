@@ -10,7 +10,7 @@ import random
 import urllib3
 import argparse
 import threading
-from requests import get, post
+from requests import get, post, codes
 from re import search, findall
 try:
     from urllib.parse import urlparse # for python3
@@ -170,20 +170,21 @@ def requester(url):
             response = random.choice([photopea, normal, pixlr, code_beautify])(url)
             
             #check if link is not broken
-            if(response.status_code != 200):
-               raise Exception("broken link!")
+            if(response.status_code == codes.ok):
+               return response.text;  # return response body
 
-            #if response is Ok, return response body
-            return response.text;
+            else:
+               failed.add(url) # add it to the failed list
+
         else:
             response = normal(url)
 
             #check if link is not broken
-            if(response.status_code != 200):
-               raise Exception("broken link!")
-               
-            #if response is Ok, return response body
-            return response.text;
+            if(response.status_code == codes.ok):
+               return response.text;  # return response body
+
+            else:
+               failed.add(url) # add it to the failed list
 
     except: # if photon fails to connect to the url
         failed.add(url) # add it to the failed list
