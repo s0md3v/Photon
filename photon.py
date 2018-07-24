@@ -11,7 +11,7 @@ import urllib3
 import argparse
 import threading
 from re import search, findall
-from requests import get, post, codes
+from requests import get, post
 try:
     from urllib.parse import urlparse # for python3
 except ImportError:
@@ -170,19 +170,18 @@ def requester(url):
             response = random.choice([photopea, normal, pixlr, code_beautify])(url)
             
             #check if link is not broken
-            if response.status_code == codes.ok:
-                return response.text  # return response body
-            else:
+            if response.status_code == '404':
                 failed.add(url) # add it to the failed list
+            return response.text  # return response body
+                
 
         else:
             response = normal(url)
 
             #check if link is not broken
-            if response.status_code == codes.ok:
-                return response.text  # return response body
-            else:
+            if response.status_code == '404':
                 failed.add(url) # add it to the failed list
+            return response.text  # return response body
 
     except: # if photon fails to connect to the url
         failed.add(url) # add it to the failed list
