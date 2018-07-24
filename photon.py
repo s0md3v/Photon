@@ -10,8 +10,8 @@ import random
 import urllib3
 import argparse
 import threading
-from requests import get, post, codes
 from re import search, findall
+from requests import get, post, codes
 try:
     from urllib.parse import urlparse # for python3
 except ImportError:
@@ -170,19 +170,19 @@ def requester(url):
             response = random.choice([photopea, normal, pixlr, code_beautify])(url)
             
             #check if link is not broken
-            if(response.status_code == codes.ok):
-               return response.text  # return response body
+            if response.status_code == codes.ok:
+                return response.text  # return response body
             else:
-               failed.add(url) # add it to the failed list
+                failed.add(url) # add it to the failed list
 
         else:
             response = normal(url)
 
             #check if link is not broken
-            if(response.status_code == codes.ok):
-               return response.text  # return response body
+            if response.status_code == codes.ok:
+                return response.text  # return response body
             else:
-               failed.add(url) # add it to the failed list
+                failed.add(url) # add it to the failed list
 
     except: # if photon fails to connect to the url
         failed.add(url) # add it to the failed list
@@ -297,12 +297,15 @@ def extractor(url):
 ####
 
 def jscanner(url):
-    response = requester(url) # make request to the url
-    matches = findall(r'[\'"](/.*?)[\'"]|[\'"](http.*?)[\'"]', response) # extract urls/endpoints
-    for match in matches: # iterate over the matches, match is a tuple
-        match = match[0] + match[1] # combining the items because one of them is always empty
-        if not search(r'[}{><"\']', match) and not match == '/': # making sure it's not some js code
-            endpoints.add(match) # add it to the endpoints list
+    try:
+        response = requester(url) # make request to the url
+        matches = findall(r'[\'"](/.*?)[\'"]|[\'"](http.*?)[\'"]', response) # extract urls/endpoints
+        for match in matches: # iterate over the matches, match is a tuple
+            match = match[0] + match[1] # combining the items because one of them is always empty
+            if not search(r'[}{><"\']', match) and not match == '/': # making sure it's not some js code
+                endpoints.add(match) # add it to the endpoints list
+    except:
+        failed.add(url)
 
 ####
 # This function starts multiple threads for a function
