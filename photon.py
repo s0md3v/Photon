@@ -16,6 +16,7 @@ try:
     from urllib.parse import urlparse # for python3
 except ImportError:
     from urlparse import urlparse # for python2
+from plugins.dnsdumpster import dnsdumpster
 
 colors = True # Output should be colored
 machine = sys.platform # Detecting the os of current system
@@ -55,6 +56,7 @@ parser.add_argument('-l', '--level', help='levels to crawl', dest='level', type=
 parser.add_argument('-t', '--threads', help='number of threads', dest='threads', type=int)
 parser.add_argument('-n', '--ninja', help='ninja mode', dest='ninja', action='store_true')
 parser.add_argument('-d', '--delay', help='delay between requests', dest='delay', type=int)
+parser.add_argument('--dns', help='dump dns data', dest='dns', action='store_true')
 args = parser.parse_args()
 
 if args.root: # if the user has supplied a url
@@ -384,10 +386,14 @@ time_taken = timer(diff)
 minutes = time_taken[0]
 seconds = time_taken[1]
 time_per_request = time_taken[2]
+
 # Step 4. Save the results
 if os.path.exists(name): # if the directory already exists
     shutil.rmtree(name, ignore_errors=True) # delete it, recursively
 os.mkdir(name) # create a new directory
+
+if args.dns:
+    dnsdumpster(name, colors)
 
 with open('%s/links.txt' % name, 'w+') as f:
     for x in storage:
