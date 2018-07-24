@@ -69,7 +69,7 @@ Number of threads to use.
 
 Default Value: `2`
 
-Tip :bulb: : The optimal number of threads depends on your connection speed as well as nature of the target server. If you have a decent network connection and the server doesn't have any rate limiting in place, you can use up to `100` threads.
+**Tip :bulb: :** The optimal number of threads depends on your connection speed as well as nature of the target server. If you have a decent network connection and the server doesn't have any rate limiting in place, you can use up to `100` threads.
 
 #### `-c --cookie`
 
@@ -85,6 +85,14 @@ Toggles Ninja Mode on/off.
 
 Default Value: `False`
 
+**Tip :bulb: :** Ninja mode uses the following websites to make requests on your behalf:
+
+- [codebeautify.org](https://codebeautify.org)
+- [photopea.com](https://www.photopea.com)
+- [pixlr.com](https://pixlr.com/)
+
+Please help me add more "APIs" to reduce load on their servers and turn off this mode whenever not required.
+
 #### `-s --seeds`
 
 Lets you add custom seeds, seperated by commas.
@@ -99,6 +107,5 @@ Specify custom regex pattern to extract strings.
 
 The strings extracted using the custom regex pattern are saved in `custom.txt`.
 
-### Contribution & License
-Apart from reporting bugs and stuff, please help me add more "APIs" to make the Ninja Mode more powerful and decrease the load on those poor servers.\
+### License
 **Photon** is licensed under [GPL v3.0 license](https://www.gnu.org/licenses/gpl-3.0.en.html).
