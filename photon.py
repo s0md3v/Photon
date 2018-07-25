@@ -57,7 +57,6 @@ parser.add_argument('-l', '--level', help='levels to crawl', dest='level', type=
 parser.add_argument('-t', '--threads', help='number of threads', dest='threads', type=int)
 parser.add_argument('-n', '--ninja', help='ninja mode', dest='ninja', action='store_true')
 parser.add_argument('-d', '--delay', help='delay between requests', dest='delay', type=int)
-parser.add_argument('--stdout', help='Print Results to screen', dest='stdout', action='store_true')
 parser.add_argument('--dns', help='dump dns data', dest='dns', action='store_true')
 args = parser.parse_args()
 
@@ -474,22 +473,3 @@ if not colors: # if colors are disabled
     print ('%s Results saved in %s directory' % (good, name))
 else:
     print ('%s Results saved in \033[;1m%s\033[0m directory' % (good, name))
-
-if args.stdout:
-    print("\nAll Results:\n") 
-    for x in storage:
-        print(str(x))
-    for x in files:
-        print(str(x))
-    for x in intel:
-        print(str(x))
-    for x in custom:
-        print(str(x))
-    for x in scripts:
-        print(str(x))
-    for x in fuzzable:
-        print(str(x))
-    for x in external:
-        print(str(x))
-    for x in endpoints:
-        print(str(x))
