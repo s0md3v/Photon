@@ -49,6 +49,7 @@ urllib3.disable_warnings() # Disable SSL related warnings
 # Processing command line arguments
 parser = argparse.ArgumentParser()
 parser.add_argument('-u', '--url', help='root url', dest='root')
+parser.add_argument('-o', '--output', help='output directory', dest='output')
 parser.add_argument('-c', '--cookie', help='cookie', dest='cook')
 parser.add_argument('-r', '--regex', help='regex pattern', dest='regex')
 parser.add_argument('-s', '--seeds', help='additional seed urls', dest='seeds')
@@ -56,6 +57,7 @@ parser.add_argument('-l', '--level', help='levels to crawl', dest='level', type=
 parser.add_argument('-t', '--threads', help='number of threads', dest='threads', type=int)
 parser.add_argument('-n', '--ninja', help='ninja mode', dest='ninja', action='store_true')
 parser.add_argument('-d', '--delay', help='delay between requests', dest='delay', type=int)
+parser.add_argument('--stdout', help='Print Results to screen', dest='stdout', action='store_true')
 parser.add_argument('--dns', help='dump dns data', dest='dns', action='store_true')
 args = parser.parse_args()
 
@@ -66,6 +68,13 @@ if args.root: # if the user has supplied a url
 else: # if the user hasn't supplied a url
     print ('\n' + parser.format_help().lower())
     quit()
+
+
+if args.output: # if the user has supplied a output dir
+    output_base_dir = args.output
+    if output_base_dir.endswith('/'): # if the dir ends with '/'
+        output_base_dir = output_base_dir[:-1] # we will remove it as it can cause problems later in the code
+
 
 delay = 0 # Delay between requests
 cook = None # Cookie
@@ -381,54 +390,69 @@ seconds = time_taken[1]
 time_per_request = time_taken[2]
 
 # Step 4. Save the results
-if os.path.exists(name): # if the directory already exists
-    shutil.rmtree(name, ignore_errors=True) # delete it, recursively
-os.mkdir(name) # create a new directory
 
 if args.dns:
     dnsdumpster(name, colors)
 
-with open('%s/links.txt' % name, 'w+') as f:
+if args.output:
+    try:
+        os.stat(output_base_dir)
+    except:
+        os.mkdir(output_base_dir)
+
+    name = output_base_dir
+
+
+
+#if os.path.exists(name): # if the directory already exists
+#    shutil.rmtree(name, ignore_errors=True) # delete it, recursively
+try:
+    os.stat(name)
+except:
+    os.mkdir(name) # create a new directory
+
+with open('%s/links.txt' % name, 'w') as f:
     for x in storage:
         f.write(str(x.encode('utf-8')) + '\n')
 
-with open('%s/files.txt' % name, 'w+') as f:
+with open('%s/files.txt' % name, 'w') as f:
     for x in files:
         f.write(str(x.encode('utf-8')) + '\n')
 
-with open('%s/intel.txt' % name, 'w+') as f:
+with open('%s/intel.txt' % name, 'w') as f:
     for x in intel:
         f.write(str(x.encode('utf-8')) + '\n')
 
-with open('%s/robots.txt' % name, 'w+') as f:
+with open('%s/robots.txt' % name, 'w') as f:
     for x in storage:
         f.write(str(x.encode('utf-8')) + '\n')
 
-with open('%s/failed.txt' % name, 'w+') as f:
+with open('%s/failed.txt' % name, 'w') as f:
     for x in failed:
         f.write(str(x.encode('utf-8')) + '\n')
 
-with open('%s/custom.txt' % name, 'w+') as f:
+with open('%s/custom.txt' % name, 'w') as f:
     for x in custom:
         f.write(str(x.encode('utf-8')) + '\n')
 
-with open('%s/scripts.txt' % name, 'w+') as f:
+with open('%s/scripts.txt' % name, 'w') as f:
     for x in scripts:
         f.write(str(x.encode('utf-8')) + '\n')
 
-with open('%s/fuzzable.txt' % name, 'w+') as f:
+with open('%s/fuzzable.txt' % name, 'w') as f:
     for x in fuzzable:
         f.write(str(x.encode('utf-8')) + '\n')
 
-with open('%s/external.txt' % name, 'w+') as f:
+with open('%s/external.txt' % name, 'w') as f:
     for x in external:
         f.write(str(x.encode('utf-8')) + '\n')
 
-with open('%s/endpoints.txt' % name, 'w+') as f:
+with open('%s/endpoints.txt' % name, 'w') as f:
     for x in endpoints:
         f.write(str(x.encode('utf-8')) + '\n')
 
 # Printing out results
+
 print ('''%s
 %s URLs: %i
 %s Intel: %i
@@ -450,3 +474,22 @@ if not colors: # if colors are disabled
     print ('%s Results saved in %s directory' % (good, name))
 else:
     print ('%s Results saved in \033[;1m%s\033[0m directory' % (good, name))
+
+if args.stdout:
+    print("\nAll Results:\n") 
+    for x in storage:
+        print(str(x))
+    for x in files:
+        print(str(x))
+    for x in intel:
+        print(str(x))
+    for x in custom:
+        print(str(x))
+    for x in scripts:
+        print(str(x))
+    for x in fuzzable:
+        print(str(x))
+    for x in external:
+        print(str(x))
+    for x in endpoints:
+        print(str(x))
