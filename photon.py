@@ -401,7 +401,7 @@ with open('%s/intel.txt' % name, 'w+') as f:
         f.write(str(x.encode('utf-8')) + '\n')
 
 with open('%s/robots.txt' % name, 'w+') as f:
-    for x in storage:
+    for x in robots:
         f.write(str(x.encode('utf-8')) + '\n')
 
 with open('%s/failed.txt' % name, 'w+') as f:
