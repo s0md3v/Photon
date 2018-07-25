@@ -54,9 +54,10 @@ parser.add_argument('-r', '--regex', help='regex pattern', dest='regex')
 parser.add_argument('-s', '--seeds', help='additional seed urls', dest='seeds')
 parser.add_argument('-l', '--level', help='levels to crawl', dest='level', type=int)
 parser.add_argument('-t', '--threads', help='number of threads', dest='threads', type=int)
-parser.add_argument('-n', '--ninja', help='ninja mode', dest='ninja', action='store_true')
 parser.add_argument('-d', '--delay', help='delay between requests', dest='delay', type=int)
+parser.add_argument('--ninja', help='ninja mode', dest='ninja', action='store_true')
 parser.add_argument('--dns', help='dump dns data', dest='dns', action='store_true')
+parser.add_argument('--only-urls', help='only extract urls', dest='only_urls', action='store_true')
 args = parser.parse_args()
 
 if args.root: # if the user has supplied a url
@@ -72,11 +73,14 @@ cook = None # Cookie
 ninja = False # Ninja mode toggle
 crawl_level = 2 # Crawling level
 thread_count = 2 # Number of threads
+only_urls = False # only urls mode is off by default
 
 if args.cook:
     cook = args.cook
 if args.ninja:
     ninja = True
+if args.only_urls:
+    only_urls = True
 if args.delay:
     delay = args.delay
 if args.level:
@@ -97,7 +101,7 @@ fuzzable = set() # urls that have get params in them e.g. example.com/page.php?i
 endpoints = set() # urls found from javascript files
 processed = set() # urls that have been crawled
 
-seeds = '' # custom urls to crawl
+seeds = []
 if args.seeds: # if the user has supplied custom seeds
     seeds = args.seeds
     for seed in seeds.split(','): # we will convert them into a list
@@ -218,6 +222,7 @@ def zap(url):
                     storage.add(match.split('<loc>')[1][:-6]) #cleaning up the url & adding it to the storage list for crawling
     except:
         pass
+
 ####
 # This functions checks whether a url should be crawled or not
 ####
@@ -237,6 +242,52 @@ def is_link(url):
         else: # it has no extension
             return True # url can be crawled
     return conclusion # return the conclusion :D
+
+####
+# This function extracts string based on regex pattern supplied by user
+####
+
+supress_regex = False
+def regxy(pattern, response):
+    try:
+        matches = findall(r'%s' % pattern, response)
+        for match in matches:
+            custom.add(match)
+    except:
+        supress_regex = True
+
+####
+# This function extracts intel from the response body
+####
+
+def intel_extractor(response):
+    try:
+        matches = findall(r'''([\w\.-]+s[\w\.-]+\.amazonaws\.com)|(github\.com/[\w\.-/]+)|
+        (facebook\.com/.*?)[\'" ]|(youtube\.com/.*?)[\'" ]|(linkedin\.com/.*?)[\'" ]|
+        (twitter\.com/.*?)[\'" ]|([\w\.-]+@[\w\.-]+\.[\.\w]+)''', response)
+        for match in matches: # iterate over the matches
+            for x in match: # iterate over the match because it's a tuple
+                if x != '': # if the value isn't empty
+                    intel.add(x) # add it to intel list
+    except:
+        pass
+
+####
+# This function extracts js files from the response body
+####
+
+def js_extractor(response):
+    try:
+        matches = findall(r'src=[\'"](.*?\.js)["\']', response) # extract .js files
+        for match in matches: # iterate over the matches
+            if match.startswith(main_url):
+                scripts.add(match)
+            elif match.startswith('/') and not match.startswith('//'):
+                scripts.add(main_url + match)
+            elif not match.startswith('http') and not match.startswith('//'):
+                scripts.add(main_url + '/' + match)
+    except:
+        pass
 
 ####
 # This function extracts stuff from the response body
@@ -266,29 +317,12 @@ def extractor(url):
                     storage.add(main_url + '/' + link)
                     if '=' in link:
                         fuzzable.add(link)
-        
-        matches = findall(r'src=[\'"](.*?\.js)["\']', response) # extract .js files
-        for match in matches: # iterate over the matches
-            if match.startswith(main_url):
-                scripts.add(match)
-            elif match.startswith('/') and not match.startswith('//'):
-                scripts.add(main_url + match)
-            elif not match.startswith('http') and not match.startswith('//'):
-                scripts.add(main_url + '/' + match)
-        # extract intel ;)
-        matches = findall(r'''([\w\.-]+s[\w\.-]+\.amazonaws\.com)|(github\.com/[\w\.-/]+)|(facebook\.com/.*?)[\'" ]|
-(youtube\.com/.*?)[\'" ]|(linkedin\.com/.*?)[\'" ]|(twitter\.com/.*?)[\'" ]|([\w\.-]+@[\w\.-]+\.[\.\w]+)''', response)
-        for match in matches: # iterate over the matches
-            for x in match: # iterate over the match because it's a tuple
-                if x != '': # if the value isn't empty
-                    intel.add(x) # add it to intel list
 
-        def regxy(pattern):
-            matches = findall(r'%s' % pattern, response)
-            for match in matches:
-                custom.add(match)
-        if args.regex:
-            regxy(args.regex)
+        if not only_urls:
+            intel_extractor(response)
+            js_extractor(response)
+        if args.regex and not supress_regex:
+            regxy(args.regex, response)
 
     except: # if something bad happens
         failed.add(url)
@@ -364,9 +398,10 @@ for level in range(crawl_level):
         print ('')
         break
 
-# Step 3. Scan the JavaScript files for enpoints
-print ('%s Crawling %i JavaScript files' % (run, len(scripts)))
-flash(jscanner, scripts)
+if not only_urls:
+    # Step 3. Scan the JavaScript files for enpoints
+    print ('%s Crawling %i JavaScript files' % (run, len(scripts)))
+    flash(jscanner, scripts)
 
 now = time.time() # records the time at which crawling stopped
 diff = (now  - then) # finds total time taken
@@ -388,45 +423,55 @@ os.mkdir(name) # create a new directory
 if args.dns:
     dnsdumpster(name, colors)
 
-with open('%s/links.txt' % name, 'w+') as f:
-    for x in storage:
-        f.write(str(x.encode('utf-8')) + '\n')
+if len(storage) > 0:
+    with open('%s/links.txt' % name, 'w+') as f:
+        for x in storage:
+            f.write(str(x.encode('utf-8')) + '\n')
 
-with open('%s/files.txt' % name, 'w+') as f:
-    for x in files:
-        f.write(str(x.encode('utf-8')) + '\n')
+if len(files) > 0:
+    with open('%s/files.txt' % name, 'w+') as f:
+        for x in files:
+            f.write(str(x.encode('utf-8')) + '\n')
 
-with open('%s/intel.txt' % name, 'w+') as f:
-    for x in intel:
-        f.write(str(x.encode('utf-8')) + '\n')
+if len(intel) > 0:
+    with open('%s/intel.txt' % name, 'w+') as f:
+        for x in intel:
+            f.write(str(x.encode('utf-8')) + '\n')
 
-with open('%s/robots.txt' % name, 'w+') as f:
-    for x in robots:
-        f.write(str(x.encode('utf-8')) + '\n')
+if len(robots) > 0:
+    with open('%s/robots.txt' % name, 'w+') as f:
+        for x in robots:
+            f.write(str(x.encode('utf-8')) + '\n')
 
-with open('%s/failed.txt' % name, 'w+') as f:
-    for x in failed:
-        f.write(str(x.encode('utf-8')) + '\n')
+if len(failed) > 0:
+    with open('%s/failed.txt' % name, 'w+') as f:
+        for x in failed:
+            f.write(str(x.encode('utf-8')) + '\n')
 
-with open('%s/custom.txt' % name, 'w+') as f:
-    for x in custom:
-        f.write(str(x.encode('utf-8')) + '\n')
+if len(custom) > 0:
+    with open('%s/custom.txt' % name, 'w+') as f:
+        for x in custom:
+            f.write(str(x.encode('utf-8')) + '\n')
 
-with open('%s/scripts.txt' % name, 'w+') as f:
-    for x in scripts:
-        f.write(str(x.encode('utf-8')) + '\n')
+if len(scripts) > 0:
+    with open('%s/scripts.txt' % name, 'w+') as f:
+        for x in scripts:
+            f.write(str(x.encode('utf-8')) + '\n')
 
-with open('%s/fuzzable.txt' % name, 'w+') as f:
-    for x in fuzzable:
-        f.write(str(x.encode('utf-8')) + '\n')
+if len(fuzzable) > 0:
+    with open('%s/fuzzable.txt' % name, 'w+') as f:
+        for x in fuzzable:
+            f.write(str(x.encode('utf-8')) + '\n')
 
-with open('%s/external.txt' % name, 'w+') as f:
-    for x in external:
-        f.write(str(x.encode('utf-8')) + '\n')
+if len(endpoints) > 0:
+    with open('%s/external.txt' % name, 'w+') as f:
+        for x in external:
+            f.write(str(x.encode('utf-8')) + '\n')
 
-with open('%s/endpoints.txt' % name, 'w+') as f:
-    for x in endpoints:
-        f.write(str(x.encode('utf-8')) + '\n')
+if len(endpoints) > 0:
+    with open('%s/endpoints.txt' % name, 'w+') as f:
+        for x in endpoints:
+            f.write(str(x.encode('utf-8')) + '\n')
 
 # Printing out results
 print ('''%s
