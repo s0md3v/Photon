@@ -331,21 +331,14 @@ def threader(function, *urls):
 # This function processes the urls and sends them to "threader" function
 ####
 
-def flash(function, links): # This shit is complicated, move on
+def flash_simple(function, links): # This shit is NOT complicated, please enjoy
     links = list(links) # convert links (set) to list
-    begin = 0 # begining of slice
-    end = thread_count # ending of slice
-    # Okay I give up, if you know it, you know it
-    for i in range((int(len(links)/thread_count)) + 1):
+    for begin in range(0, len(links), thread_count): # range with step
+        end = begin + thread_count
         splitted = links[begin:end]
         threader(function, splitted)
-        begin += thread_count
-        if (len(links) - end) >= thread_count:
-            end += thread_count
-        else:
-            end += len(links) - begin
         progress = begin
-        if progress > len(links):
+        if progress > len(links): # fix if overflow
             progress = len(links)
         sys.stdout.write('\r%s Progress: %i/%i' % (info, progress, len(links)))
         sys.stdout.flush()
