@@ -1,5 +1,8 @@
 language: python
 install:
   - pip install requests urllib3
+python:
+    - 2.7
+    - 3.6
 script:
   - python photon.py -u "github.com" -l 1 -t 10
