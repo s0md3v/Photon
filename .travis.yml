@@ -5,4 +5,5 @@ python:
     - 2.7
     - 3.6
 script:
-  - python photon.py -u "github.com" -l 1 -t 10
+  - python photon.py -u "github.com" -l 1 -d 1 -t 10 --regex "\d{10}" --dns
+  - python photon.py -u "github.com" -l 1 -t 10 --seeds="https://github.com/s0md3v" --only_urls --ninja
