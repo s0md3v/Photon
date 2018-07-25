@@ -1,3 +1,11 @@
+#### v1.0.4
+- Fixed an issue which caused regular links to be saved in robots.txt
+- Simplified `flash` function
+- Removed `-n` as an alias of `--ninja`
+- Added `--only-urls` option
+- Refactored code for readability
+- Skip saving files if the content is empty
+
 #### v1.0.3
 - Introduced plugins
 - Added `dnsdumpster` plugin
