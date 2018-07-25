@@ -337,7 +337,7 @@ def flash(function, links): # This shit is NOT complicated, please enjoy
         end = begin + thread_count
         splitted = links[begin:end]
         threader(function, splitted)
-        progress = begin
+        progress = end
         if progress > len(links): # fix if overflow
             progress = len(links)
         sys.stdout.write('\r%s Progress: %i/%i' % (info, progress, len(links)))
