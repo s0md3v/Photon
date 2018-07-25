@@ -331,7 +331,7 @@ def threader(function, *urls):
 # This function processes the urls and sends them to "threader" function
 ####
 
-def flash_simple(function, links): # This shit is NOT complicated, please enjoy
+def flash(function, links): # This shit is NOT complicated, please enjoy
     links = list(links) # convert links (set) to list
     for begin in range(0, len(links), thread_count): # range with step
         end = begin + thread_count
