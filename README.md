@@ -77,6 +77,8 @@ Cookie to send.
 
 `python photon.py -u http://example.com -c "PHPSSID=821b32d21"`
 
+**Tip :bulb: :** Don't use ninja mode when you are using cookies because the online services used in that mode don't allow that.
+
 #### `-n --ninja`
 
 Toggles Ninja Mode on/off.
@@ -119,5 +121,13 @@ Specify custom regex pattern to extract strings.
 
 The strings extracted using the custom regex pattern are saved in `custom.txt`.
 
-### License
+### Contribution & License
+You can contribute in following ways:
+
+- Report bugs
+- Develop plugins
+- Add more "APIs" for ninja mode
+- Give suggestions to make it better
+- Fix issues & submit a pull request
+
 **Photon** is licensed under [GPL v3.0 license](https://www.gnu.org/licenses/gpl-3.0.en.html).
