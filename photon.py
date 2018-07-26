@@ -8,6 +8,7 @@ import time
 import shutil
 import random
 import urllib3
+import warnings
 import argparse
 import threading
 import lxml.html
