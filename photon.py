@@ -63,6 +63,7 @@ parser.add_argument('-t', '--threads', help='number of threads', dest='threads',
 parser.add_argument('-d', '--delay', help='delay between requests', dest='delay', type=int)
 # Switches
 parser.add_argument('--dns', help='dump dns data', dest='dns', action='store_true')
+parser.add_argument('--ninja', help='ninja mode', dest='ninja', action='store_true')
 parser.add_argument('--update', help='update photon', dest='update', action='store_true')
 parser.add_argument('--only-urls', help='only extract urls', dest='only_urls', action='store_true')
 args = parser.parse_args()
@@ -73,7 +74,7 @@ args = parser.parse_args()
 
 def update():
     print('%s Checking for updates' % run)
-    changes = '''better performance;fixed 3 bugs''' # Changes must be seperated by ;
+    changes = '''x2 faster;added ninja;fixed bugs''' # Changes must be seperated by ;
     latest_commit = get('https://raw.githubusercontent.com/s0md3v/Photon/master/photon.py').text
 
     if changes not in latest_commit: # just hack to see if a new version is available
@@ -112,12 +113,15 @@ else: # if the user hasn't supplied a url
 delay = 0 # Delay between requests
 timeout = 6 # HTTP request timeout
 cook = None # Cookie
+ninja = False # Ninja mode toggle
 crawl_level = 2 # Crawling level
 thread_count = 2 # Number of threads
 only_urls = False # only urls mode is off by default
 
 if args.cook:
     cook = args.cook
+if args.ninja:
+    ninja = True
 if args.only_urls:
     only_urls = True
 if args.delay:
@@ -176,24 +180,65 @@ user_agents = ['Mozilla/5.0 (X11; Linux i686; rv:60.0) Gecko/20100101 Firefox/60
 def requester(url):
     processed.add(url) # mark the url as crawled
     time.sleep(delay) # pause/sleep the program for specified time
-    headers = {
-    'Host' : name, # ummm this is the hostname?
-    'User-Agent' : random.choice(user_agents), # selecting a random user-agent
-    'Accept' : 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-    'Accept-Language' : 'en-US,en;q=0.5',
-    'Accept-Encoding' : 'gzip',
-    'DNT' : '1',
-    'Connection' : 'close'}
-    # make request and return response
-    try:
-        response = get(url, cookies=cook, headers=headers, verify=False, timeout=timeout, stream=True)
-        if 'text/html' in response.headers['content-type']:
-            return response.text
-        else:
-            response.close()
+    def normal(url):
+        headers = {
+        'Host' : name, # ummm this is the hostname?
+        'User-Agent' : random.choice(user_agents), # selecting a random user-agent
+        'Accept' : 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language' : 'en-US,en;q=0.5',
+        'Accept-Encoding' : 'gzip',
+        'DNT' : '1',
+        'Connection' : 'close'}
+        # make request and return response
+        try:
+            response = get(url, cookies=cook, headers=headers, verify=False, timeout=timeout, stream=True)
+            if 'text/html' in response.headers['content-type']:
+                if response.status_code != '404':
+                    return response.text
+                else:
+                    response.close()
+                    failed.append(url)
+                    return 'dummy'
+            else:
+                response.close()
+                return 'dummy'
+        except:
             return 'dummy'
-    except:
-        return 'dummy'
+
+    # pixlr.com API
+    def pixlr(url):
+        if url == main_url:
+            url = main_url + '/' # because pixlr throws error if http://example.com is used
+        # make request and return response
+        return get('https://pixlr.com/proxy/?url=' + url, headers={'Accept-Encoding' : 'gzip'}, verify=False).text
+
+    # codebeautify.org API
+    def code_beautify(url):
+        headers = {
+        'User-Agent' : 'Mozilla/5.0 (X11; Linux x86_64; rv:61.0) Gecko/20100101 Firefox/61.0',
+        'Accept' : 'text/plain, */*; q=0.01',
+        'Accept-Encoding' : 'gzip',
+        'Content-Type' : 'application/x-www-form-urlencoded; charset=UTF-8',
+        'Origin' : 'https://codebeautify.org',
+        'Connection' : 'close'
+        }
+        # make request and return response
+        return post('https://codebeautify.com/URLService', headers=headers, data='path=' + url, verify=False).text
+
+    # www.photopea.com API
+    def photopea(url):
+        # make request and return response
+        return get('https://www.photopea.com/mirror.php?url=' + url, verify=False).text
+
+    if ninja: # if the ninja mode is enabled
+        # select a random request function i.e. random API
+        response = random.choice([photopea, normal, pixlr, code_beautify])(url)
+        if response != '':
+            return response  # return response body
+        else:
+            return 'dummy'
+    else:
+        return normal(url)
 
 ####
 # This function extracts links from robots.txt and sitemap.xml
