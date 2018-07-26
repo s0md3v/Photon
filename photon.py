@@ -93,6 +93,8 @@ def update():
             os.system('git clone --quiet https://github.com/s0md3v/Photon %s' % (folder))
             os.system('cp -r %s/%s/* %s && rm -r %s/%s/ 2>/dev/null' % (path, folder, path, path, folder))
             print ('%s Update successful!' % good)
+    else:
+        print ('%s Photon is up to date!' % good)
 
 if args.update: # if the user has supplied --update argument
     update()
