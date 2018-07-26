@@ -1,6 +1,6 @@
 language: python
 install:
-  - pip install requests urllib3
+  - pip install -r requirements.txt
 os:
   - linux
   - osx
