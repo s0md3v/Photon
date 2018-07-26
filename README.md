@@ -1,4 +1,4 @@
-# Photon [![python](https://img.shields.io/badge/Python-2.x|3.x-green.svg?style=style=flat-square)](https://www.python.org/downloads/)  [![license](https://img.shields.io/badge/License-GPL--v3-orange.svg?style=style=flat-square)](https://www.gnu.org/licenses/gpl-3.0.en.html) [![version](https://img.shields.io/badge/Version-1.0.4-blue.svg?style=style=flat-square)](https://github.com/s0md3v/Photon/blob/master/CHANGELOG.md) [![plugins](https://img.shields.io/badge/Plugins-1-yellow.svg?style=style=flat-square)](https://github.com/s0md3v/Photon/tree/master/plugins) [![twitter](https://img.shields.io/badge/Twitter-@s0md3v-skyblue.svg?style=style=flat-square)](https://twitter.com/s0md3v/)
+# Photon [![python](https://img.shields.io/badge/Python-2.x|3.x-green.svg?style=style=flat-square)](https://www.python.org/downloads/)  [![license](https://img.shields.io/badge/License-GPL--v3-orange.svg?style=style=flat-square)](https://www.gnu.org/licenses/gpl-3.0.en.html) [![version](https://img.shields.io/badge/Version-1.0.5-blue.svg?style=style=flat-square)](https://github.com/s0md3v/Photon/blob/master/CHANGELOG.md) [![plugins](https://img.shields.io/badge/Plugins-1-yellow.svg?style=style=flat-square)](https://github.com/s0md3v/Photon/tree/master/plugins) [![twitter](https://img.shields.io/badge/Twitter-@s0md3v-skyblue.svg?style=style=flat-square)](https://twitter.com/s0md3v/)
 
 Photon is a lightning fast web crawler which extracts URLs, files, intel & endpoints from a target.
 
@@ -38,7 +38,7 @@ Photon's capabilites can be further extended by using plugins.
 Available plugins:
 
 - **[dnsdumpster](https://github.com/s0md3v/Photon/wiki/Usage#dumping-dns-data)**: Generates an image containing the DNS data of the target domain.
-- **Exporter**: Plugin to export results in JSON, support for more formats is being developed.
+- **[Exporter](https://github.com/s0md3v/Photon/wiki/Usage#export-formatted-result)**: Plugin to export results in JSON, support for more formats is being developed.
 
 Plugins in active development:
 

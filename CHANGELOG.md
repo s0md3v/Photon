@@ -1,3 +1,8 @@
+#### v1.0.5
+- Added exporter plugin
+- Added seamless update ability
+- Fixed a bug in update function
+
 #### v1.0.4
 - Fixed an issue which caused regular links to be saved in robots.txt
 - Simplified `flash` function
