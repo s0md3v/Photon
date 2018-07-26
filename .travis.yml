@@ -1,6 +1,9 @@
 language: python
 install:
   - pip install requests urllib3
+os:
+  - linux
+  - osx
 python:
     - 2.7
     - 3.6
