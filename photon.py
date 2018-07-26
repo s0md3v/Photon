@@ -72,7 +72,7 @@ args = parser.parse_args()
 
 def update():
     print('%s Checking for updates' % run)
-    changes = '''added --export feature;--export supports json at present''' # Changes must be seperated by ;
+    changes = '''x100 faster;removed ninja''' # Changes must be seperated by ;
     latest_commit = get('https://raw.githubusercontent.com/s0md3v/Photon/master/photon.py').text
 
     if changes not in latest_commit: # just hack to see if a new version is available
