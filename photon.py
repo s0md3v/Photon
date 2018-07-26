@@ -9,6 +9,7 @@ import shutil
 import random
 import urllib3
 import argparse
+import warnings
 import threading
 import lxml.html
 from re import search, findall
@@ -22,6 +23,7 @@ from plugins.exporter import exporter
 from plugins.dnsdumpster import dnsdumpster
 
 colors = True # Output should be colored
+warnings.filterwarnings('ignore')
 machine = sys.platform # Detecting the os of current system
 if machine.startswith('os') or machine.startswith('win') or machine.startswith('darwin') or machine.startswith('ios'):
     colors = False # Colors shouldn't be displayed in mac & windows
