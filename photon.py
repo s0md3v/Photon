@@ -7,7 +7,6 @@ import sys
 import time
 import shutil
 import random
-import urllib3
 import warnings
 import argparse
 import threading
@@ -59,8 +58,9 @@ parser.add_argument('-r', '--regex', help='regex pattern', dest='regex')
 parser.add_argument('-e', '--export', help='export format', dest='export')
 parser.add_argument('-s', '--seeds', help='additional seed urls', dest='seeds')
 parser.add_argument('-l', '--level', help='levels to crawl', dest='level', type=int)
+parser.add_argument('--timeout', help='http request timeout', dest='timeout', type=float)
 parser.add_argument('-t', '--threads', help='number of threads', dest='threads', type=int)
-parser.add_argument('-d', '--delay', help='delay between requests', dest='delay', type=int)
+parser.add_argument('-d', '--delay', help='delay between requests', dest='delay', type=float)
 # Switches
 parser.add_argument('--dns', help='dump dns data', dest='dns', action='store_true')
 parser.add_argument('--ninja', help='ninja mode', dest='ninja', action='store_true')
@@ -74,7 +74,7 @@ args = parser.parse_args()
 
 def update():
     print('%s Checking for updates' % run)
-    changes = '''x2 faster;added ninja;fixed bugs''' # Changes must be seperated by ;
+    changes = '''added --timeout option;delay changed from int to float;efficient file handling''' # Changes must be seperated by ;
     latest_commit = get('https://raw.githubusercontent.com/s0md3v/Photon/master/photon.py').text
 
     if changes not in latest_commit: # just hack to see if a new version is available
@@ -118,14 +118,16 @@ crawl_level = 2 # Crawling level
 thread_count = 2 # Number of threads
 only_urls = False # only urls mode is off by default
 
-if args.cook:
-    cook = args.cook
 if args.ninja:
     ninja = True
 if args.only_urls:
     only_urls = True
+if args.cook:
+    cook = args.cook
 if args.delay:
     delay = args.delay
+if args.timeout:
+    timeout = args.timeout
 if args.level:
     crawl_level = args.level
 if args.threads:
@@ -442,60 +444,60 @@ for url in storage:
     if '=' in url:
         fuzzable.add(url)
 
-for match in bad_intel: # iterate over the match because it's a tuple
-    for x in match:
+for match in bad_intel:
+    for x in match: # because "match" is a tuple
         if x != '': # if the value isn't empty
             intel.add(x)
 
 if len(storage) > 0:
     with open('%s/links.txt' % name, 'w+') as f:
-        for x in storage:
-            f.write(str(x.encode('utf-8')) + '\n')
+        joined = '\n'.join(storage)
+        f.write(str(joined.encode('utf-8')) + '\n')
 
 if len(files) > 0:
     with open('%s/files.txt' % name, 'w+') as f:
-        for x in files:
-            f.write(str(x.encode('utf-8')) + '\n')
+        joined = '\n'.join(files)
+        f.write(str(joined.encode('utf-8')) + '\n')
 
 if len(intel) > 0:
     with open('%s/intel.txt' % name, 'w+') as f:
-        for x in intel:
-            f.write(str(x.encode('utf-8')) + '\n')
+        joined = '\n'.join(intel)
+        f.write(str(joined.encode('utf-8')) + '\n')
 
 if len(robots) > 0:
     with open('%s/robots.txt' % name, 'w+') as f:
-        for x in robots:
-            f.write(str(x.encode('utf-8')) + '\n')
+        joined = '\n'.join(robots)
+        f.write(str(joined.encode('utf-8')) + '\n')
 
 if len(failed) > 0:
     with open('%s/failed.txt' % name, 'w+') as f:
-        for x in failed:
-            f.write(str(x.encode('utf-8')) + '\n')
+        joined = '\n'.join(failed)
+        f.write(str(joined.encode('utf-8')) + '\n')
 
 if len(custom) > 0:
     with open('%s/custom.txt' % name, 'w+') as f:
-        for x in custom:
-            f.write(str(x.encode('utf-8')) + '\n')
+        joined = '\n'.join(custom)
+        f.write(str(joined.encode('utf-8')) + '\n')
 
 if len(scripts) > 0:
     with open('%s/scripts.txt' % name, 'w+') as f:
-        for x in scripts:
-            f.write(str(x.encode('utf-8')) + '\n')
+        joined = '\n'.join(scripts)
+        f.write(str(joined.encode('utf-8')) + '\n')
 
 if len(fuzzable) > 0:
     with open('%s/fuzzable.txt' % name, 'w+') as f:
-        for x in fuzzable:
-            f.write(str(x.encode('utf-8')) + '\n')
+        joined = '\n'.join(fuzzable)
+        f.write(str(joined.encode('utf-8')) + '\n')
 
-if len(endpoints) > 0:
+if len(external) > 0:
     with open('%s/external.txt' % name, 'w+') as f:
-        for x in external:
-            f.write(str(x.encode('utf-8')) + '\n')
+        joined = '\n'.join(external)
+        f.write(str(joined.encode('utf-8')) + '\n')
 
 if len(endpoints) > 0:
     with open('%s/endpoints.txt' % name, 'w+') as f:
-        for x in endpoints:
-            f.write(str(x.encode('utf-8')) + '\n')
+        joined = '\n'.join(endpoints)
+        f.write(str(joined.encode('utf-8')) + '\n')
 
 # Printing out results
 print ('''%s
@@ -513,7 +515,7 @@ len(custom), good, len(scripts), good, len(external),
 (('%s-%s' % (red, end)) * 50)))
 
 print ('%s Total time taken: %i minutes %i seconds' % (info, minutes, seconds))
-print ('%s Average request time: %s seconds' % (info, str(time_per_request)[:4]))
+print ('%s Average request time: %s seconds' % (info, time_per_request))
 
 if args.export:
     # exporter(directory, format, datasets)
