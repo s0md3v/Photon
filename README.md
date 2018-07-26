@@ -48,8 +48,9 @@ Plugins in active development:
 #### Support
 The project is under heavy development and any submitted issues or pull requests will be acknowledged within min 5 minutes and max 9 hours.
 
-### Compatibility & Usage
-A detailed usage of Photon can be found on the [Usage](https://github.com/s0md3v/Photon/wiki/Usage) and compatibility related information on [Compatibility & Dependencies](https://github.com/s0md3v/Photon/wiki/Compatibility-&-Dependencies) section of the [Wiki](https://github.com/s0md3v/Photon/wiki).
+### Documentation
+- [Using Photon](https://github.com/s0md3v/Photon/wiki/Usage)
+- [Compatibility & Dependencies](https://github.com/s0md3v/Photon/wiki/Compatibility-&-Dependencies)
 
 ### Contribution & License
 You can contribute in following ways:
