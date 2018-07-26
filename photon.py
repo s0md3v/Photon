@@ -15,6 +15,7 @@ from requests import get, post
 try:
     from urllib.parse import urlparse # for python3
 except ImportError:
+    input = raw_input
     from urlparse import urlparse # for python2
 from plugins.dnsdumpster import dnsdumpster
 
@@ -48,6 +49,7 @@ urllib3.disable_warnings() # Disable SSL related warnings
 
 # Processing command line arguments
 parser = argparse.ArgumentParser()
+# Options
 parser.add_argument('-u', '--url', help='root url', dest='root')
 parser.add_argument('-c', '--cookie', help='cookie', dest='cook')
 parser.add_argument('-r', '--regex', help='regex pattern', dest='regex')
@@ -55,10 +57,44 @@ parser.add_argument('-s', '--seeds', help='additional seed urls', dest='seeds')
 parser.add_argument('-l', '--level', help='levels to crawl', dest='level', type=int)
 parser.add_argument('-t', '--threads', help='number of threads', dest='threads', type=int)
 parser.add_argument('-d', '--delay', help='delay between requests', dest='delay', type=int)
-parser.add_argument('--ninja', help='ninja mode', dest='ninja', action='store_true')
+# Switches
 parser.add_argument('--dns', help='dump dns data', dest='dns', action='store_true')
+parser.add_argument('--ninja', help='ninja mode', dest='ninja', action='store_true')
+parser.add_argument('--update', help='update photon', dest='update', action='store_true')
 parser.add_argument('--only-urls', help='only extract urls', dest='only_urls', action='store_true')
 args = parser.parse_args()
+
+####
+# This function git clones the latest version and merges it with the current directory
+####
+
+def update():
+    print('%s Checking for updates' % run)
+    changes = '''added --update feature''' # Changes must be seperated by ;
+    latest_commit = get('https://raw.githubusercontent.com/s0md3v/Photon/master/photon.py').text
+
+    if changes not in latest_commit: # just hack to see if a new version is available
+        changelog = search(r"changes = '''(.*?)'''", latest_commit)
+        changelog = changelog.group(1).split(';') # splitting the changes to form a list
+        print ('%s A new version of Photon is available.' % good)
+        print ('%s Changes:' % info)
+        for change in changelog: # print changes
+            print ('%s>%s %s' % (green, end, change))
+
+        current_path = os.getcwd().split('/') # if you know it, you know it
+        folder = current_path[-1] # current directory name
+        path = '/'.join(current_path) # current directory path
+        choice = input('%s Would you like to update? [Y/n] ' % que).lower()
+
+        if choice != 'n':
+            print ('%s Updating Photon' % run)
+            os.system('git clone --quiet https://github.com/s0md3v/Photon %s' % (folder))
+            os.system('cp -r %s/%s/* %s && rm -r %s/%s/ 2>/dev/null' % (path, folder, path, folder))
+            print ('%s Update successful!' % good)
+
+if args.update: # if the user has supplied --update argument
+    update()
+    quit() # quitting because files have been changed
 
 if args.root: # if the user has supplied a url
     main_inp = args.root
