@@ -38,11 +38,11 @@ Photon's capabilites can be further extended by using plugins.
 Available plugins:
 
 - **[dnsdumpster](https://github.com/s0md3v/Photon/wiki/Usage#dumping-dns-data)**: Generates an image containing the DNS data of the target domain.
+- **Exporter**: Plugin to export results in JSON, support for more formats is being developed.
 
 Plugins in active development:
 
 - **Quark**: A plugin to plot a graph making it easier to inspect relationships between different webpages using [Quark](https://github.com/s0md3v/Quark).
-- **Exporter**: Plugin to export results in JSON, more formats will be added later.
 - **dnsdumpster**: A new version of the plugin is in development which will save the DNS data in a nicely formatted HTML file.
 
 #### Support

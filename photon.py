@@ -17,6 +17,7 @@ try:
 except ImportError:
     input = raw_input
     from urlparse import urlparse # for python2
+from plugins.exporter import exporter
 from plugins.dnsdumpster import dnsdumpster
 
 colors = True # Output should be colored
@@ -53,6 +54,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-u', '--url', help='root url', dest='root')
 parser.add_argument('-c', '--cookie', help='cookie', dest='cook')
 parser.add_argument('-r', '--regex', help='regex pattern', dest='regex')
+parser.add_argument('-e', '--export', help='export format', dest='export')
 parser.add_argument('-s', '--seeds', help='additional seed urls', dest='seeds')
 parser.add_argument('-l', '--level', help='levels to crawl', dest='level', type=int)
 parser.add_argument('-t', '--threads', help='number of threads', dest='threads', type=int)
@@ -70,7 +72,7 @@ args = parser.parse_args()
 
 def update():
     print('%s Checking for updates' % run)
-    changes = '''added --update feature''' # Changes must be seperated by ;
+    changes = '''added --export feature;--export supports json at present''' # Changes must be seperated by ;
     latest_commit = get('https://raw.githubusercontent.com/s0md3v/Photon/master/photon.py').text
 
     if changes not in latest_commit: # just hack to see if a new version is available
@@ -526,6 +528,10 @@ len(custom), good, len(scripts), good, len(external),
 
 print ('%s Total time taken: %i:%i' % (info, minutes, seconds))
 print ('%s Average request time: %s' % (info, str(time_per_request)[:4]))
+
+if args.export:
+    # exporter(directory, format, *sets)
+    exporter(name, args.export, files, intel, robots, custom, failed, storage, scripts, external, fuzzable, endpoints, processed)
 
 if not colors: # if colors are disabled
     print ('%s Results saved in %s directory' % (good, name))
