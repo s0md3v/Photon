@@ -1,3 +1,4 @@
+lxml
 requests
 urllib3
 argparse
