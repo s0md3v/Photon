@@ -1,5 +1,11 @@
+#### v1.0.6
+- Fixed lot of bugs
+- Suppress SSL warnings in MAC
+- x100 speed by code optimization
+- Simplified code of `exporter` plugin
+
 #### v1.0.5
-- Added exporter plugin
+- Added `exporter` plugin
 - Added seamless update ability
 - Fixed a bug in update function
 
