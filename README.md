@@ -38,7 +38,7 @@ Photon's capabilites can be further extended by using plugins.
 Available plugins:
 
 - **[dnsdumpster](https://github.com/s0md3v/Photon/wiki/Usage#dumping-dns-data)**: Generates an image containing the DNS data of the target domain.
-- **Exporter**: Plugin to export results in JSON, support for more formats is being developed.
+- **[Exporter](https://github.com/s0md3v/Photon/wiki/Usage#export-formatted-result)**: Plugin to export results in JSON, support for more formats is being developed.
 
 Plugins in active development:
 
