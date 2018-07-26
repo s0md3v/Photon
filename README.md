@@ -2,7 +2,9 @@
 
 Photon is a lightning fast web crawler which extracts URLs, files, intel & endpoints from a target.
 
-![demo](https://image.ibb.co/bTNwBy/Screenshot_2018_07_22_12_07_30.png)
+160 requests per second while extensive data extraction is just another day for Photon!
+
+![demo](https://image.ibb.co/fdASuT/Screenshot_2018_07_27_00_55_33.png)
 
 ## Main Features
 
@@ -23,7 +25,7 @@ Photon also allows custom data extraction with [regex patterns](https://github.c
 
 #### Intelligent Multithreading
 Here's a secret, most of the tools floating on the internet aren't properly multi-threaded even if they are supposed to. They either supply a list of items to threads which results in multiple threads accessing the same item or they simply put a thread lock and end up rendering multi-threading useless.\
-But Photon is different or should I say "genius"? Take a look at [this](https://github.com/s0md3v/Photon/blob/aaf5ab3b2a2a168a8eb625eb2a6feb4307521f22/photon.py#L315-L339) and decide yourself.
+But Photon is different or should I say "genius"? Take a look at [this](https://github.com/s0md3v/Photon/blob/8b58580df1bdfe5f7b96eaf83957d018418ec8ae/photon.py#L357-L381) and decide yourself.
 
 #### Ninja Mode
 In Ninja Mode, 3 online services are used to make requests to the target on your behalf.\
