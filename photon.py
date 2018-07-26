@@ -91,7 +91,7 @@ def update():
         if choice != 'n':
             print ('%s Updating Photon' % run)
             os.system('git clone --quiet https://github.com/s0md3v/Photon %s' % (folder))
-            os.system('cp -r %s/%s/* %s && rm -r %s/%s/ 2>/dev/null' % (path, folder, path, folder))
+            os.system('cp -r %s/%s/* %s && rm -r %s/%s/ 2>/dev/null' % (path, folder, path, path, folder))
             print ('%s Update successful!' % good)
 
 if args.update: # if the user has supplied --update argument
