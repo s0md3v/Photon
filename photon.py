@@ -9,11 +9,10 @@ import shutil
 import random
 import urllib3
 import argparse
-import warnings
 import threading
 import lxml.html
 from re import search, findall
-from requests import get, post, Timeout
+from requests import get, post
 try:
     from urllib.parse import urlparse # for python3
 except ImportError:
@@ -23,7 +22,6 @@ from plugins.exporter import exporter
 from plugins.dnsdumpster import dnsdumpster
 
 colors = True # Output should be colored
-warnings.filterwarnings('ignore')
 machine = sys.platform # Detecting the os of current system
 if machine.startswith('os') or machine.startswith('win') or machine.startswith('darwin') or machine.startswith('ios'):
     colors = False # Colors shouldn't be displayed in mac & windows
@@ -49,7 +47,7 @@ print ('''%s      ____  __          __
   /_/   /_/ /_/\____/\__/\____/_/ /_/ %s\n''' %
   (red, white, red, white, red, white, red, white, red, white, red, white, red, end))
 
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning) # Disable SSL related warnings
+warnings.filterwarnings('ignore') # Disable SSL related warnings
 
 # Processing command line arguments
 parser = argparse.ArgumentParser()
@@ -74,7 +72,7 @@ args = parser.parse_args()
 
 def update():
     print('%s Checking for updates' % run)
-    changes = '''x100 faster;removed ninja''' # Changes must be seperated by ;
+    changes = '''better performance;fixed 3 bugs''' # Changes must be seperated by ;
     latest_commit = get('https://raw.githubusercontent.com/s0md3v/Photon/master/photon.py').text
 
     if changes not in latest_commit: # just hack to see if a new version is available
@@ -142,7 +140,8 @@ endpoints = set() # urls found from javascript files
 processed = set() # urls that have been crawled
 
 everything = []
-bad_scripts = set() # bad javascript files
+bad_intel = set() # unclean intel urls
+bad_scripts = set() # unclean javascript file urls
 
 seeds = []
 if args.seeds: # if the user has supplied custom seeds
@@ -192,7 +191,7 @@ def requester(url):
         else:
             response.close()
             return 'dummy'
-    except Timeout:
+    except:
         return 'dummy'
 
 ####
@@ -206,7 +205,7 @@ def zap(url):
         if matches:
             for match in matches: # iterating over the matches, match is a tuple here
                 match = ''.join(match) # one item in match will always be empty so will combine both items
-                if '/*/' not in match: # if the url doesn't use a wildcard
+                if '*' not in match: # if the url doesn't use a wildcard
                     url = main_url + match
                     storage.add(url) # add the url to storage list for crawling
                     robots.add(url) # add the url to robots list
@@ -257,7 +256,7 @@ def intel_extractor(response):
     (twitter\.com/.*?)[\'" ]|([\w\.-]+@[\w\.-]+\.[\.\w]+)''', response)
     if matches:
         for match in matches: # iterate over the matches
-            intel.add(match) # add it to intel list
+            bad_intel.add(match) # add it to intel list
 
 ####
 # This function extracts js files from the response body
@@ -397,6 +396,11 @@ for url in storage:
     if '=' in url:
         fuzzable.add(url)
 
+for match in bad_intel: # iterate over the match because it's a tuple
+    for x in match:
+        if x != '': # if the value isn't empty
+            intel.add(x)
+
 if len(storage) > 0:
     with open('%s/links.txt' % name, 'w+') as f:
         for x in storage:
@@ -409,10 +413,8 @@ if len(files) > 0:
 
 if len(intel) > 0:
     with open('%s/intel.txt' % name, 'w+') as f:
-        for match in intel:
-            for x in match: # iterate over the match because it's a tuple
-                if x != '': # if the value isn't empty
-                    f.write(str(x.encode('utf-8')) + '\n')
+        for x in intel:
+            f.write(str(x.encode('utf-8')) + '\n')
 
 if len(robots) > 0:
     with open('%s/robots.txt' % name, 'w+') as f:
@@ -468,8 +470,8 @@ print ('%s Total time taken: %i minutes %i seconds' % (info, minutes, seconds))
 print ('%s Average request time: %s seconds' % (info, str(time_per_request)[:4]))
 
 if args.export:
-    # exporter(directory, format, *sets)
-    exporter(name, args.export, files, intel, robots, custom, failed, storage, scripts, external, fuzzable, endpoints, processed)
+    # exporter(directory, format, datasets)
+    exporter(name, args.export, {'files': list(files), 'intel': list(intel), 'robots': list(robots), 'custom': list(custom), 'failed': list(failed), 'storage': list(storage), 'scripts': list(scripts), 'external': list(external), 'fuzzable': list(fuzzable), 'endpoints': list(endpoints)})
 
 if not colors: # if colors are disabled
     print ('%s Results saved in %s directory' % (good, name))
