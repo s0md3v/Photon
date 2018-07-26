@@ -10,6 +10,7 @@ import random
 import urllib3
 import argparse
 import threading
+from fake_useragent import UserAgent
 from re import search, findall
 from requests import get, post
 try:
@@ -126,9 +127,11 @@ name = urlparse(main_url).netloc # Extracts domain out of the url
 ####
 
 # list of user agents
-user_agents = ['Mozilla/5.0 (X11; Linux i686; rv:60.0) Gecko/20100101 Firefox/60.0',
-'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36'
-'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36 OPR/43.0.2442.991']
+# now we dont need the list just use fake useragent
+ua = UserAgent()
+# user_agents = ['Mozilla/5.0 (X11; Linux i686; rv:60.0) Gecko/20100101 Firefox/60.0',
+# 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36'
+# 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36 OPR/43.0.2442.991']
 
 def requester(url):
     processed.add(url) # mark the url as crawled
@@ -137,7 +140,7 @@ def requester(url):
         def normal(url):
             headers = {
             'Host' : name, # ummm this is the hostname?
-            'User-Agent' : random.choice(user_agents), # selecting a random user-agent
+            'User-Agent' : ua.random, # selecting a random user-agent
             'Accept' : 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
             'Accept-Language' : 'en-US,en;q=0.5',
             'Accept-Encoding' : 'gzip',
