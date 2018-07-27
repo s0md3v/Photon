@@ -10,7 +10,6 @@ import random
 import warnings
 import argparse
 import threading
-import lxml.html
 from re import search, findall
 from requests import get, post
 try:
@@ -74,7 +73,7 @@ args = parser.parse_args()
 
 def update():
     print('%s Checking for updates' % run)
-    changes = '''added --timeout option;delay changed from int to float;efficient file handling''' # Changes must be seperated by ;
+    changes = '''replaced lxml with regex;better logic to favor performance''' # Changes must be seperated by ;
     latest_commit = get('https://raw.githubusercontent.com/s0md3v/Photon/master/photon.py').text
 
     if changes not in latest_commit: # just hack to see if a new version is available
@@ -321,18 +320,18 @@ def js_extractor(response):
 
 def extractor(url):
     response = requester(url) # make request to the url
-    root = lxml.html.fromstring(response) # find all the links
-    for link in root.xpath('//a/@href'): # iterate over the matches
+    matches = findall(r'<[aA].*[href|HREF]=["\']{0,1}([^>"\']*)', response)
+    for link in matches: # iterate over the matches
         link = link.split('#')[0] # remove everything after a "#" to deal with in-page anchors
         if is_link(link): # checks if the urls should be crawled
-            if link.startswith('http'): # self-explanatory
+            if link.startswith('http') or link.startswith('//'):
                 if link.startswith(main_url):
                     storage.add(link)
                 else:
                     external.add(link)
-            elif link.startswith('/') and not link.startswith('//'):
+            elif link.startswith('/'):
                 storage.add(main_url + link)
-            elif not link.startswith('http') and not link.startswith('//'):
+            else:
                 storage.add(main_url + '/' + link)
     if not only_urls:
         intel_extractor(response)
@@ -398,7 +397,7 @@ for level in range(crawl_level):
     links = storage - processed # links to crawl = all links - already crawled links
     if len(links) == 0: # if links to crawl are 0 i.e. all links have been crawled
         break
-    if len(storage) <= len(processed): # if crawled links are somehow more than all links. Possible? ;/
+    elif len(storage) <= len(processed): # if crawled links are somehow more than all links. Possible? ;/
         if len(storage) > 2 + len(seeds): # if you know it, you know it
             break
     print ('%s Level %i: %i URLs' % (run, level + 1, len(links)))
@@ -420,6 +419,15 @@ if not only_urls:
     print ('%s Crawling %i JavaScript files' % (run, len(scripts)))
     flash(jscanner, scripts)
 
+    for url in storage:
+        if '=' in url:
+            fuzzable.add(url)
+
+    for match in bad_intel:
+        for x in match: # because "match" is a tuple
+            if x != '': # if the value isn't empty
+                intel.add(x)
+
 now = time.time() # records the time at which crawling stopped
 diff = (now  - then) # finds total time taken
 
@@ -439,15 +447,6 @@ os.mkdir(name) # create a new directory
 
 if args.dns:
     dnsdumpster(name, colors)
-
-for url in storage:
-    if '=' in url:
-        fuzzable.add(url)
-
-for match in bad_intel:
-    for x in match: # because "match" is a tuple
-        if x != '': # if the value isn't empty
-            intel.add(x)
 
 if len(storage) > 0:
     with open('%s/links.txt' % name, 'w+') as f:
