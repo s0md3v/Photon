@@ -16,5 +16,6 @@ def dnsdumpster(domain, colors):
     response = requests.Session().post('https://dnsdumpster.com/', cookies=cookies, data=data, headers=headers)
 
     image = requests.get('https://dnsdumpster.com/static/map/%s.png' % domain)
-    with open('%s/%s.png' % (domain, domain), 'wb') as f:
-        f.write(image.content)
+    return image
+
+

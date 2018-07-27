@@ -440,11 +440,11 @@ minutes = time_taken[0]
 seconds = time_taken[1]
 time_per_request = time_taken[2]
 
-# Step 4. Save the results
 
 if args.dns:
-    dnsdumpster(name, colors)
+    image = dnsdumpster(name, colors)
 
+# Step 4. Save the results
 if args.output:
     try:
         os.stat(output_base_dir)
@@ -518,6 +518,12 @@ if len(endpoints) > 0:
     with open('%s/endpoints.txt' % name, 'w') as f:
         joined = '\n'.join(endpoints)
         f.write(str(joined.encode('utf-8')) + '\n')
+
+if args.dns:
+    if image:
+        with open('%s/%s.png' % (name, name), 'wb') as f:
+            f.write(image.content)
+
 
 # Printing out results
 
