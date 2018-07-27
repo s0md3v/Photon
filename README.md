@@ -6,6 +6,10 @@ Photon is a lightning fast web crawler which extracts URLs, files, intel & endpo
 
 ![demo](https://image.ibb.co/fdASuT/Screenshot_2018_07_27_00_55_33.png)
 
+### Documentation
+- [Using Photon](https://github.com/s0md3v/Photon/wiki/Usage)
+- [Compatibility & Dependencies](https://github.com/s0md3v/Photon/wiki/Compatibility-&-Dependencies)
+
 ## Main Features
 
 #### Data Extraction
@@ -20,8 +24,6 @@ Photon extracts the following data while crawling by default:
 
 The extracted information is saved in an organized manner.\
 ![save demo](https://image.ibb.co/ezTEyd/Screenshot_2018_07_22_12_24_44.png)
-
-Photon also allows custom data extraction with [regex patterns](https://github.com/s0md3v/Photon/wiki/Usage#custom-regex-pattern).
 
 #### Intelligent Multithreading
 Here's a secret, most of the tools floating on the internet aren't properly multi-threaded even if they are supposed to. They either supply a list of items to threads which results in multiple threads accessing the same item or they simply put a thread lock and end up rendering multi-threading useless.\
@@ -40,19 +42,20 @@ Photon's capabilites can be further extended by using plugins.
 Available plugins:
 
 - **[dnsdumpster](https://github.com/s0md3v/Photon/wiki/Usage#dumping-dns-data)**: Generates an image containing the DNS data of the target domain.
-- **[Exporter](https://github.com/s0md3v/Photon/wiki/Usage#export-formatted-result)**: Plugin to export results in JSON, support for more formats is being developed.
+- **[Exporter](https://github.com/s0md3v/Photon/wiki/Usage#export-formatted-result)**: Plugin to export results in JSON, support for more formats is being worked on.
 
 Plugins in active development:
 
 - **Quark**: A plugin to plot a graph making it easier to inspect relationships between different webpages using [Quark](https://github.com/s0md3v/Quark).
+- **XSStrike**: Modular & *targeted* version of [XSStrike](https://github.com/s0md3v/XSStrike) to be used with Photon.
 - **dnsdumpster**: A new version of the plugin is in development which will save the DNS data in a nicely formatted HTML file.
 
-#### Support
-The project is under heavy development and any submitted issues or pull requests will be acknowledged within min 5 minutes and max 9 hours.
+#### Frequent & Seemless Updates
+The project is under heavy development and updates for fixing bugs. optimizing performance & new features are being rolled everyday.
 
-### Documentation
-- [Using Photon](https://github.com/s0md3v/Photon/wiki/Usage)
-- [Compatibility & Dependencies](https://github.com/s0md3v/Photon/wiki/Compatibility-&-Dependencies)
+If you would like to see features and issues that are being worked on, you can do that on [Development]() project board.
+
+Updates can be installed & checked for with the `--update` option. Photon has seamless update capabilities which means you can update Photon without losing any of your saved data.
 
 ### Contribution & License
 You can contribute in following ways:
