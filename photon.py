@@ -7,15 +7,18 @@ import sys
 import time
 import shutil
 import random
-import urllib3
+import warnings
 import argparse
 import threading
+import lxml.html
 from re import search, findall
 from requests import get, post
 try:
     from urllib.parse import urlparse # for python3
 except ImportError:
+    input = raw_input
     from urlparse import urlparse # for python2
+from plugins.exporter import exporter
 from plugins.dnsdumpster import dnsdumpster
 
 colors = True # Output should be colored
@@ -44,21 +47,61 @@ print ('''%s      ____  __          __
   /_/   /_/ /_/\____/\__/\____/_/ /_/ %s\n''' %
   (red, white, red, white, red, white, red, white, red, white, red, white, red, end))
 
-urllib3.disable_warnings() # Disable SSL related warnings
+warnings.filterwarnings('ignore') # Disable SSL related warnings
 
 # Processing command line arguments
 parser = argparse.ArgumentParser()
+# Options
 parser.add_argument('-u', '--url', help='root url', dest='root')
 parser.add_argument('-o', '--output', help='output directory', dest='output')
 parser.add_argument('-c', '--cookie', help='cookie', dest='cook')
 parser.add_argument('-r', '--regex', help='regex pattern', dest='regex')
+parser.add_argument('-e', '--export', help='export format', dest='export')
 parser.add_argument('-s', '--seeds', help='additional seed urls', dest='seeds')
 parser.add_argument('-l', '--level', help='levels to crawl', dest='level', type=int)
+parser.add_argument('--timeout', help='http request timeout', dest='timeout', type=float)
 parser.add_argument('-t', '--threads', help='number of threads', dest='threads', type=int)
-parser.add_argument('-n', '--ninja', help='ninja mode', dest='ninja', action='store_true')
-parser.add_argument('-d', '--delay', help='delay between requests', dest='delay', type=int)
+parser.add_argument('-d', '--delay', help='delay between requests', dest='delay', type=float)
+# Switches
 parser.add_argument('--dns', help='dump dns data', dest='dns', action='store_true')
+parser.add_argument('--ninja', help='ninja mode', dest='ninja', action='store_true')
+parser.add_argument('--update', help='update photon', dest='update', action='store_true')
+parser.add_argument('--only-urls', help='only extract urls', dest='only_urls', action='store_true')
 args = parser.parse_args()
+
+####
+# This function git clones the latest version and merges it with the current directory
+####
+
+def update():
+    print('%s Checking for updates' % run)
+    changes = '''added --timeout option;delay changed from int to float;efficient file handling''' # Changes must be seperated by ;
+    latest_commit = get('https://raw.githubusercontent.com/s0md3v/Photon/master/photon.py').text
+
+    if changes not in latest_commit: # just hack to see if a new version is available
+        changelog = search(r"changes = '''(.*?)'''", latest_commit)
+        changelog = changelog.group(1).split(';') # splitting the changes to form a list
+        print ('%s A new version of Photon is available.' % good)
+        print ('%s Changes:' % info)
+        for change in changelog: # print changes
+            print ('%s>%s %s' % (green, end, change))
+
+        current_path = os.getcwd().split('/') # if you know it, you know it
+        folder = current_path[-1] # current directory name
+        path = '/'.join(current_path) # current directory path
+        choice = input('%s Would you like to update? [Y/n] ' % que).lower()
+
+        if choice != 'n':
+            print ('%s Updating Photon' % run)
+            os.system('git clone --quiet https://github.com/s0md3v/Photon %s' % (folder))
+            os.system('cp -r %s/%s/* %s && rm -r %s/%s/ 2>/dev/null' % (path, folder, path, path, folder))
+            print ('%s Update successful!' % good)
+    else:
+        print ('%s Photon is up to date!' % good)
+
+if args.update: # if the user has supplied --update argument
+    update()
+    quit() # quitting because files have been changed
 
 if args.root: # if the user has supplied a url
     main_inp = args.root
@@ -76,17 +119,23 @@ if args.output: # if the user has supplied a output dir
 
 
 delay = 0 # Delay between requests
+timeout = 6 # HTTP request timeout
 cook = None # Cookie
 ninja = False # Ninja mode toggle
 crawl_level = 2 # Crawling level
 thread_count = 2 # Number of threads
+only_urls = False # only urls mode is off by default
 
-if args.cook:
-    cook = args.cook
 if args.ninja:
     ninja = True
+if args.only_urls:
+    only_urls = True
+if args.cook:
+    cook = args.cook
 if args.delay:
     delay = args.delay
+if args.timeout:
+    timeout = args.timeout
 if args.level:
     crawl_level = args.level
 if args.threads:
@@ -105,7 +154,11 @@ fuzzable = set() # urls that have get params in them e.g. example.com/page.php?i
 endpoints = set() # urls found from javascript files
 processed = set() # urls that have been crawled
 
-seeds = '' # custom urls to crawl
+everything = []
+bad_intel = set() # unclean intel urls
+bad_scripts = set() # unclean javascript file urls
+
+seeds = []
 if args.seeds: # if the user has supplied custom seeds
     seeds = args.seeds
     for seed in seeds.split(','): # we will convert them into a list
@@ -137,114 +190,138 @@ user_agents = ['Mozilla/5.0 (X11; Linux i686; rv:60.0) Gecko/20100101 Firefox/60
 def requester(url):
     processed.add(url) # mark the url as crawled
     time.sleep(delay) # pause/sleep the program for specified time
-    try:
-        def normal(url):
-            headers = {
-            'Host' : name, # ummm this is the hostname?
-            'User-Agent' : random.choice(user_agents), # selecting a random user-agent
-            'Accept' : 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Language' : 'en-US,en;q=0.5',
-            'Accept-Encoding' : 'gzip',
-            'DNT' : '1',
-            'Connection' : 'close'}
-            # make request and return response
-            return get(url, cookies=cook, headers=headers, verify=False)
+    def normal(url):
+        headers = {
+        'Host' : name, # ummm this is the hostname?
+        'User-Agent' : random.choice(user_agents), # selecting a random user-agent
+        'Accept' : 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language' : 'en-US,en;q=0.5',
+        'Accept-Encoding' : 'gzip',
+        'DNT' : '1',
+        'Connection' : 'close'}
+        # make request and return response
+        try:
+            response = get(url, cookies=cook, headers=headers, verify=False, timeout=timeout, stream=True)
+            if 'text/html' in response.headers['content-type']:
+                if response.status_code != '404':
+                    return response.text
+                else:
+                    response.close()
+                    failed.append(url)
+                    return 'dummy'
+            else:
+                response.close()
+                return 'dummy'
+        except:
+            return 'dummy'
 
-        # pixlr.com API
-        def pixlr(url):
-            if url == main_url:
-                url = main_url + '/' # because pixlr throws error if http://example.com is used
-            # make request and return response
-            return get('https://pixlr.com/proxy/?url=' + url, headers={'Accept-Encoding' : 'gzip'}, verify=False)
+    # pixlr.com API
+    def pixlr(url):
+        if url == main_url:
+            url = main_url + '/' # because pixlr throws error if http://example.com is used
+        # make request and return response
+        return get('https://pixlr.com/proxy/?url=' + url, headers={'Accept-Encoding' : 'gzip'}, verify=False).text
 
-        # codebeautify.org API
-        def code_beautify(url):
-            headers = {
-            'User-Agent' : 'Mozilla/5.0 (X11; Linux x86_64; rv:61.0) Gecko/20100101 Firefox/61.0',
-            'Accept' : 'text/plain, */*; q=0.01',
-            'Accept-Encoding' : 'gzip',
-            'Content-Type' : 'application/x-www-form-urlencoded; charset=UTF-8',
-            'Origin' : 'https://codebeautify.org',
-            'Connection' : 'close'
-            }
-            # make request and return response
-            return post('https://codebeautify.com/URLService', headers=headers, data='path=' + url, verify=False)
+    # codebeautify.org API
+    def code_beautify(url):
+        headers = {
+        'User-Agent' : 'Mozilla/5.0 (X11; Linux x86_64; rv:61.0) Gecko/20100101 Firefox/61.0',
+        'Accept' : 'text/plain, */*; q=0.01',
+        'Accept-Encoding' : 'gzip',
+        'Content-Type' : 'application/x-www-form-urlencoded; charset=UTF-8',
+        'Origin' : 'https://codebeautify.org',
+        'Connection' : 'close'
+        }
+        # make request and return response
+        return post('https://codebeautify.com/URLService', headers=headers, data='path=' + url, verify=False).text
 
-        # www.photopea.com API
-        def photopea(url):
-            # make request and return response
-            return get('https://www.photopea.com/mirror.php?url=' + url, verify=False)
+    # www.photopea.com API
+    def photopea(url):
+        # make request and return response
+        return get('https://www.photopea.com/mirror.php?url=' + url, verify=False).text
 
-        if ninja: # if the ninja mode is enabled
-            # select a random request function i.e. random API
-            response = random.choice([photopea, normal, pixlr, code_beautify])(url)
-            
-            #check if link is not broken
-            if response.status_code == '404':
-                failed.add(url) # add it to the failed list
-            return response.text  # return response body
-                
-
+    if ninja: # if the ninja mode is enabled
+        # select a random request function i.e. random API
+        response = random.choice([photopea, normal, pixlr, code_beautify])(url)
+        if response != '':
+            return response  # return response body
         else:
-            response = normal(url)
-
-            #check if link is not broken
-            if response.status_code == '404':
-                failed.add(url) # add it to the failed list
-            return response.text  # return response body
-
-    except: # if photon fails to connect to the url
-        failed.add(url) # add it to the failed list
+            return 'dummy'
+    else:
+        return normal(url)
 
 ####
 # This function extracts links from robots.txt and sitemap.xml
 ####
 
 def zap(url):
-    try:
-        response = requester(url + '/robots.txt') # makes request to robots.txt
-        if '<body' not in response: # making sure robots.txt isn't some fancy 404 page
-            matches = findall(r'Allow: (.*)|Disallow: (.*)', response) # If you know it, you know it
+    response = get(url + '/robots.txt').text # makes request to robots.txt
+    if '<body' not in response: # making sure robots.txt isn't some fancy 404 page
+        matches = findall(r'Allow: (.*)|Disallow: (.*)', response) # If you know it, you know it
+        if matches:
             for match in matches: # iterating over the matches, match is a tuple here
-                match = match[0] + match[1] # one item in match will always be empty so will combine both items
-                if '/*/' not in match: # if the url doesn't use a wildcard
+                match = ''.join(match) # one item in match will always be empty so will combine both items
+                if '*' not in match: # if the url doesn't use a wildcard
                     url = main_url + match
                     storage.add(url) # add the url to storage list for crawling
                     robots.add(url) # add the url to robots list
-                    if '=' in url: # self-explanatory
-                        fuzzable.add(url) # add url to the fuzzable urls list
-            if len(matches) > 0: # if there are more than 0 matches
-                print ('%s URLs retrieved from robots.txt: %s' % (good, len(robots)))
-        
-        response = requester(url + '/sitemap.xml') # makes request to sitemap.xml
-        
-        if '<body' not in response: # making sure robots.txt isn't some fancy 404 page
-            matches = findall(r'<loc>[^<]*</loc>', response) # regex for extracting urls
-            if matches: # if there are any matches
-                print ('%s URLs retrieved from sitemap.xml: %s' % (good, len(matches)))
-                for match in matches:
-                    storage.add(match.split('<loc>')[1][:-6]) #cleaning up the url & adding it to the storage list for crawling
-    except:
-        pass
+            print ('%s URLs retrieved from robots.txt: %s' % (good, len(robots)))        
+    response = get(url + '/sitemap.xml').text # makes request to sitemap.xml        
+    if '<body' not in response: # making sure robots.txt isn't some fancy 404 page
+        matches = findall(r'<loc>[^<]*</loc>', response) # regex for extracting urls
+        if matches: # if there are any matches
+            print ('%s URLs retrieved from sitemap.xml: %s' % (good, len(matches)))
+            for match in matches:
+                storage.add(match.split('<loc>')[1][:-6]) #cleaning up the url & adding it to the storage list for crawling
+
 ####
 # This functions checks whether a url should be crawled or not
 ####
 
 def is_link(url):
     # file extension that don't need to be crawled and are files
-    bad = ['xml', 'png', 'bmp', 'jpg', 'jpeg', 'pdf', 'css', 'ico', 'js', 'svg', 'json']
     conclusion = False # whether the the url should be crawled or not
     
     if url not in processed: # if the url hasn't been crawled already
-        if '.' in url[-5:]: # url[-5:] = last 5 chars of url
-            extension = url[-5:].split('.')[-1] # finding the extension of webpage
-            if extension not in bad: # if the extension isn't "bad"
-                conclusion = True # url can be crawled
-            else:
-                files.add(main_url + url) # its a file
-        else: # it has no extension
+        if not ('.xml' or '.png' or '.bmp' or '.jpg' or '.jpeg' or '.pdf' or '.css' or '.ico' or '.js' or '.svg' or '.json') in url:
             return True # url can be crawled
+        else:
+            files.add(url)
     return conclusion # return the conclusion :D
+
+####
+# This function extracts string based on regex pattern supplied by user
+####
+
+supress_regex = False
+def regxy(pattern, response):
+    try:
+        matches = findall(r'%s' % pattern, response)
+        for match in matches:
+            custom.add(match)
+    except:
+        supress_regex = True
+
+####
+# This function extracts intel from the response body
+####
+
+def intel_extractor(response):
+    matches = findall(r'''([\w\.-]+s[\w\.-]+\.amazonaws\.com)|(github\.com/[\w\.-/]+)|
+    (facebook\.com/.*?)[\'" ]|(youtube\.com/.*?)[\'" ]|(linkedin\.com/.*?)[\'" ]|
+    (twitter\.com/.*?)[\'" ]|([\w\.-]+@[\w\.-]+\.[\.\w]+)''', response)
+    if matches:
+        for match in matches: # iterate over the matches
+            bad_intel.add(match) # add it to intel list
+
+####
+# This function extracts js files from the response body
+####
+
+def js_extractor(response):
+    matches = findall(r'src=[\'"](.*?\.js)["\']', response) # extract .js files
+    for match in matches: # iterate over the matches
+        bad_scripts.add(match)
 
 ####
 # This function extracts stuff from the response body
@@ -252,69 +329,36 @@ def is_link(url):
 
 def extractor(url):
     response = requester(url) # make request to the url
-    try:
-        matches = findall(r'href=[\'"](.*?)["\']', response) # find all the linkx
-        for link in matches: # iterate over the matches
-            link = link.split('#')[0] # remove everything after a "#" to deal with in-page anchors
-            if is_link(link): # checks if the urls should be crawled
-                if link.startswith(main_url): # self-explanatory
+    root = lxml.html.fromstring(response) # find all the links
+    for link in root.xpath('//a/@href'): # iterate over the matches
+        link = link.split('#')[0] # remove everything after a "#" to deal with in-page anchors
+        if is_link(link): # checks if the urls should be crawled
+            if link.startswith('http'): # self-explanatory
+                if link.startswith(main_url):
                     storage.add(link)
-                    if '=' in link:
-                        fuzzable.add(link)
-                if link.startswith('http') or link.startswith('//'):
-                    if not link.startswith(main_url):
-                        external.add(link)
-                elif link.startswith('javascript') or link.startswith('{{'):
-                    pass # we aren't fucking with javascript
-                elif link.startswith('/') and not link.startswith('//'):
-                    storage.add(main_url + link)
-                    if '=' in link:
-                        fuzzable.add(link)
-                elif not link.startswith('http') and not link.startswith('//'):
-                    storage.add(main_url + '/' + link)
-                    if '=' in link:
-                        fuzzable.add(link)
-        
-        matches = findall(r'src=[\'"](.*?\.js)["\']', response) # extract .js files
-        for match in matches: # iterate over the matches
-            if match.startswith(main_url):
-                scripts.add(match)
-            elif match.startswith('/') and not match.startswith('//'):
-                scripts.add(main_url + match)
-            elif not match.startswith('http') and not match.startswith('//'):
-                scripts.add(main_url + '/' + match)
-        # extract intel ;)
-        matches = findall(r'''([\w\.-]+s[\w\.-]+\.amazonaws\.com)|(github\.com/[\w\.-/]+)|(facebook\.com/.*?)[\'" ]|
-(youtube\.com/.*?)[\'" ]|(linkedin\.com/.*?)[\'" ]|(twitter\.com/.*?)[\'" ]|([\w\.-]+@[\w\.-]+\.[\.\w]+)''', response)
-        for match in matches: # iterate over the matches
-            for x in match: # iterate over the match because it's a tuple
-                if x != '': # if the value isn't empty
-                    intel.add(x) # add it to intel list
-
-        def regxy(pattern):
-            matches = findall(r'%s' % pattern, response)
-            for match in matches:
-                custom.add(match)
-        if args.regex:
-            regxy(args.regex)
-
-    except: # if something bad happens
-        failed.add(url)
+                else:
+                    external.add(link)
+            elif link.startswith('/') and not link.startswith('//'):
+                storage.add(main_url + link)
+            elif not link.startswith('http') and not link.startswith('//'):
+                storage.add(main_url + '/' + link)
+    if not only_urls:
+        intel_extractor(response)
+        js_extractor(response)
+    if args.regex and not supress_regex:
+        regxy(args.regex, response)
 
 ####
 # This function extracts endpoints from JavaScript Code
 ####
 
 def jscanner(url):
-    try:
-        response = requester(url) # make request to the url
-        matches = findall(r'[\'"](/.*?)[\'"]|[\'"](http.*?)[\'"]', response) # extract urls/endpoints
-        for match in matches: # iterate over the matches, match is a tuple
-            match = match[0] + match[1] # combining the items because one of them is always empty
-            if not search(r'[}{><"\']', match) and not match == '/': # making sure it's not some js code
-                endpoints.add(match) # add it to the endpoints list
-    except:
-        failed.add(url)
+    response = requester(url) # make request to the url
+    matches = findall(r'[\'"](/.*?)[\'"]|[\'"](http.*?)[\'"]', response) # extract urls/endpoints
+    for match in matches: # iterate over the matches, match is a tuple
+        match = match[0] + match[1] # combining the items because one of them is always empty
+        if not search(r'[}{><"\']', match) and not match == '/': # making sure it's not some js code
+            endpoints.add(match) # add it to the endpoints list
 
 ####
 # This function starts multiple threads for a function
@@ -372,9 +416,17 @@ for level in range(crawl_level):
         print ('')
         break
 
-# Step 3. Scan the JavaScript files for enpoints
-print ('%s Crawling %i JavaScript files' % (run, len(scripts)))
-flash(jscanner, scripts)
+if not only_urls:
+    for match in bad_scripts:
+        if match.startswith(main_url):
+            scripts.add(match)
+        elif match.startswith('/') and not match.startswith('//'):
+            scripts.add(main_url + match)
+        elif not match.startswith('http') and not match.startswith('//'):
+            scripts.add(main_url + '/' + match)
+    # Step 3. Scan the JavaScript files for enpoints
+    print ('%s Crawling %i JavaScript files' % (run, len(scripts)))
+    flash(jscanner, scripts)
 
 now = time.time() # records the time at which crawling stopped
 diff = (now  - then) # finds total time taken
@@ -401,8 +453,6 @@ if args.output:
 
     name = output_base_dir
 
-
-
 #if os.path.exists(name): # if the directory already exists
 #    shutil.rmtree(name, ignore_errors=True) # delete it, recursively
 try:
@@ -410,45 +460,64 @@ try:
 except:
     os.mkdir(name) # create a new directory
 
-with open('%s/links.txt' % name, 'w') as f:
-    for x in storage:
-        f.write(str(x.encode('utf-8')) + '\n')
+for url in storage:
+    if '=' in url:
+        fuzzable.add(url)
 
-with open('%s/files.txt' % name, 'w') as f:
-    for x in files:
-        f.write(str(x.encode('utf-8')) + '\n')
+for match in bad_intel:
+    for x in match: # because "match" is a tuple
+        if x != '': # if the value isn't empty
+            intel.add(x)
 
-with open('%s/intel.txt' % name, 'w') as f:
-    for x in intel:
-        f.write(str(x.encode('utf-8')) + '\n')
+if len(storage) > 0:
+    with open('%s/links.txt' % name, 'w') as f:
+        joined = '\n'.join(storage)
+        f.write(str(joined.encode('utf-8')) + '\n')
 
-with open('%s/robots.txt' % name, 'w') as f:
-    for x in storage:
-        f.write(str(x.encode('utf-8')) + '\n')
+if len(files) > 0:
+    with open('%s/files.txt' % name, 'w') as f:
+        joined = '\n'.join(files)
+        f.write(str(joined.encode('utf-8')) + '\n')
 
-with open('%s/failed.txt' % name, 'w') as f:
-    for x in failed:
-        f.write(str(x.encode('utf-8')) + '\n')
+if len(intel) > 0:
+    with open('%s/intel.txt' % name, 'w') as f:
+        joined = '\n'.join(intel)
+        f.write(str(joined.encode('utf-8')) + '\n')
 
-with open('%s/custom.txt' % name, 'w') as f:
-    for x in custom:
-        f.write(str(x.encode('utf-8')) + '\n')
+if len(robots) > 0:
+    with open('%s/robots.txt' % name, 'w') as f:
+        joined = '\n'.join(robots)
+        f.write(str(joined.encode('utf-8')) + '\n')
 
-with open('%s/scripts.txt' % name, 'w') as f:
-    for x in scripts:
-        f.write(str(x.encode('utf-8')) + '\n')
+if len(failed) > 0:
+    with open('%s/failed.txt' % name, 'w') as f:
+        joined = '\n'.join(failed)
+        f.write(str(joined.encode('utf-8')) + '\n')
 
-with open('%s/fuzzable.txt' % name, 'w') as f:
-    for x in fuzzable:
-        f.write(str(x.encode('utf-8')) + '\n')
+if len(custom) > 0:
+    with open('%s/custom.txt' % name, 'w') as f:
+        joined = '\n'.join(custom)
+        f.write(str(joined.encode('utf-8')) + '\n')
 
-with open('%s/external.txt' % name, 'w') as f:
-    for x in external:
-        f.write(str(x.encode('utf-8')) + '\n')
+if len(scripts) > 0:
+    with open('%s/scripts.txt' % name, 'w') as f:
+        joined = '\n'.join(scripts)
+        f.write(str(joined.encode('utf-8')) + '\n')
 
-with open('%s/endpoints.txt' % name, 'w') as f:
-    for x in endpoints:
-        f.write(str(x.encode('utf-8')) + '\n')
+if len(fuzzable) > 0:
+    with open('%s/fuzzable.txt' % name, 'w') as f:
+        joined = '\n'.join(fuzzable)
+        f.write(str(joined.encode('utf-8')) + '\n')
+
+if len(external) > 0:
+    with open('%s/external.txt' % name, 'w') as f:
+        joined = '\n'.join(external)
+        f.write(str(joined.encode('utf-8')) + '\n')
+
+if len(endpoints) > 0:
+    with open('%s/endpoints.txt' % name, 'w') as f:
+        joined = '\n'.join(endpoints)
+        f.write(str(joined.encode('utf-8')) + '\n')
 
 # Printing out results
 
@@ -466,8 +535,12 @@ len(intel), good, len(files), good, len(endpoints), good, len(fuzzable), good,
 len(custom), good, len(scripts), good, len(external),
 (('%s-%s' % (red, end)) * 50)))
 
-print ('%s Total time taken: %i:%i' % (info, minutes, seconds))
-print ('%s Average request time: %s' % (info, str(time_per_request)[:4]))
+print ('%s Total time taken: %i minutes %i seconds' % (info, minutes, seconds))
+print ('%s Average request time: %s seconds' % (info, time_per_request))
+
+if args.export:
+    # exporter(directory, format, datasets)
+    exporter(name, args.export, {'files': list(files), 'intel': list(intel), 'robots': list(robots), 'custom': list(custom), 'failed': list(failed), 'storage': list(storage), 'scripts': list(scripts), 'external': list(external), 'fuzzable': list(fuzzable), 'endpoints': list(endpoints)})
 
 if not colors: # if colors are disabled
     print ('%s Results saved in %s directory' % (good, name))

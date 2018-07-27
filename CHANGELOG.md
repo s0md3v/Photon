@@ -1,3 +1,22 @@
+#### v1.0.6
+- Fixed lot of bugs
+- Suppress SSL warnings in MAC
+- x100 speed by code optimization
+- Simplified code of `exporter` plugin
+
+#### v1.0.5
+- Added `exporter` plugin
+- Added seamless update ability
+- Fixed a bug in update function
+
+#### v1.0.4
+- Fixed an issue which caused regular links to be saved in robots.txt
+- Simplified `flash` function
+- Removed `-n` as an alias of `--ninja`
+- Added `--only-urls` option
+- Refactored code for readability
+- Skip saving files if the content is empty
+
 #### v1.0.3
 - Introduced plugins
 - Added `dnsdumpster` plugin
