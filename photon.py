@@ -456,7 +456,7 @@ if os.path.exists(output_dir): # if the directory already exists
 os.mkdir(output_dir) # create a new directory
 
 if args.dns:
-    dnsdumpster(domain_name, colors)
+    dnsdumpster(domain_name, output_dir, colors)
 
 if len(storage) > 0:
     with open('%s/links.txt' % output_dir, 'w+') as f:
