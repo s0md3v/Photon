@@ -1,6 +1,9 @@
 #### v1.0.7
+- Added `--timeout` option
+- Added `--output` option
+- Added `--user-agent` option
+- Replaced lxml with regex
 - Better logic for favoring performance
-- Added two new options: `--output` & `--user-agent`
 - Added bigger and seperate file for user-agents
 
 #### v1.0.6
