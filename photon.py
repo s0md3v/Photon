@@ -52,6 +52,7 @@ warnings.filterwarnings('ignore') # Disable SSL related warnings
 parser = argparse.ArgumentParser()
 # Options
 parser.add_argument('-u', '--url', help='root url', dest='root')
+parser.add_argument('-o', '--output', help='output directory', dest='output')
 parser.add_argument('-c', '--cookie', help='cookie', dest='cook')
 parser.add_argument('-r', '--regex', help='regex pattern', dest='regex')
 parser.add_argument('-e', '--export', help='export format', dest='export')
@@ -108,6 +109,13 @@ if args.root: # if the user has supplied a url
 else: # if the user hasn't supplied a url
     print ('\n' + parser.format_help().lower())
     quit()
+
+
+if args.output: # if the user has supplied a output dir
+    output_base_dir = args.output
+    if output_base_dir.endswith('/'): # if the dir ends with '/'
+        output_base_dir = output_base_dir[:-1] # we will remove it as it can cause problems later in the code
+
 
 delay = 0 # Delay between requests
 timeout = 6 # HTTP request timeout
@@ -440,65 +448,84 @@ minutes = time_taken[0]
 seconds = time_taken[1]
 time_per_request = time_taken[2]
 
-# Step 4. Save the results
-if os.path.exists(name): # if the directory already exists
-    shutil.rmtree(name, ignore_errors=True) # delete it, recursively
-os.mkdir(name) # create a new directory
 
 if args.dns:
-    dnsdumpster(name, colors)
+    image = dnsdumpster(name, colors)
+
+# Step 4. Save the results
+if args.output:
+    try:
+        os.stat(output_base_dir)
+    except:
+        os.mkdir(output_base_dir)
+
+    name = output_base_dir
+
+#if os.path.exists(name): # if the directory already exists
+#    shutil.rmtree(name, ignore_errors=True) # delete it, recursively
+try:
+    os.stat(name)
+except:
+    os.mkdir(name) # create a new directory
 
 if len(storage) > 0:
-    with open('%s/links.txt' % name, 'w+') as f:
+    with open('%s/links.txt' % name, 'w') as f:
         joined = '\n'.join(storage)
         f.write(str(joined.encode('utf-8')) + '\n')
 
 if len(files) > 0:
-    with open('%s/files.txt' % name, 'w+') as f:
+    with open('%s/files.txt' % name, 'w') as f:
         joined = '\n'.join(files)
         f.write(str(joined.encode('utf-8')) + '\n')
 
 if len(intel) > 0:
-    with open('%s/intel.txt' % name, 'w+') as f:
+    with open('%s/intel.txt' % name, 'w') as f:
         joined = '\n'.join(intel)
         f.write(str(joined.encode('utf-8')) + '\n')
 
 if len(robots) > 0:
-    with open('%s/robots.txt' % name, 'w+') as f:
+    with open('%s/robots.txt' % name, 'w') as f:
         joined = '\n'.join(robots)
         f.write(str(joined.encode('utf-8')) + '\n')
 
 if len(failed) > 0:
-    with open('%s/failed.txt' % name, 'w+') as f:
+    with open('%s/failed.txt' % name, 'w') as f:
         joined = '\n'.join(failed)
         f.write(str(joined.encode('utf-8')) + '\n')
 
 if len(custom) > 0:
-    with open('%s/custom.txt' % name, 'w+') as f:
+    with open('%s/custom.txt' % name, 'w') as f:
         joined = '\n'.join(custom)
         f.write(str(joined.encode('utf-8')) + '\n')
 
 if len(scripts) > 0:
-    with open('%s/scripts.txt' % name, 'w+') as f:
+    with open('%s/scripts.txt' % name, 'w') as f:
         joined = '\n'.join(scripts)
         f.write(str(joined.encode('utf-8')) + '\n')
 
 if len(fuzzable) > 0:
-    with open('%s/fuzzable.txt' % name, 'w+') as f:
+    with open('%s/fuzzable.txt' % name, 'w') as f:
         joined = '\n'.join(fuzzable)
         f.write(str(joined.encode('utf-8')) + '\n')
 
 if len(external) > 0:
-    with open('%s/external.txt' % name, 'w+') as f:
+    with open('%s/external.txt' % name, 'w') as f:
         joined = '\n'.join(external)
         f.write(str(joined.encode('utf-8')) + '\n')
 
 if len(endpoints) > 0:
-    with open('%s/endpoints.txt' % name, 'w+') as f:
+    with open('%s/endpoints.txt' % name, 'w') as f:
         joined = '\n'.join(endpoints)
         f.write(str(joined.encode('utf-8')) + '\n')
 
+if args.dns:
+    if image:
+        with open('%s/%s.png' % (name, name), 'wb') as f:
+            f.write(image.content)
+
+
 # Printing out results
+
 print ('''%s
 %s URLs: %i
 %s Intel: %i
