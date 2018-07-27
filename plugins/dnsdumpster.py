@@ -1,7 +1,7 @@
 import re
 import requests
 
-def dnsdumpster(domain, colors):
+def dnsdumpster(domain, output_dir, colors):
     if colors:
         run = '\033[1;97m[~]\033[1;m'
     else:

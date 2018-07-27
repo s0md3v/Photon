@@ -1,3 +1,8 @@
+#### v1.0.7
+- Better logic for favoring performance
+- Added two new options: `--output` & `--user-agent`
+- Added bigger and seperate file for user-agents
+
 #### v1.0.6
 - Fixed lot of bugs
 - Suppress SSL warnings in MAC

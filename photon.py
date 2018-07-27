@@ -12,6 +12,7 @@ import argparse
 import threading
 from re import search, findall
 from requests import get, post
+
 try:
     from urllib.parse import urlparse # for python3
 except ImportError:
@@ -55,7 +56,9 @@ parser.add_argument('-u', '--url', help='root url', dest='root')
 parser.add_argument('-c', '--cookie', help='cookie', dest='cook')
 parser.add_argument('-r', '--regex', help='regex pattern', dest='regex')
 parser.add_argument('-e', '--export', help='export format', dest='export')
+parser.add_argument('-o', '--output', help='output directory', dest='output')
 parser.add_argument('-s', '--seeds', help='additional seed urls', dest='seeds')
+parser.add_argument('--user-agent', help='custom user agent(s)', dest='user_agent')
 parser.add_argument('-l', '--level', help='levels to crawl', dest='level', type=int)
 parser.add_argument('--timeout', help='http request timeout', dest='timeout', type=float)
 parser.add_argument('-t', '--threads', help='number of threads', dest='threads', type=int)
@@ -73,7 +76,7 @@ args = parser.parse_args()
 
 def update():
     print('%s Checking for updates' % run)
-    changes = '''replaced lxml with regex;better logic to favor performance''' # Changes must be seperated by ;
+    changes = '''ability to specify output directory & user agent;bigger & seperate file for user-agents''' # Changes must be seperated by ;
     latest_commit = get('https://raw.githubusercontent.com/s0md3v/Photon/master/photon.py').text
 
     if changes not in latest_commit: # just hack to see if a new version is available
@@ -167,23 +170,31 @@ else:
 
 storage.add(main_url) # adding the root url to storage for crawling
 
-name = urlparse(main_url).netloc # Extracts domain out of the url
+domain_name = urlparse(main_url).netloc # Extracts domain out of the url
+
+if args.output:
+    output_dir = args.output
+else:
+    output_dir = domain_name
 
 ####
 # This function makes requests to webpage and returns response body
 ####
 
-# list of user agents
-user_agents = ['Mozilla/5.0 (X11; Linux i686; rv:60.0) Gecko/20100101 Firefox/60.0',
-'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36'
-'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36 OPR/43.0.2442.991']
+if args.user_agent:
+    user_agents = args.user_agent.split(',')
+else:
+    user_agents = []
+    with open(os.getcwd() + '/core/user-agents.txt', 'r') as uas:
+        for agent in uas:
+            user_agents.append(agent.strip('\n'))
 
 def requester(url):
     processed.add(url) # mark the url as crawled
     time.sleep(delay) # pause/sleep the program for specified time
     def normal(url):
         headers = {
-        'Host' : name, # ummm this is the hostname?
+        'Host' : domain_name, # ummm this is the hostname?
         'User-Agent' : random.choice(user_agents), # selecting a random user-agent
         'Accept' : 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
         'Accept-Language' : 'en-US,en;q=0.5',
@@ -441,60 +452,60 @@ seconds = time_taken[1]
 time_per_request = time_taken[2]
 
 # Step 4. Save the results
-if os.path.exists(name): # if the directory already exists
-    shutil.rmtree(name, ignore_errors=True) # delete it, recursively
-os.mkdir(name) # create a new directory
+if os.path.exists(output_dir): # if the directory already exists
+    shutil.rmtree(output_dir, ignore_errors=True) # delete it, recursively
+os.mkdir(output_dir) # create a new directory
 
 if args.dns:
-    dnsdumpster(name, colors)
+    dnsdumpster(domain_name, output_dir, colors)
 
 if len(storage) > 0:
-    with open('%s/links.txt' % name, 'w+') as f:
+    with open('%s/links.txt' % output_dir, 'w+') as f:
         joined = '\n'.join(storage)
         f.write(str(joined.encode('utf-8')) + '\n')
 
 if len(files) > 0:
-    with open('%s/files.txt' % name, 'w+') as f:
+    with open('%s/files.txt' % output_dir, 'w+') as f:
         joined = '\n'.join(files)
         f.write(str(joined.encode('utf-8')) + '\n')
 
 if len(intel) > 0:
-    with open('%s/intel.txt' % name, 'w+') as f:
+    with open('%s/intel.txt' % output_dir, 'w+') as f:
         joined = '\n'.join(intel)
         f.write(str(joined.encode('utf-8')) + '\n')
 
 if len(robots) > 0:
-    with open('%s/robots.txt' % name, 'w+') as f:
+    with open('%s/robots.txt' % output_dir, 'w+') as f:
         joined = '\n'.join(robots)
         f.write(str(joined.encode('utf-8')) + '\n')
 
 if len(failed) > 0:
-    with open('%s/failed.txt' % name, 'w+') as f:
+    with open('%s/failed.txt' % output_dir, 'w+') as f:
         joined = '\n'.join(failed)
         f.write(str(joined.encode('utf-8')) + '\n')
 
 if len(custom) > 0:
-    with open('%s/custom.txt' % name, 'w+') as f:
+    with open('%s/custom.txt' % output_dir, 'w+') as f:
         joined = '\n'.join(custom)
         f.write(str(joined.encode('utf-8')) + '\n')
 
 if len(scripts) > 0:
-    with open('%s/scripts.txt' % name, 'w+') as f:
+    with open('%s/scripts.txt' % output_dir, 'w+') as f:
         joined = '\n'.join(scripts)
         f.write(str(joined.encode('utf-8')) + '\n')
 
 if len(fuzzable) > 0:
-    with open('%s/fuzzable.txt' % name, 'w+') as f:
+    with open('%s/fuzzable.txt' % output_dir, 'w+') as f:
         joined = '\n'.join(fuzzable)
         f.write(str(joined.encode('utf-8')) + '\n')
 
 if len(external) > 0:
-    with open('%s/external.txt' % name, 'w+') as f:
+    with open('%s/external.txt' % output_dir, 'w+') as f:
         joined = '\n'.join(external)
         f.write(str(joined.encode('utf-8')) + '\n')
 
 if len(endpoints) > 0:
-    with open('%s/endpoints.txt' % name, 'w+') as f:
+    with open('%s/endpoints.txt' % output_dir, 'w+') as f:
         joined = '\n'.join(endpoints)
         f.write(str(joined.encode('utf-8')) + '\n')
 
@@ -518,9 +529,9 @@ print ('%s Average request time: %s seconds' % (info, time_per_request))
 
 if args.export:
     # exporter(directory, format, datasets)
-    exporter(name, args.export, {'files': list(files), 'intel': list(intel), 'robots': list(robots), 'custom': list(custom), 'failed': list(failed), 'storage': list(storage), 'scripts': list(scripts), 'external': list(external), 'fuzzable': list(fuzzable), 'endpoints': list(endpoints)})
+    exporter(output_dir, args.export, {'files': list(files), 'intel': list(intel), 'robots': list(robots), 'custom': list(custom), 'failed': list(failed), 'storage': list(storage), 'scripts': list(scripts), 'external': list(external), 'fuzzable': list(fuzzable), 'endpoints': list(endpoints)})
 
 if not colors: # if colors are disabled
-    print ('%s Results saved in %s directory' % (good, name))
+    print ('%s Results saved in %s directory' % (good, output_dir))
 else:
-    print ('%s Results saved in \033[;1m%s\033[0m directory' % (good, name))
+    print ('%s Results saved in \033[;1m%s\033[0m directory' % (good, output_dir))
