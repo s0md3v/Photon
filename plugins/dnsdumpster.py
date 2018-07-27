@@ -1,7 +1,7 @@
 import re
 import requests
 
-def dnsdumpster(domain, output_dir, colors):
+def dnsdumpster(domain, colors):
     if colors:
         run = '\033[1;97m[~]\033[1;m'
     else:
@@ -16,5 +16,5 @@ def dnsdumpster(domain, output_dir, colors):
     response = requests.Session().post('https://dnsdumpster.com/', cookies=cookies, data=data, headers=headers)
 
     image = requests.get('https://dnsdumpster.com/static/map/%s.png' % domain)
-    with open('%s/%s.png' % (output_dir, domain), 'wb') as f:
+    with open('%s/%s.png' % (domain, domain), 'wb') as f:
         f.write(image.content)
