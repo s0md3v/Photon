@@ -7,5 +7,5 @@ python:
     - 2.7
     - 3.6
 script:
-  - python photon.py -u "https://stackoverflow.com" -l 1 -d 1 -t 100 --regex "\d{10}" --dns --output=d3v
+  - python photon.py -u "https://stackoverflow.com" -l 1 -d 1 -t 100 --regex "\d{10}" --dns
   - python photon.py -u "https://stackoverflow.com" -l 1 -t 2 --seeds="https://stackoverflow.com/jobs" --only-urls --export=json
