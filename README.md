@@ -22,8 +22,11 @@ Photon extracts the following data while crawling by default:
 - JavaScript files & Endpoints present in them
 - Strings based on custom regex pattern
 
-The extracted information is saved in an organized manner.\
+The extracted information is saved in an organized manner:
+
 ![save demo](https://image.ibb.co/ezTEyd/Screenshot_2018_07_22_12_24_44.png)
+
+By default, all informations will be store inside `output/<domain name>` directory. You can specify the output directory by providing `--output` option from the command line.
 
 #### Intelligent Multithreading
 Here's a secret, most of the tools floating on the internet aren't properly multi-threaded even if they are supposed to. They either supply a list of items to threads which results in multiple threads accessing the same item or they simply put a thread lock and end up rendering multi-threading useless.\
