@@ -15,9 +15,11 @@ from requests import get, post
 
 try:
     from urllib.parse import urlparse # for python3
+    python2, python3 = False, True
 except ImportError:
     input = raw_input
     from urlparse import urlparse # for python2
+    python2, python3 = True, False
 from plugins.exporter import exporter
 from plugins.dnsdumpster import dnsdumpster
 
@@ -44,8 +46,8 @@ print ('''%s      ____  __          __
      / %s__%s \/ /_  ____  / /_____  ____ 
     / %s/_/%s / __ \/ %s__%s \/ __/ %s__%s \/ __ \\
    / ____/ / / / %s/_/%s / /_/ %s/_/%s / / / /
-  /_/   /_/ /_/\____/\__/\____/_/ /_/ %s\n''' %
-  (red, white, red, white, red, white, red, white, red, white, red, white, red, end))
+  /_/   /_/ /_/\____/\__/\____/_/ /_/ %sv1.0.7%s\n''' %
+  (red, white, red, white, red, white, red, white, red, white, red, white, red, white, end))
 
 warnings.filterwarnings('ignore') # Disable SSL related warnings
 
@@ -76,10 +78,10 @@ args = parser.parse_args()
 
 def update():
     print('%s Checking for updates' % run)
-    changes = '''ability to specify output directory & user agent;bigger & seperate file for user-agents''' # Changes must be seperated by ;
+    changes = '''fixed a major bug in file saving for python3''' # Changes must be seperated by ;
     latest_commit = get('https://raw.githubusercontent.com/s0md3v/Photon/master/photon.py').text
 
-    if changes not in latest_commit: # just hack to see if a new version is available
+    if changes not in latest_commit: # just a hack to see if a new version is available
         changelog = search(r"changes = '''(.*?)'''", latest_commit)
         changelog = changelog.group(1).split(';') # splitting the changes to form a list
         print ('%s A new version of Photon is available.' % good)
@@ -459,55 +461,21 @@ os.mkdir(output_dir) # create a new directory
 if args.dns:
     dnsdumpster(domain_name, output_dir, colors)
 
-if len(storage) > 0:
-    with open('%s/links.txt' % output_dir, 'w+') as f:
-        joined = '\n'.join(storage)
-        f.write(str(joined.encode('utf-8')) + '\n')
+datasets = [files, intel, robots, custom, failed, storage, scripts, external, fuzzable, endpoints]
+dataset_names =  ['files', 'intel', 'robots', 'custom', 'failed', 'links', 'scripts', 'external', 'fuzzable', 'endpoints']
 
-if len(files) > 0:
-    with open('%s/files.txt' % output_dir, 'w+') as f:
-        joined = '\n'.join(files)
-        f.write(str(joined.encode('utf-8')) + '\n')
+def writer(datasets, dataset_names, output_dir):
+    for dataset, dataset_name in zip(datasets, dataset_names):
+        if len(dataset) > 0:
+            if python3:
+                with open(output_dir + '/' + dataset_name + '.txt', 'w+', encoding='utf8') as f:
+                    f.write(str('\n'.join(dataset)))
+            else:
+                with open(output_dir + '/' + dataset_name + '.txt', 'w+') as f:
+                    joined = '\n'.join(dataset)
+                    f.write(str(joined.encode('utf-8')))
 
-if len(intel) > 0:
-    with open('%s/intel.txt' % output_dir, 'w+') as f:
-        joined = '\n'.join(intel)
-        f.write(str(joined.encode('utf-8')) + '\n')
-
-if len(robots) > 0:
-    with open('%s/robots.txt' % output_dir, 'w+') as f:
-        joined = '\n'.join(robots)
-        f.write(str(joined.encode('utf-8')) + '\n')
-
-if len(failed) > 0:
-    with open('%s/failed.txt' % output_dir, 'w+') as f:
-        joined = '\n'.join(failed)
-        f.write(str(joined.encode('utf-8')) + '\n')
-
-if len(custom) > 0:
-    with open('%s/custom.txt' % output_dir, 'w+') as f:
-        joined = '\n'.join(custom)
-        f.write(str(joined.encode('utf-8')) + '\n')
-
-if len(scripts) > 0:
-    with open('%s/scripts.txt' % output_dir, 'w+') as f:
-        joined = '\n'.join(scripts)
-        f.write(str(joined.encode('utf-8')) + '\n')
-
-if len(fuzzable) > 0:
-    with open('%s/fuzzable.txt' % output_dir, 'w+') as f:
-        joined = '\n'.join(fuzzable)
-        f.write(str(joined.encode('utf-8')) + '\n')
-
-if len(external) > 0:
-    with open('%s/external.txt' % output_dir, 'w+') as f:
-        joined = '\n'.join(external)
-        f.write(str(joined.encode('utf-8')) + '\n')
-
-if len(endpoints) > 0:
-    with open('%s/endpoints.txt' % output_dir, 'w+') as f:
-        joined = '\n'.join(endpoints)
-        f.write(str(joined.encode('utf-8')) + '\n')
+writer(datasets, dataset_names, output_dir)
 
 # Printing out results
 print ('''%s
