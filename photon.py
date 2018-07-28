@@ -56,7 +56,7 @@ parser.add_argument('-u', '--url', help='root url', dest='root')
 parser.add_argument('-c', '--cookie', help='cookie', dest='cook')
 parser.add_argument('-r', '--regex', help='regex pattern', dest='regex')
 parser.add_argument('-e', '--export', help='export format', dest='export')
-parser.add_argument('-o', '--output', help='output directory', dest='output')
+parser.add_argument('-o', '--output', help='output directory. defaults to `output/<domain name>`', dest='output')
 parser.add_argument('-s', '--seeds', help='additional seed urls', dest='seeds')
 parser.add_argument('--user-agent', help='custom user agent(s)', dest='user_agent')
 parser.add_argument('-l', '--level', help='levels to crawl', dest='level', type=int)
@@ -172,10 +172,16 @@ storage.add(main_url) # adding the root url to storage for crawling
 
 domain_name = urlparse(main_url).netloc # Extracts domain out of the url
 
+# prepare output dirs
 if args.output:
     output_dir = args.output
 else:
-    output_dir = domain_name
+    # default output dir
+    output_dir = 'output/%s' % domain_name
+
+if os.path.exists(output_dir): # if the directory already exists
+    shutil.rmtree(output_dir, ignore_errors=True) # delete it, recursively
+os.makedirs(output_dir) # create output directory
 
 ####
 # This function makes requests to webpage and returns response body
@@ -451,63 +457,44 @@ minutes = time_taken[0]
 seconds = time_taken[1]
 time_per_request = time_taken[2]
 
-# Step 4. Save the results
-if os.path.exists(output_dir): # if the directory already exists
-    shutil.rmtree(output_dir, ignore_errors=True) # delete it, recursively
-os.mkdir(output_dir) # create a new directory
+# create writer function
+def writer(file, lines):
+    with open(file, 'w+', encoding='utf8') as f:
+        f.write(str('\n'.join(lines)))
 
+# Step 4. Save the results
 if args.dns:
     dnsdumpster(domain_name, output_dir, colors)
 
 if len(storage) > 0:
-    with open('%s/links.txt' % output_dir, 'w+') as f:
-        joined = '\n'.join(storage)
-        f.write(str(joined.encode('utf-8')) + '\n')
+    writer('%s/links.txt' % output_dir, storage)
 
 if len(files) > 0:
-    with open('%s/files.txt' % output_dir, 'w+') as f:
-        joined = '\n'.join(files)
-        f.write(str(joined.encode('utf-8')) + '\n')
+    writer('%s/files.txt' % output_dir, files)
 
 if len(intel) > 0:
-    with open('%s/intel.txt' % output_dir, 'w+') as f:
-        joined = '\n'.join(intel)
-        f.write(str(joined.encode('utf-8')) + '\n')
+    writer('%s/intel.txt' % output_dir, intel)
 
 if len(robots) > 0:
-    with open('%s/robots.txt' % output_dir, 'w+') as f:
-        joined = '\n'.join(robots)
-        f.write(str(joined.encode('utf-8')) + '\n')
+    writer('%s/robots.txt' % output_dir, robots)
 
 if len(failed) > 0:
-    with open('%s/failed.txt' % output_dir, 'w+') as f:
-        joined = '\n'.join(failed)
-        f.write(str(joined.encode('utf-8')) + '\n')
+    writer('%s/failed.txt' % output_dir, failed)
 
 if len(custom) > 0:
-    with open('%s/custom.txt' % output_dir, 'w+') as f:
-        joined = '\n'.join(custom)
-        f.write(str(joined.encode('utf-8')) + '\n')
+    writer('%s/custom.txt' % output_dir, custom)
 
 if len(scripts) > 0:
-    with open('%s/scripts.txt' % output_dir, 'w+') as f:
-        joined = '\n'.join(scripts)
-        f.write(str(joined.encode('utf-8')) + '\n')
+    writer('%s/scripts.txt' % output_dir, scripts)
 
 if len(fuzzable) > 0:
-    with open('%s/fuzzable.txt' % output_dir, 'w+') as f:
-        joined = '\n'.join(fuzzable)
-        f.write(str(joined.encode('utf-8')) + '\n')
+    writer('%s/fuzzable.txt' % output_dir, fuzzable)
 
 if len(external) > 0:
-    with open('%s/external.txt' % output_dir, 'w+') as f:
-        joined = '\n'.join(external)
-        f.write(str(joined.encode('utf-8')) + '\n')
+    writer('%s/external.txt' % output_dir, external)
 
 if len(endpoints) > 0:
-    with open('%s/endpoints.txt' % output_dir, 'w+') as f:
-        joined = '\n'.join(endpoints)
-        f.write(str(joined.encode('utf-8')) + '\n')
+    writer('%s/endpoints.txt' % output_dir, endpoints)
 
 # Printing out results
 print ('''%s
