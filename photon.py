@@ -28,7 +28,7 @@ machine = sys.platform # Detecting the os of current system
 if machine.startswith('os') or machine.startswith('win') or machine.startswith('darwin') or machine.startswith('ios'):
     colors = False # Colors shouldn't be displayed in mac & windows
 if not colors:
-    end = red = white = green = yellow = run = bad = good = info = que =  '' 
+    end = red = white = green = yellow = run = bad = good = info = que =  ''
 else:
     end = '\033[1;m'
     red = '\033[91m'
@@ -42,8 +42,8 @@ else:
     que =  '\033[1;34m[?]\033[1;m'
 
 # Just a fancy ass banner
-print ('''%s      ____  __          __            
-     / %s__%s \/ /_  ____  / /_____  ____ 
+print ('''%s      ____  __          __
+     / %s__%s \/ /_  ____  / /_____  ____
     / %s/_/%s / __ \/ %s__%s \/ __/ %s__%s \/ __ \\
    / ____/ / / / %s/_/%s / /_/ %s/_/%s / / / /
   /_/   /_/ /_/\____/\__/\____/_/ /_/ %sv1.0.7%s\n''' %
@@ -78,7 +78,7 @@ args = parser.parse_args()
 
 def update():
     print('%s Checking for updates' % run)
-    changes = '''fixed a major bug in file saving for python3''' # Changes must be seperated by ;
+    changes = '''better regex & code logic to favor performance''' # Changes must be seperated by ;
     latest_commit = get('https://raw.githubusercontent.com/s0md3v/Photon/master/photon.py').text
 
     if changes not in latest_commit: # just a hack to see if a new version is available
@@ -269,8 +269,8 @@ def zap(url):
                     url = main_url + match
                     storage.add(url) # add the url to storage list for crawling
                     robots.add(url) # add the url to robots list
-            print ('%s URLs retrieved from robots.txt: %s' % (good, len(robots)))        
-    response = get(url + '/sitemap.xml').text # makes request to sitemap.xml        
+            print ('%s URLs retrieved from robots.txt: %s' % (good, len(robots)))
+    response = get(url + '/sitemap.xml').text # makes request to sitemap.xml
     if '<body' not in response: # making sure robots.txt isn't some fancy 404 page
         matches = findall(r'<loc>[^<]*</loc>', response) # regex for extracting urls
         if matches: # if there are any matches
@@ -285,9 +285,9 @@ def zap(url):
 def is_link(url):
     # file extension that don't need to be crawled and are files
     conclusion = False # whether the the url should be crawled or not
-    
+
     if url not in processed: # if the url hasn't been crawled already
-        if not ('.xml' or '.png' or '.bmp' or '.jpg' or '.jpeg' or '.pdf' or '.css' or '.ico' or '.js' or '.svg' or '.json') in url:
+        if not ('.png' or '.jpg' or '.jpeg' or '.js' or '.css' or '.pdf' or '.ico' or '.bmp' or '.svg' or '.json' or '.xml') in url:
             return True # url can be crawled
         else:
             files.add(url)
@@ -311,13 +311,10 @@ def regxy(pattern, response):
 ####
 
 def intel_extractor(response):
-    matches = findall(r'''([\w\.-]+s[\w\.-]+\.amazonaws\.com)|(github\.com/[\w\.-/]+)|
-    (facebook\.com/.*?)[\'" ]|(youtube\.com/.*?)[\'" ]|(linkedin\.com/.*?)[\'" ]|
-    (twitter\.com/.*?)[\'" ]|([\w\.-]+@[\w\.-]+\.[\.\w]+)''', response)
+    matches = findall(r'''([\w\.-]+s[\w\.-]+\.amazonaws\.com)|([\w\.-]+@[\w\.-]+\.[\.\w]+)''', response)
     if matches:
         for match in matches: # iterate over the matches
             bad_intel.add(match) # add it to intel list
-
 ####
 # This function extracts js files from the response body
 ####
@@ -337,15 +334,16 @@ def extractor(url):
     for link in matches: # iterate over the matches
         link = link.split('#')[0] # remove everything after a "#" to deal with in-page anchors
         if is_link(link): # checks if the urls should be crawled
-            if link.startswith('http') or link.startswith('//'):
+            if link[:4] == 'http' or link[:2] == '//':
                 if link.startswith(main_url):
                     storage.add(link)
                 else:
                     external.add(link)
-            elif link.startswith('/'):
+            elif link[:1] == '/':
                 storage.add(main_url + link)
             else:
                 storage.add(main_url + '/' + link)
+
     if not only_urls:
         intel_extractor(response)
         js_extractor(response)
@@ -441,6 +439,10 @@ if not only_urls:
             if x != '': # if the value isn't empty
                 intel.add(x)
 
+    for url in external:
+        if ('github.com' or 'facebook.com' or 'instagram.com' or 'youtube.com') in url:
+            intel.add(url)
+
 now = time.time() # records the time at which crawling stopped
 diff = (now  - then) # finds total time taken
 
@@ -487,7 +489,7 @@ print ('''%s
 %s Custom strings: %i
 %s JavaScript Files: %i
 %s External References: %i
-%s''' % ((('%s-%s' % (red, end)) * 50), good, len(storage), good, 
+%s''' % ((('%s-%s' % (red, end)) * 50), good, len(storage), good,
 len(intel), good, len(files), good, len(endpoints), good, len(fuzzable), good,
 len(custom), good, len(scripts), good, len(external),
 (('%s-%s' % (red, end)) * 50)))
