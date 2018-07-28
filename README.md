@@ -1,4 +1,6 @@
-# Photon [![python](https://img.shields.io/badge/Python-2.x|3.x-green.svg?style=style=flat-square)](https://www.python.org/downloads/)  [![license](https://img.shields.io/badge/License-GPL--v3-orange.svg?style=style=flat-square)](https://www.gnu.org/licenses/gpl-3.0.en.html) [![version](https://img.shields.io/badge/Version-1.0.7-blue.svg?style=style=flat-square)](https://github.com/s0md3v/Photon/blob/master/CHANGELOG.md) [![plugins](https://img.shields.io/badge/Plugins-2-yellow.svg?style=style=flat-square)](https://github.com/s0md3v/Photon/tree/master/plugins) [![twitter](https://img.shields.io/badge/Twitter-@s0md3v-skyblue.svg?style=style=flat-square)](https://twitter.com/s0md3v/)
+![logo](https://image.ibb.co/eRSV3o/photon_github.png)
+
+[![python](https://img.shields.io/badge/Python-2.7--3.6-green.svg?style=style=flat-square)](https://www.python.org/downloads/)  [![license](https://img.shields.io/badge/License-GPL_v3-orange.svg?style=style=flat-square)](https://www.gnu.org/licenses/gpl-3.0.en.html) [![version](https://img.shields.io/github/release/s0md3v/Photon.svg)](https://github.com/s0md3v/Photon/blob/master/CHANGELOG.md) ![build](https://img.shields.io/travis/com/s0md3v/Photon.svg) [![open issues](https://img.shields.io/github/issues-raw/s0md3v/Photon.svg?maxAge=2592000)](https://github.com/s0md3v/Photon/issues) [![closed issues](	https://img.shields.io/github/issues-closed-raw/s0md3v/Photon.svg)](https://github.com/s0md3v/Photon/issues?q=is%3Aissue+is%3Aclosed) [![plugins](https://img.shields.io/badge/Plugins-2-yellow.svg?style=style=flat-square)](https://github.com/s0md3v/Photon/tree/master/plugins) ![awesome](https://cdn.rawgit.com/sindresorhus/awesome/d7305f38d29fed78fa85652e3a63e154dd8e8829/media/badge.svg)
 
 Photon is a lightning fast web crawler which extracts URLs, files, intel & endpoints from a target.
 
@@ -67,5 +69,7 @@ You can contribute in following ways:
 - Fix issues & submit a pull request
 
 Please read the [guidelines](https://github.com/s0md3v/Photon/wiki/Guidelines) before submitting a pull request or issue.
+
+Do you want to have a conversation in private? Hit me up on my [twitter](https://twitter.com/s0md3v/), inbox is open :)
 
 **Photon** is licensed under [GPL v3.0 license](https://www.gnu.org/licenses/gpl-3.0.en.html)
