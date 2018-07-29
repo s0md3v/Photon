@@ -78,7 +78,7 @@ args = parser.parse_args()
 
 def update():
     print('%s Checking for updates' % run)
-    changes = '''better regex & code logic to favor performance''' # Changes must be seperated by ;
+    changes = '''fixed a bug in link extracting regex;doesn't delete output directory if it exists''' # Changes must be seperated by ;
     latest_commit = get('https://raw.githubusercontent.com/s0md3v/Photon/master/photon.py').text
 
     if changes not in latest_commit: # just a hack to see if a new version is available
@@ -330,7 +330,7 @@ def js_extractor(response):
 
 def extractor(url):
     response = requester(url) # make request to the url
-    matches = findall(r'<[aA].*[href|HREF]=["\']{0,1}([^>"\']*)', response)
+    matches = findall(r'<[aA].*href=["\']{0,1}(.*?)["\']', response)
     for link in matches: # iterate over the matches
         link = link.split('#')[0] # remove everything after a "#" to deal with in-page anchors
         if is_link(link): # checks if the urls should be crawled
@@ -456,9 +456,8 @@ seconds = time_taken[1]
 time_per_request = time_taken[2]
 
 # Step 4. Save the results
-if os.path.exists(output_dir): # if the directory already exists
-    shutil.rmtree(output_dir, ignore_errors=True) # delete it, recursively
-os.mkdir(output_dir) # create a new directory
+if not os.path.exists(output_dir): # if the directory doesn't exist
+    os.mkdir(output_dir) # create a new directory
 
 if args.dns:
     dnsdumpster(domain_name, output_dir, colors)
