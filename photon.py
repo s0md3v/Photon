@@ -5,7 +5,6 @@
 import os
 import sys
 import time
-import shutil
 import random
 import warnings
 import argparse
@@ -20,8 +19,6 @@ except ImportError:
     input = raw_input
     from urlparse import urlparse # for python2
     python2, python3 = True, False
-from plugins.exporter import exporter
-from plugins.dnsdumpster import dnsdumpster
 
 colors = True # Output should be colored
 machine = sys.platform # Detecting the os of current system
@@ -459,9 +456,6 @@ time_per_request = time_taken[2]
 if not os.path.exists(output_dir): # if the directory doesn't exist
     os.mkdir(output_dir) # create a new directory
 
-if args.dns:
-    dnsdumpster(domain_name, output_dir, colors)
-
 datasets = [files, intel, robots, custom, failed, storage, scripts, external, fuzzable, endpoints]
 dataset_names =  ['files', 'intel', 'robots', 'custom', 'failed', 'links', 'scripts', 'external', 'fuzzable', 'endpoints']
 
@@ -496,11 +490,17 @@ len(custom), good, len(scripts), good, len(external),
 print ('%s Total time taken: %i minutes %i seconds' % (info, minutes, seconds))
 print ('%s Average request time: %s seconds' % (info, time_per_request))
 
-if args.export:
-    # exporter(directory, format, datasets)
-    exporter(output_dir, args.export, {'files': list(files), 'intel': list(intel), 'robots': list(robots), 'custom': list(custom), 'failed': list(failed), 'storage': list(storage), 'scripts': list(scripts), 'external': list(external), 'fuzzable': list(fuzzable), 'endpoints': list(endpoints)})
+if args.dns:
+    from plugins.dnsdumpster import dnsdumpster
+    dnsdumpster(domain_name, output_dir, colors)
 
-if not colors: # if colors are disabled
-    print ('%s Results saved in %s directory' % (good, output_dir))
-else:
-    print ('%s Results saved in \033[;1m%s\033[0m directory' % (good, output_dir))
+if args.export:
+    datasets = {
+    'files': list(files), 'intel': list(intel), 'robots': list(robots), 'custom': list(custom), 'failed': list(failed),
+    'storage': list(storage), 'scripts': list(scripts), 'external': list(external), 'fuzzable': list(fuzzable), 'endpoints': list(endpoints)
+    }
+    from plugins.exporter import exporter
+    # exporter(directory, format, datasets)
+    exporter(output_dir, args.export, datasets)
+
+print ('%s Results saved in %s%s%s directory' % (good, green, output_dir, end))
