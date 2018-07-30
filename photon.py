@@ -398,7 +398,11 @@ def flash(function, links): # This shit is NOT complicated, please enjoy
 then = time.time() # records the time at which crawling started
 
 # Step 1. Extract urls from robots.txt & sitemap.xml
-zap(main_url)
+try:
+	zap(main_url)
+except Exception as e:
+	print ('URL, \"%s\", not found' % main_url)
+	exit(1)
 
 # Step 2. Crawl recursively to the limit specified in "crawl_level"
 for level in range(crawl_level):
