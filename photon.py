@@ -274,7 +274,7 @@ def zap(url):
 # This functions checks whether a url matches a regular expression
 ####
 
-def parse(urls, regex):
+def remove_regex(urls, regex):
     """
     Parses a list for non-matches to a regex
 
@@ -353,7 +353,7 @@ def extractor(url):
     matches = findall(r'<[aA].*href=["\']{0,1}(.*?)["\']', response)
     for link in matches: # iterate over the matches
         link = link.split('#')[0] # remove everything after a "#" to deal with in-page anchors
-        if is_link(link) and (not args.exclude or parse(link, args.exclude)): # checks if the urls should be crawled
+        if is_link(link) and (not args.exclude or remove_regex(link, args.exclude)): # checks if the urls should be crawled
             if link[:4] == 'http' or link[:2] == '//':
                 if link.startswith(main_url):
                     storage.add(link)
@@ -424,8 +424,8 @@ then = time.time() # records the time at which crawling started
 zap(main_url)
 
 # this is so the round 1 emails are parsed as well
-if args.exclude or parse(storage, args.exclude):
-    storage = set(parse(storage, args.exclude))
+if args.exclude or remove_regex(storage, args.exclude):
+    storage = set(remove_regex(storage, args.exclude))
 
 # Step 2. Crawl recursively to the limit specified in "crawl_level"
 for level in range(crawl_level):
