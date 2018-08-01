@@ -76,7 +76,7 @@ args = parser.parse_args()
 
 def update():
     print('%s Checking for updates' % run)
-    changes = '''added option to exclude URLs by regex;minor code refactor''' # Changes must be seperated by ;
+    changes = '''added option to skip crawling of URLs that match a regex pattern;changed handling of seeds''' # Changes must be seperated by ;
     latest_commit = get('https://raw.githubusercontent.com/s0md3v/Photon/master/photon.py').text
 
     if changes not in latest_commit: # just a hack to see if a new version is available
@@ -259,8 +259,9 @@ def zap(url):
                 match = ''.join(match) # one item in match will always be empty so will combine both items
                 if '*' not in match: # if the url doesn't use a wildcard
                     url = main_url + match
-                    storage.add(url) # add the url to storage list for crawling
-                    robots.add(url) # add the url to robots list
+                    if not args.exclude or parse(url, args.exclude):
+                        storage.add(url) # add the url to storage list for crawling
+                        robots.add(url) # add the url to robots list
             print ('%s URLs retrieved from robots.txt: %s' % (good, len(robots)))
     response = get(url + '/sitemap.xml').text # makes request to sitemap.xml
     if '<body' not in response: # making sure robots.txt isn't some fancy 404 page
@@ -268,7 +269,9 @@ def zap(url):
         if matches: # if there are any matches
             print ('%s URLs retrieved from sitemap.xml: %s' % (good, len(matches)))
             for match in matches:
-                storage.add(match.split('<loc>')[1][:-6]) #cleaning up the url & adding it to the storage list for crawling
+                url = match.split('<loc>')[1][:-6]
+                if not args.exclude or parse(url, args.exclude):
+                    storage.add(url) #cleaning up the url & adding it to the storage list for crawling
 
 ####
 # This functions checks whether a url matches a regular expression
