@@ -25,7 +25,7 @@ machine = sys.platform # Detecting the os of current system
 if machine.startswith('os') or machine.startswith('win') or machine.startswith('darwin') or machine.startswith('ios'):
     colors = False # Colors shouldn't be displayed in mac & windows
 if not colors:
-    end = red = white = green = yellow = run = bad = good = info = que =  ''
+    end = red = white = green = yellow = run = bad = good = info = que = ''
 else:
     end = '\033[1;m'
     red = '\033[91m'
@@ -36,7 +36,7 @@ else:
     bad = '\033[1;31m[-]\033[1;m'
     good = '\033[1;32m[+]\033[1;m'
     info = '\033[1;33m[!]\033[1;m'
-    que =  '\033[1;34m[?]\033[1;m'
+    que = '\033[1;34m[?]\033[1;m'
 
 # Just a fancy ass banner
 print ('''%s      ____  __          __
@@ -245,7 +245,7 @@ def requester(url):
         # select a random request function i.e. random API
         response = random.choice([photopea, normal, pixlr, code_beautify])(url)
         if response != '':
-            return response  # return response body
+            return response # return response body
         else:
             return 'dummy'
     else:
@@ -441,7 +441,7 @@ if not only_urls:
             intel.add(url)
 
 now = time.time() # records the time at which crawling stopped
-diff = (now  - then) # finds total time taken
+diff = (now - then) # finds total time taken
 
 def timer(diff):
     minutes, seconds = divmod(diff, 60) # Changes seconds into minutes and seconds
@@ -457,7 +457,7 @@ if not os.path.exists(output_dir): # if the directory doesn't exist
     os.mkdir(output_dir) # create a new directory
 
 datasets = [files, intel, robots, custom, failed, storage, scripts, external, fuzzable, endpoints]
-dataset_names =  ['files', 'intel', 'robots', 'custom', 'failed', 'links', 'scripts', 'external', 'fuzzable', 'endpoints']
+dataset_names = ['files', 'intel', 'robots', 'custom', 'failed', 'links', 'scripts', 'external', 'fuzzable', 'endpoints']
 
 def writer(datasets, dataset_names, output_dir):
     for dataset, dataset_name in zip(datasets, dataset_names):
