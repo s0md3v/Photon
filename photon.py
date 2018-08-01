@@ -294,8 +294,7 @@ def regxy(pattern, response):
         matches = findall(r'%s' % pattern, response)
         for match in matches:
             custom.add(match)
-    except Exception as e:
-        print(e)
+    except:
         supress_regex = True
 
 ####
