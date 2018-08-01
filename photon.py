@@ -76,7 +76,7 @@ args = parser.parse_args()
 
 def update():
     print('%s Checking for updates' % run)
-    changes = '''added option to skip crawling of URLs that match a regex pattern;changed handling of seeds''' # Changes must be seperated by ;
+    changes = '''fixed a bug in link extracting regex;doesn't delete output directory if it exists''' # Changes must be seperated by ;
     latest_commit = get('https://raw.githubusercontent.com/s0md3v/Photon/master/photon.py').text
 
     if changes not in latest_commit: # just a hack to see if a new version is available
@@ -352,7 +352,6 @@ def js_extractor(response):
 def extractor(url):
     response = requester(url) # make request to the url
     matches = findall(r'<[aA].*href=["\']{0,1}(.*?)["\']', response)
-
     for link in matches: # iterate over the matches
         link = link.split('#')[0] # remove everything after a "#" to deal with in-page anchors
         if is_link(link): # checks if the urls should be crawled
