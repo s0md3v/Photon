@@ -9,7 +9,7 @@ import random
 import warnings
 import argparse
 import threading
-from re import search, findall
+from re import search, findall, match
 from requests import get, post
 
 try:
@@ -291,7 +291,7 @@ def parse(urls, regex):
         urls = [urls]
 
     try:
-        non_matching_urls = [url for url in urls if not re.match(regex, url)]
+        non_matching_urls = [url for url in urls if not match(regex, url)]
     except TypeError:
         print("Non-string values are in list of urls passed.")
         return []
