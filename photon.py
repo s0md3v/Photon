@@ -76,7 +76,7 @@ args = parser.parse_args()
 
 def update():
     print('%s Checking for updates' % run)
-    changes = '''fixed a bug in link extracting regex;doesn't delete output directory if it exists''' # Changes must be seperated by ;
+    changes = '''added option to skip crawling of URLs that match a regex pattern;changed handling of seeds''' # Changes must be seperated by ;
     latest_commit = get('https://raw.githubusercontent.com/s0md3v/Photon/master/photon.py').text
 
     if changes not in latest_commit: # just a hack to see if a new version is available
@@ -259,9 +259,8 @@ def zap(url):
                 match = ''.join(match) # one item in match will always be empty so will combine both items
                 if '*' not in match: # if the url doesn't use a wildcard
                     url = main_url + match
-                    if not args.exclude or parse(url, args.exclude):
-                        storage.add(url) # add the url to storage list for crawling
-                        robots.add(url) # add the url to robots list
+                    storage.add(url) # add the url to storage list for crawling
+                    robots.add(url) # add the url to robots list
             print ('%s URLs retrieved from robots.txt: %s' % (good, len(robots)))
     response = get(url + '/sitemap.xml').text # makes request to sitemap.xml
     if '<body' not in response: # making sure robots.txt isn't some fancy 404 page
@@ -269,9 +268,7 @@ def zap(url):
         if matches: # if there are any matches
             print ('%s URLs retrieved from sitemap.xml: %s' % (good, len(matches)))
             for match in matches:
-                url = match.split('<loc>')[1][:-6]
-                if not args.exclude or parse(url, args.exclude):
-                    storage.add(url) #cleaning up the url & adding it to the storage list for crawling
+                storage.add(match.split('<loc>')[1][:-6]) #cleaning up the url & adding it to the storage list for crawling
 
 ####
 # This functions checks whether a url matches a regular expression
@@ -296,7 +293,6 @@ def parse(urls, regex):
     try:
         non_matching_urls = [url for url in urls if not match(regex, url)]
     except TypeError:
-        print("Non-string values are in list of urls passed.")
         return []
 
     return non_matching_urls
@@ -312,8 +308,9 @@ def is_link(url):
 
     if url not in processed: # if the url hasn't been crawled already
         if not ('.png' or '.jpg' or '.jpeg' or '.js' or '.css' or '.pdf' or '.ico' or '.bmp' or '.svg' or '.json' or '.xml') in url:
-            return True # url can be crawled
-        else:
+            if not args.exclude or parse(url, args.exclude):
+                return True # url can be crawled
+        elif not args.exclude or parse(url, args.exclude):
             files.add(url)
     return conclusion # return the conclusion :D
 
@@ -355,8 +352,7 @@ def js_extractor(response):
 def extractor(url):
     response = requester(url) # make request to the url
     matches = findall(r'<[aA].*href=["\']{0,1}(.*?)["\']', response)
-    if args.exclude:
-        matches = parse(url, args.exclude)
+
     for link in matches: # iterate over the matches
         link = link.split('#')[0] # remove everything after a "#" to deal with in-page anchors
         if is_link(link): # checks if the urls should be crawled
@@ -429,6 +425,9 @@ then = time.time() # records the time at which crawling started
 # Step 1. Extract urls from robots.txt & sitemap.xml
 zap(main_url)
 
+if args.exclude or parse(storage, args.exclude):
+    storage = set(parse(storage, args.exclude))
+
 # Step 2. Crawl recursively to the limit specified in "crawl_level"
 for level in range(crawl_level):
     links = storage - processed # links to crawl = all links - already crawled links
@@ -474,7 +473,10 @@ diff = (now - then) # finds total time taken
 
 def timer(diff):
     minutes, seconds = divmod(diff, 60) # Changes seconds into minutes and seconds
-    time_per_request = diff / float(len(processed)) # Finds average time taken by requests
+    try:
+        time_per_request = diff / float(len(processed)) # Finds average time taken by requests
+    except ZeroDivisionError:
+        time_per_request = 0
     return minutes, seconds, time_per_request
 time_taken = timer(diff)
 minutes = time_taken[0]
