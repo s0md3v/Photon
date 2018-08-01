@@ -62,6 +62,7 @@ parser.add_argument('-l', '--level', help='levels to crawl', dest='level', type=
 parser.add_argument('--timeout', help='http request timeout', dest='timeout', type=float)
 parser.add_argument('-t', '--threads', help='number of threads', dest='threads', type=int)
 parser.add_argument('-d', '--delay', help='delay between requests', dest='delay', type=float)
+parser.add_argument('--exclude', help='exclude urls matching this regex', dest='exclude', type=str)
 # Switches
 parser.add_argument('--dns', help='dump dns data', dest='dns', action='store_true')
 parser.add_argument('--ninja', help='ninja mode', dest='ninja', action='store_true')
@@ -270,6 +271,35 @@ def zap(url):
                 storage.add(match.split('<loc>')[1][:-6]) #cleaning up the url & adding it to the storage list for crawling
 
 ####
+# This functions checks whether a url matches a regular expression
+####
+
+def parse(urls, regex):
+    """
+    Parses a list for a custom
+
+    Args:
+        urls: iterable of urls
+        custom_regex: string regex to be parsed for
+
+    Returns:
+        list of strings not matching regex
+    """
+
+    # to avoid iterating over the characters of a string
+    if not isinstance(urls, (list, set, tuple)):
+        urls = [urls]
+
+    try:
+        non_matching_urls = [url for url in urls if not re.match(regex, url)]
+    except TypeError:
+        print("Non-string values are in list of urls passed.")
+        return []
+
+    return non_matching_urls
+
+
+####
 # This functions checks whether a url should be crawled or not
 ####
 
@@ -279,7 +309,8 @@ def is_link(url):
 
     if url not in processed: # if the url hasn't been crawled already
         if not ('.png' or '.jpg' or '.jpeg' or '.js' or '.css' or '.pdf' or '.ico' or '.bmp' or '.svg' or '.json' or '.xml') in url:
-            return True # url can be crawled
+            if not args.exclude or parse(url, args.exclude):
+                return True # url can be crawled
         else:
             files.add(url)
     return conclusion # return the conclusion :D
@@ -294,7 +325,8 @@ def regxy(pattern, response):
         matches = findall(r'%s' % pattern, response)
         for match in matches:
             custom.add(match)
-    except:
+    except Exception as e:
+        print(e)
         supress_regex = True
 
 ####
