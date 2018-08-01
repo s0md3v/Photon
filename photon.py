@@ -308,9 +308,8 @@ def is_link(url):
 
     if url not in processed: # if the url hasn't been crawled already
         if not ('.png' or '.jpg' or '.jpeg' or '.js' or '.css' or '.pdf' or '.ico' or '.bmp' or '.svg' or '.json' or '.xml') in url:
-            if not args.exclude or parse(url, args.exclude):
-                return True # url can be crawled
-        elif not args.exclude or parse(url, args.exclude):
+            return True # url can be crawled
+        else:
             files.add(url)
     return conclusion # return the conclusion :D
 
@@ -354,7 +353,7 @@ def extractor(url):
     matches = findall(r'<[aA].*href=["\']{0,1}(.*?)["\']', response)
     for link in matches: # iterate over the matches
         link = link.split('#')[0] # remove everything after a "#" to deal with in-page anchors
-        if is_link(link): # checks if the urls should be crawled
+        if is_link(link) and (not args.exclude or parse(link, args.exclude)): # checks if the urls should be crawled
             if link[:4] == 'http' or link[:2] == '//':
                 if link.startswith(main_url):
                     storage.add(link)
@@ -424,6 +423,7 @@ then = time.time() # records the time at which crawling started
 # Step 1. Extract urls from robots.txt & sitemap.xml
 zap(main_url)
 
+# this is so the round 1 emails are parsed as well
 if args.exclude or parse(storage, args.exclude):
     storage = set(parse(storage, args.exclude))
 
