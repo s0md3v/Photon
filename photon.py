@@ -9,7 +9,7 @@ import random
 import warnings
 import argparse
 import threading
-from re import search, findall, match
+from re import search, findall, search
 from requests import get, post
 
 try:
@@ -291,7 +291,7 @@ def remove_regex(urls, regex):
         urls = [urls]
 
     try:
-        non_matching_urls = [url for url in urls if not match(regex, url)]
+        non_matching_urls = [url for url in urls if not search(regex, url)]
     except TypeError:
         return []
 
