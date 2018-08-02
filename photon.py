@@ -9,7 +9,7 @@ import random
 import warnings
 import argparse
 import threading
-from re import search, findall
+from re import search, findall, match
 from requests import get, post
 
 try:
@@ -62,6 +62,7 @@ parser.add_argument('-l', '--level', help='levels to crawl', dest='level', type=
 parser.add_argument('--timeout', help='http request timeout', dest='timeout', type=float)
 parser.add_argument('-t', '--threads', help='number of threads', dest='threads', type=int)
 parser.add_argument('-d', '--delay', help='delay between requests', dest='delay', type=float)
+parser.add_argument('--exclude', help='exclude urls matching this regex', dest='exclude', type=str)
 # Switches
 parser.add_argument('--dns', help='dump dns data', dest='dns', action='store_true')
 parser.add_argument('--ninja', help='ninja mode', dest='ninja', action='store_true')
@@ -270,6 +271,34 @@ def zap(url):
                 storage.add(match.split('<loc>')[1][:-6]) #cleaning up the url & adding it to the storage list for crawling
 
 ####
+# This functions checks whether a url matches a regular expression
+####
+
+def remove_regex(urls, regex):
+    """
+    Parses a list for non-matches to a regex
+
+    Args:
+        urls: iterable of urls
+        custom_regex: string regex to be parsed for
+
+    Returns:
+        list of strings not matching regex
+    """
+
+    # to avoid iterating over the characters of a string
+    if not isinstance(urls, (list, set, tuple)):
+        urls = [urls]
+
+    try:
+        non_matching_urls = [url for url in urls if not match(regex, url)]
+    except TypeError:
+        return []
+
+    return non_matching_urls
+
+
+####
 # This functions checks whether a url should be crawled or not
 ####
 
@@ -394,9 +423,15 @@ then = time.time() # records the time at which crawling started
 # Step 1. Extract urls from robots.txt & sitemap.xml
 zap(main_url)
 
+# this is so the level 1 emails are parsed as well
+if args.exclude:
+    storage = set(remove_regex(storage, args.exclude))
+
 # Step 2. Crawl recursively to the limit specified in "crawl_level"
 for level in range(crawl_level):
     links = storage - processed # links to crawl = all links - already crawled links
+    if args.exclude:
+        links = remove_regex(links, args.exclude)
     if not links: # if links to crawl are 0 i.e. all links have been crawled
         break
     elif len(storage) <= len(processed): # if crawled links are somehow more than all links. Possible? ;/
@@ -439,7 +474,10 @@ diff = (now - then) # finds total time taken
 
 def timer(diff):
     minutes, seconds = divmod(diff, 60) # Changes seconds into minutes and seconds
-    time_per_request = diff / float(len(processed)) # Finds average time taken by requests
+    try:
+        time_per_request = diff / float(len(processed)) # Finds average time taken by requests
+    except ZeroDivisionError:
+        time_per_request = 0
     return minutes, seconds, time_per_request
 time_taken = timer(diff)
 minutes = time_taken[0]
