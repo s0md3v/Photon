@@ -2,14 +2,14 @@
 # -*- coding: utf-8 -*-
 
 # Let's import what we need
-import argparse
 import os
 import sys
-import random
-from re import search, findall
-import threading
 import time
+import random
 import warnings
+import argparse
+import threading
+from re import search, findall
 from requests import get, post
 
 try:
@@ -76,7 +76,7 @@ args = parser.parse_args()
 
 def update():
     print('%s Checking for updates' % run)
-    changes = '''fixed a bug in link extracting regex;doesn't delete output directory if it exists''' # Changes must be seperated by ;
+    changes = '''--exclude option to exclude urls with regex;minor refactor''' # Changes must be seperated by ;
     latest_commit = get('https://raw.githubusercontent.com/s0md3v/Photon/master/photon.py').text
 
     if changes not in latest_commit: # just a hack to see if a new version is available
@@ -141,12 +141,12 @@ intel = set() # emails, website accounts, aws buckets etc.
 robots = set() # entries of robots.txt
 custom = set() # string extracted by custom regex pattern
 failed = set() # urls that photon failed to crawl
-storage = set([s for s in args.seeds]) # urls that belong to the target i.e. in-scope
 scripts = set() # javascript files
 external = set() # urls that don't belong to the target i.e. out-of-scope
 fuzzable = set() # urls that have get params in them e.g. example.com/page.php?id=2
 endpoints = set() # urls found from javascript files
 processed = set() # urls that have been crawled
+storage = set([s for s in args.seeds]) # urls that belong to the target i.e. in-scope
 
 everything = []
 bad_intel = set() # unclean intel urls
@@ -503,7 +503,6 @@ def writer(datasets, dataset_names, output_dir):
                     f.write(str(joined.encode('utf-8')))
 
 writer(datasets, dataset_names, output_dir)
-
 # Printing out results
 print ('''%s
 %s URLs: %i
