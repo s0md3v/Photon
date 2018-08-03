@@ -2,14 +2,14 @@
 # -*- coding: utf-8 -*-
 
 # Let's import what we need
+import argparse
 import os
 import sys
-import time
 import random
-import warnings
-import argparse
+from re import search, findall
 import threading
-from re import search, findall, match
+import time
+import warnings
 from requests import get, post
 
 try:
@@ -22,7 +22,7 @@ except ImportError:
 
 colors = True # Output should be colored
 machine = sys.platform # Detecting the os of current system
-if machine.startswith('os') or machine.startswith('win') or machine.startswith('darwin') or machine.startswith('ios'):
+if machine.lower().startswith(('os', 'win', 'darwin', 'ios')):
     colors = False # Colors shouldn't be displayed in mac & windows
 if not colors:
     end = red = white = green = yellow = run = bad = good = info = que = ''
@@ -203,7 +203,7 @@ def requester(url):
                     return response.text
                 else:
                     response.close()
-                    failed.append(url)
+                    failed.add(url)
                     return 'dummy'
             else:
                 response.close()
@@ -291,7 +291,7 @@ def remove_regex(urls, regex):
         urls = [urls]
 
     try:
-        non_matching_urls = [url for url in urls if not match(regex, url)]
+        non_matching_urls = [url for url in urls if not search(regex, url)]
     except TypeError:
         return []
 
@@ -493,7 +493,7 @@ dataset_names = ['files', 'intel', 'robots', 'custom', 'failed', 'links', 'scrip
 
 def writer(datasets, dataset_names, output_dir):
     for dataset, dataset_name in zip(datasets, dataset_names):
-        if len(dataset) > 0:
+        if dataset:
             if python3:
                 with open(output_dir + '/' + dataset_name + '.txt', 'w+', encoding='utf8') as f:
                     f.write(str('\n'.join(dataset)))
