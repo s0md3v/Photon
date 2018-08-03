@@ -6,7 +6,7 @@ import argparse
 import os
 import sys
 import random
-from re import search, findall, search
+from re import search, findall
 import threading
 import time
 import warnings
