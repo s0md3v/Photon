@@ -488,7 +488,7 @@ time_per_request = time_taken[2]
 if not os.path.exists(output_dir): # if the directory doesn't exist
     os.mkdir(output_dir) # create a new directory
 
-datasets = [files, intel, robots, custom, failed, storage, scripts, external, fuzzable, endpoints]
+datasets = [files, intel, robots, custom, failed, remove_regex(storage, args.exclude), scripts, external, fuzzable, endpoints]
 dataset_names = ['files', 'intel', 'robots', 'custom', 'failed', 'links', 'scripts', 'external', 'fuzzable', 'endpoints']
 
 def writer(datasets, dataset_names, output_dir):
