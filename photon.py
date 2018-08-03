@@ -16,7 +16,6 @@ try:
     from urllib.parse import urlparse # for python3
     python2, python3 = False, True
 except ImportError:
-    input = raw_input
     from urlparse import urlparse # for python2
     python2, python3 = True, False
 
@@ -203,7 +202,7 @@ def requester(url):
                     return response.text
                 else:
                     response.close()
-                    failed.append(url)
+                    failed.add(url)
                     return 'dummy'
             else:
                 response.close()
@@ -493,7 +492,7 @@ dataset_names = ['files', 'intel', 'robots', 'custom', 'failed', 'links', 'scrip
 
 def writer(datasets, dataset_names, output_dir):
     for dataset, dataset_name in zip(datasets, dataset_names):
-        if len(dataset) > 0:
+        if dataset:
             if python3:
                 with open(output_dir + '/' + dataset_name + '.txt', 'w+', encoding='utf8') as f:
                     f.write(str('\n'.join(dataset)))
