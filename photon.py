@@ -22,7 +22,7 @@ except ImportError:
 
 colors = True # Output should be colored
 machine = sys.platform # Detecting the os of current system
-if machine.startswith('os') or machine.startswith('win') or machine.startswith('darwin') or machine.startswith('ios'):
+if machine.lower().startswith(('os', 'win', 'darwin', 'ios')):
     colors = False # Colors shouldn't be displayed in mac & windows
 if not colors:
     end = red = white = green = yellow = run = bad = good = info = que = ''
@@ -62,6 +62,7 @@ parser.add_argument('-l', '--level', help='levels to crawl', dest='level', type=
 parser.add_argument('--timeout', help='http request timeout', dest='timeout', type=float)
 parser.add_argument('-t', '--threads', help='number of threads', dest='threads', type=int)
 parser.add_argument('-d', '--delay', help='delay between requests', dest='delay', type=float)
+parser.add_argument('--exclude', help='exclude urls matching this regex', dest='exclude', type=str)
 # Switches
 parser.add_argument('--dns', help='dump dns data', dest='dns', action='store_true')
 parser.add_argument('--ninja', help='ninja mode', dest='ninja', action='store_true')
@@ -75,7 +76,7 @@ args = parser.parse_args()
 
 def update():
     print('%s Checking for updates' % run)
-    changes = '''fixed a bug in link extracting regex;doesn't delete output directory if it exists''' # Changes must be seperated by ;
+    changes = '''--exclude option to exclude urls with regex;minor refactor''' # Changes must be seperated by ;
     latest_commit = get('https://raw.githubusercontent.com/s0md3v/Photon/master/photon.py').text
 
     if changes not in latest_commit: # just a hack to see if a new version is available
@@ -140,12 +141,12 @@ intel = set() # emails, website accounts, aws buckets etc.
 robots = set() # entries of robots.txt
 custom = set() # string extracted by custom regex pattern
 failed = set() # urls that photon failed to crawl
-storage = set([s for s in args.seeds]) # urls that belong to the target i.e. in-scope
 scripts = set() # javascript files
 external = set() # urls that don't belong to the target i.e. out-of-scope
 fuzzable = set() # urls that have get params in them e.g. example.com/page.php?id=2
 endpoints = set() # urls found from javascript files
 processed = set() # urls that have been crawled
+storage = set([s for s in args.seeds]) # urls that belong to the target i.e. in-scope
 
 everything = []
 bad_intel = set() # unclean intel urls
@@ -202,7 +203,7 @@ def requester(url):
                     return response.text
                 else:
                     response.close()
-                    failed.append(url)
+                    failed.add(url)
                     return 'dummy'
             else:
                 response.close()
@@ -268,6 +269,37 @@ def zap(url):
             print ('%s URLs retrieved from sitemap.xml: %s' % (good, len(matches)))
             for match in matches:
                 storage.add(match.split('<loc>')[1][:-6]) #cleaning up the url & adding it to the storage list for crawling
+
+####
+# This functions checks whether a url matches a regular expression
+####
+
+def remove_regex(urls, regex):
+    """
+    Parses a list for non-matches to a regex
+
+    Args:
+        urls: iterable of urls
+        custom_regex: string regex to be parsed for
+
+    Returns:
+        list of strings not matching regex
+    """
+
+    if not regex:
+        return urls
+
+    # to avoid iterating over the characters of a string
+    if not isinstance(urls, (list, set, tuple)):
+        urls = [urls]
+
+    try:
+        non_matching_urls = [url for url in urls if not search(regex, url)]
+    except TypeError:
+        return []
+
+    return non_matching_urls
+
 
 ####
 # This functions checks whether a url should be crawled or not
@@ -394,9 +426,12 @@ then = time.time() # records the time at which crawling started
 # Step 1. Extract urls from robots.txt & sitemap.xml
 zap(main_url)
 
+# this is so the level 1 emails are parsed as well
+storage = set(remove_regex(storage, args.exclude))
+
 # Step 2. Crawl recursively to the limit specified in "crawl_level"
 for level in range(crawl_level):
-    links = storage - processed # links to crawl = all links - already crawled links
+    links = remove_regex(storage - processed, args.exclude) # links to crawl = all links - already crawled links
     if not links: # if links to crawl are 0 i.e. all links have been crawled
         break
     elif len(storage) <= len(processed): # if crawled links are somehow more than all links. Possible? ;/
@@ -439,7 +474,10 @@ diff = (now - then) # finds total time taken
 
 def timer(diff):
     minutes, seconds = divmod(diff, 60) # Changes seconds into minutes and seconds
-    time_per_request = diff / float(len(processed)) # Finds average time taken by requests
+    try:
+        time_per_request = diff / float(len(processed)) # Finds average time taken by requests
+    except ZeroDivisionError:
+        time_per_request = 0
     return minutes, seconds, time_per_request
 time_taken = timer(diff)
 minutes = time_taken[0]
@@ -450,12 +488,12 @@ time_per_request = time_taken[2]
 if not os.path.exists(output_dir): # if the directory doesn't exist
     os.mkdir(output_dir) # create a new directory
 
-datasets = [files, intel, robots, custom, failed, storage, scripts, external, fuzzable, endpoints]
+datasets = [files, intel, robots, custom, failed, remove_regex(storage, args.exclude), scripts, external, fuzzable, endpoints]
 dataset_names = ['files', 'intel', 'robots', 'custom', 'failed', 'links', 'scripts', 'external', 'fuzzable', 'endpoints']
 
 def writer(datasets, dataset_names, output_dir):
     for dataset, dataset_name in zip(datasets, dataset_names):
-        if len(dataset) > 0:
+        if dataset:
             if python3:
                 with open(output_dir + '/' + dataset_name + '.txt', 'w+', encoding='utf8') as f:
                     f.write(str('\n'.join(dataset)))
@@ -465,7 +503,6 @@ def writer(datasets, dataset_names, output_dir):
                     f.write(str(joined.encode('utf-8')))
 
 writer(datasets, dataset_names, output_dir)
-
 # Printing out results
 print ('''%s
 %s URLs: %i
