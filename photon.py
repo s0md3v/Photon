@@ -286,6 +286,9 @@ def remove_regex(urls, regex):
         list of strings not matching regex
     """
 
+    if not regex:
+        return urls
+
     # to avoid iterating over the characters of a string
     if not isinstance(urls, (list, set, tuple)):
         urls = [urls]
@@ -424,14 +427,11 @@ then = time.time() # records the time at which crawling started
 zap(main_url)
 
 # this is so the level 1 emails are parsed as well
-if args.exclude:
-    storage = set(remove_regex(storage, args.exclude))
+storage = set(remove_regex(storage, args.exclude))
 
 # Step 2. Crawl recursively to the limit specified in "crawl_level"
 for level in range(crawl_level):
-    links = storage - processed # links to crawl = all links - already crawled links
-    if args.exclude:
-        links = remove_regex(links, args.exclude)
+    links = remove_regex(storage - processed, args.exclude) # links to crawl = all links - already crawled links
     if not links: # if links to crawl are 0 i.e. all links have been crawled
         break
     elif len(storage) <= len(processed): # if crawled links are somehow more than all links. Possible? ;/
