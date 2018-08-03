@@ -2,14 +2,14 @@
 # -*- coding: utf-8 -*-
 
 # Let's import what we need
+import argparse
 import os
 import sys
-import time
 import random
-import warnings
-import argparse
-import threading
 from re import search, findall, search
+import threading
+import time
+import warnings
 from requests import get, post
 
 try:
@@ -22,7 +22,7 @@ except ImportError:
 
 colors = True # Output should be colored
 machine = sys.platform # Detecting the os of current system
-if machine.startswith('os') or machine.startswith('win') or machine.startswith('darwin') or machine.startswith('ios'):
+if machine.lower().startswith(('os', 'win', 'darwin', 'ios')):
     colors = False # Colors shouldn't be displayed in mac & windows
 if not colors:
     end = red = white = green = yellow = run = bad = good = info = que = ''
