@@ -16,6 +16,7 @@ try:
     from urllib.parse import urlparse # for python3
     python2, python3 = False, True
 except ImportError:
+    input = raw_input
     from urlparse import urlparse # for python2
     python2, python3 = True, False
 
