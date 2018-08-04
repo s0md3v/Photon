@@ -1,3 +1,10 @@
+#### v1.0.8
+- added `--exclude` option
+- Better regex and code logic to favor performance
+- Fixed a bug that caused dnsdumpster to fail if target was a subdomain
+- Fixed a bug that caused a crash if run outside "Photon" directory
+- Fixed a bug in file saving (specific to python3)
+
 #### v1.0.7
 - Added `--timeout` option
 - Added `--output` option
