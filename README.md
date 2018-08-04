@@ -1,6 +1,6 @@
 ![logo](https://image.ibb.co/eRSV3o/photon_github.png)
 
-[![python](https://img.shields.io/badge/Python-2.7--3.6-green.svg?style=style=flat-square)](https://www.python.org/downloads/)  [![license](https://img.shields.io/badge/License-GPL_v3-orange.svg?style=style=flat-square)](https://www.gnu.org/licenses/gpl-3.0.en.html) [![version](https://img.shields.io/github/release/s0md3v/Photon.svg)](https://github.com/s0md3v/Photon/blob/master/CHANGELOG.md) ![build](https://img.shields.io/travis/com/s0md3v/Photon.svg) [![open issues](https://img.shields.io/github/issues-raw/s0md3v/Photon.svg?maxAge=2592000)](https://github.com/s0md3v/Photon/issues) [![closed issues](	https://img.shields.io/github/issues-closed-raw/s0md3v/Photon.svg)](https://github.com/s0md3v/Photon/issues?q=is%3Aissue+is%3Aclosed) [![plugins](https://img.shields.io/badge/Plugins-2-yellow.svg?style=style=flat-square)](https://github.com/s0md3v/Photon/tree/master/plugins) ![awesome](https://cdn.rawgit.com/sindresorhus/awesome/d7305f38d29fed78fa85652e3a63e154dd8e8829/media/badge.svg)
+[![python](https://img.shields.io/badge/Python-2.7--3.6-green.svg?style=style=flat-square)](https://www.python.org/downloads/)  [![license](https://img.shields.io/badge/License-GPL_v3-orange.svg?style=style=flat-square)](https://www.gnu.org/licenses/gpl-3.0.en.html) [![version](https://img.shields.io/github/release/s0md3v/Photon.svg)](https://github.com/s0md3v/Photon/blob/master/CHANGELOG.md) ![build](https://img.shields.io/travis/com/s0md3v/Photon.svg) [![closed issues](	https://img.shields.io/github/issues-closed-raw/s0md3v/Photon.svg)](https://github.com/s0md3v/Photon/issues?q=is%3Aissue+is%3Aclosed) [![plugins](https://img.shields.io/badge/Plugins-2-yellow.svg?style=style=flat-square)](https://github.com/s0md3v/Photon/tree/master/plugins) ![awesome](https://cdn.rawgit.com/sindresorhus/awesome/d7305f38d29fed78fa85652e3a63e154dd8e8829/media/badge.svg)
 
 Photon is a lightning fast web crawler which extracts URLs, files, intel & endpoints from a target.
 
@@ -13,6 +13,9 @@ Photon is a lightning fast web crawler which extracts URLs, files, intel & endpo
 - [Compatibility & Dependencies](https://github.com/s0md3v/Photon/wiki/Compatibility-&-Dependencies)
 
 ## Main Features
+
+The extensive range of [options](https://github.com/s0md3v/Photon/wiki/Usage) provided by Photon lets you crawl the web exactly the way you want, which is a cool thing on its own.
+However, the features of Photon that make it awesome are follows:
 
 #### Data Extraction
 Photon extracts the following data while crawling by default:
