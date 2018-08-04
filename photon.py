@@ -179,7 +179,7 @@ if args.user_agent:
     user_agents = args.user_agent.split(',')
 else:
     user_agents = []
-    with open(os.getcwd() + '/core/user-agents.txt', 'r') as uas:
+    with open(sys.path[0] + '/core/user-agents.txt', 'r') as uas:
         for agent in uas:
             user_agents.append(agent.strip('\n'))
 
