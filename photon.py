@@ -357,8 +357,13 @@ def extractor(url):
     for link in matches: # iterate over the matches
         link = link.split('#')[0] # remove everything after a "#" to deal with in-page anchors
         if is_link(link): # checks if the urls should be crawled
-            if link[:4] == 'http' or link[:2] == '//':
+            if link[:4] == 'http':
                 if link.startswith(main_url):
+                    storage.add(link)
+                else:
+                    external.add(link)
+            elif link[:2] == '//':
+                if link.split('/')[2].startswith(domain_name):
                     storage.add(link)
                 else:
                     external.add(link)
