@@ -314,10 +314,10 @@ def is_link(url):
     conclusion = False # whether the the url should be crawled or not
 
     if url not in processed: # if the url hasn't been crawled already
-        if not ('.png' or '.jpg' or '.jpeg' or '.js' or '.css' or '.pdf' or '.ico' or '.bmp' or '.svg' or '.json' or '.xml') in url:
-            return True # url can be crawled
-        else:
+        if ('.png' or '.jpg' or '.jpeg' or '.js' or '.css' or '.pdf' or '.ico' or '.bmp' or '.svg' or '.json' or '.xml') in url:
             files.add(url)
+        else:
+            return True # url can be crawled
     return conclusion # return the conclusion :D
 
 ####
