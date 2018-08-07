@@ -440,7 +440,7 @@ for level in range(crawl_level):
     if not links: # if links to crawl are 0 i.e. all links have been crawled
         break
     elif len(storage) <= len(processed): # if crawled links are somehow more than all links. Possible? ;/
-        if len(storage) > 2 + len(seeds): # if you know it, you know it
+        if len(storage) > 2 + len(args.seeds): # if you know it, you know it
             break
     print ('%s Level %i: %i URLs' % (run, level + 1, len(links)))
     try:
