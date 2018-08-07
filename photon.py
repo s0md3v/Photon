@@ -16,9 +16,13 @@ try:
     from urllib.parse import urlparse # for python3
     python2, python3 = False, True
 except ImportError:
-    input = raw_input
     from urlparse import urlparse # for python2
     python2, python3 = True, False
+
+try:
+    input = raw_input
+except NameError:
+    pass
 
 colors = True # Output should be colored
 machine = sys.platform # Detecting the os of current system
