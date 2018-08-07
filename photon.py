@@ -16,9 +16,13 @@ try:
     from urllib.parse import urlparse # for python3
     python2, python3 = False, True
 except ImportError:
-    input = raw_input
     from urlparse import urlparse # for python2
     python2, python3 = True, False
+
+try:
+    input = raw_input
+except NameError:
+    pass
 
 colors = True # Output should be colored
 machine = sys.platform # Detecting the os of current system
@@ -417,7 +421,7 @@ for level in range(crawl_level):
     if not links: # if links to crawl are 0 i.e. all links have been crawled
         break
     elif len(storage) <= len(processed): # if crawled links are somehow more than all links. Possible? ;/
-        if len(storage) > 2 + len(seeds): # if you know it, you know it
+        if len(storage) > 2 + len(args.seeds): # if you know it, you know it
             break
     print('%s Level %i: %i URLs' % (run, level + 1, len(links)))
     try:
