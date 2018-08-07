@@ -291,7 +291,7 @@ def is_link(url):
     conclusion = False # whether the the url should be crawled or not
 
     if url not in processed: # if the url hasn't been crawled already
-        if ('.png' or '.jpg' or '.jpeg' or '.js' or '.css' or '.pdf' or '.ico' or '.bmp' or '.svg' or '.json' or '.xml') in url:
+        if '.png' in url or '.jpg' in url or '.jpeg' in url or '.js' in url or '.css' in url or '.pdf' in url or '.ico' in url or '.bmp' in url or '.svg' in url or '.json' in url or '.xml' in url:
             files.add(url)
         else:
             return True # url can be crawled
@@ -452,7 +452,7 @@ if not only_urls:
                 intel.add(x)
 
     for url in external:
-        if ('github.com' or 'facebook.com' or 'instagram.com' or 'youtube.com') in url:
+        if 'github.com' in url or 'facebook.com' in url or 'instagram.com' in url or 'youtube.com' in url:
             intel.add(url)
 
 now = time.time() # records the time at which crawling stopped
