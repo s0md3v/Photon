@@ -1,3 +1,9 @@
+#### v1.0.9
+- Code refactor
+- Better identification of external URLs
+- Fixed a major bug that made several intel URLs pass under the radar
+- Fixed a major bug that caused non-html type content to be marked a crawlable URL
+
 #### v1.0.8
 - added `--exclude` option
 - Better regex and code logic to favor performance
