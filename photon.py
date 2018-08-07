@@ -16,13 +16,9 @@ try:
     from urllib.parse import urlparse # for python3
     python2, python3 = False, True
 except ImportError:
+    input = raw_input
     from urlparse import urlparse # for python2
     python2, python3 = True, False
-
-try:
-    input = raw_input
-except NameError:
-    pass
 
 colors = True # Output should be colored
 machine = sys.platform # Detecting the os of current system
@@ -43,7 +39,7 @@ else:
     que = '\033[1;34m[?]\033[1;m'
 
 # Just a fancy ass banner
-print ('''%s      ____  __          __
+print('''%s      ____  __          __
      / %s__%s \/ /_  ____  / /_____  ____
     / %s/_/%s / __ \/ %s__%s \/ __/ %s__%s \/ __ \\
    / ____/ / / / %s/_/%s / /_/ %s/_/%s / / / /
@@ -86,10 +82,10 @@ def update():
     if changes not in latest_commit: # just a hack to see if a new version is available
         changelog = search(r"changes = '''(.*?)'''", latest_commit)
         changelog = changelog.group(1).split(';') # splitting the changes to form a list
-        print ('%s A new version of Photon is available.' % good)
-        print ('%s Changes:' % info)
+        print('%s A new version of Photon is available.' % good)
+        print('%s Changes:' % info)
         for change in changelog: # print changes
-            print ('%s>%s %s' % (green, end, change))
+            print('%s>%s %s' % (green, end, change))
 
         current_path = os.getcwd().split('/') # if you know it, you know it
         folder = current_path[-1] # current directory name
@@ -97,12 +93,12 @@ def update():
         choice = input('%s Would you like to update? [Y/n] ' % que).lower()
 
         if choice != 'n':
-            print ('%s Updating Photon' % run)
+            print('%s Updating Photon' % run)
             os.system('git clone --quiet https://github.com/s0md3v/Photon %s' % (folder))
             os.system('cp -r %s/%s/* %s && rm -r %s/%s/ 2>/dev/null' % (path, folder, path, path, folder))
-            print ('%s Update successful!' % good)
+            print('%s Update successful!' % good)
     else:
-        print ('%s Photon is up to date!' % good)
+        print('%s Photon is up to date!' % good)
 
 if args.update: # if the user has supplied --update argument
     update()
@@ -113,31 +109,16 @@ if args.root: # if the user has supplied a url
     if main_inp.endswith('/'): # if the url ends with '/'
         main_inp = main_inp[:-1] # we will remove it as it can cause problems later in the code
 else: # if the user hasn't supplied a url
-    print ('\n' + parser.format_help().lower())
+    print('\n' + parser.format_help().lower())
     quit()
 
-delay = 0 # Delay between requests
-timeout = 6 # HTTP request timeout
-cook = None # Cookie
-ninja = False # Ninja mode toggle
-crawl_level = 2 # Crawling level
-thread_count = 2 # Number of threads
-only_urls = False # only urls mode is off by default
-
-if args.ninja:
-    ninja = True
-if args.only_urls:
-    only_urls = True
-if args.cook:
-    cook = args.cook
-if args.delay:
-    delay = args.delay
-if args.timeout:
-    timeout = args.timeout
-if args.level:
-    crawl_level = args.level
-if args.threads:
-    thread_count = args.threads
+delay = args.delay or 0  # Delay between requests
+timeout = args.timeout or 6  # HTTP request timeout
+cook = args.cook or None  # Cookie
+ninja = bool(args.ninja)  # Ninja mode toggle
+crawl_level = args.level or 2  # Crawling level
+thread_count = args.threads or 2  # Number of threads
+only_urls = bool(args.only_urls)  # only urls mode is off by default
 
 # Variables we are gonna use later to store stuff
 files = set() # pdf, css, png etc.
@@ -170,10 +151,7 @@ storage.add(main_url) # adding the root url to storage for crawling
 
 domain_name = urlparse(main_url).netloc # Extracts domain out of the url
 
-if args.output:
-    output_dir = args.output
-else:
-    output_dir = domain_name
+output_dir = args.output or domain_name
 
 ####
 # This function makes requests to webpage and returns response body
@@ -182,10 +160,8 @@ else:
 if args.user_agent:
     user_agents = args.user_agent.split(',')
 else:
-    user_agents = []
     with open(sys.path[0] + '/core/user-agents.txt', 'r') as uas:
-        for agent in uas:
-            user_agents.append(agent.strip('\n'))
+        user_agents = [agent.strip('\n') for agent in uas]
 
 def requester(url):
     processed.add(url) # mark the url as crawled
@@ -243,10 +219,7 @@ def requester(url):
     if ninja: # if the ninja mode is enabled
         # select a random request function i.e. random API
         response = random.choice([photopea, normal, pixlr, code_beautify])(url)
-        if response != '':
-            return response # return response body
-        else:
-            return 'dummy'
+        return response or 'dummy'
     else:
         return normal(url)
 
@@ -265,12 +238,12 @@ def zap(url):
                     url = main_url + match
                     storage.add(url) # add the url to storage list for crawling
                     robots.add(url) # add the url to robots list
-            print ('%s URLs retrieved from robots.txt: %s' % (good, len(robots)))
+            print('%s URLs retrieved from robots.txt: %s' % (good, len(robots)))
     response = get(url + '/sitemap.xml').text # makes request to sitemap.xml
     if '<body' not in response: # making sure robots.txt isn't some fancy 404 page
         matches = findall(r'<loc>[^<]*</loc>', response) # regex for extracting urls
         if matches: # if there are any matches
-            print ('%s URLs retrieved from sitemap.xml: %s' % (good, len(matches)))
+            print('%s URLs retrieved from sitemap.xml: %s' % (good, len(matches)))
             for match in matches:
                 storage.add(match.split('<loc>')[1][:-6]) #cleaning up the url & adding it to the storage list for crawling
 
@@ -428,7 +401,7 @@ def flash(function, links): # This shit is NOT complicated, please enjoy
             progress = len(links)
         sys.stdout.write('\r%s Progress: %i/%i' % (info, progress, len(links)))
         sys.stdout.flush()
-    print ('')
+    print('')
 
 then = time.time() # records the time at which crawling started
 
@@ -444,13 +417,13 @@ for level in range(crawl_level):
     if not links: # if links to crawl are 0 i.e. all links have been crawled
         break
     elif len(storage) <= len(processed): # if crawled links are somehow more than all links. Possible? ;/
-        if len(storage) > 2 + len(args.seeds): # if you know it, you know it
+        if len(storage) > 2 + len(seeds): # if you know it, you know it
             break
-    print ('%s Level %i: %i URLs' % (run, level + 1, len(links)))
+    print('%s Level %i: %i URLs' % (run, level + 1, len(links)))
     try:
         flash(extractor, links)
     except KeyboardInterrupt:
-        print ('')
+        print('')
         break
 
 if not only_urls:
@@ -462,7 +435,7 @@ if not only_urls:
         elif not match.startswith('http') and not match.startswith('//'):
             scripts.add(main_url + '/' + match)
     # Step 3. Scan the JavaScript files for enpoints
-    print ('%s Crawling %i JavaScript files' % (run, len(scripts)))
+    print('%s Crawling %i JavaScript files' % (run, len(scripts)))
     flash(jscanner, scripts)
 
     for url in storage:
@@ -488,10 +461,7 @@ def timer(diff):
     except ZeroDivisionError:
         time_per_request = 0
     return minutes, seconds, time_per_request
-time_taken = timer(diff)
-minutes = time_taken[0]
-seconds = time_taken[1]
-time_per_request = time_taken[2]
+minutes, seconds, time_per_request = timer(diff)
 
 # Step 4. Save the results
 if not os.path.exists(output_dir): # if the directory doesn't exist
@@ -503,17 +473,18 @@ dataset_names = ['files', 'intel', 'robots', 'custom', 'failed', 'links', 'scrip
 def writer(datasets, dataset_names, output_dir):
     for dataset, dataset_name in zip(datasets, dataset_names):
         if dataset:
+            filepath = output_dir + '/' + dataset_name + '.txt'
             if python3:
-                with open(output_dir + '/' + dataset_name + '.txt', 'w+', encoding='utf8') as f:
+                with open(filepath, 'w+', encoding='utf8') as f:
                     f.write(str('\n'.join(dataset)))
             else:
-                with open(output_dir + '/' + dataset_name + '.txt', 'w+') as f:
+                with open(filepath, 'w+') as f:
                     joined = '\n'.join(dataset)
                     f.write(str(joined.encode('utf-8')))
 
 writer(datasets, dataset_names, output_dir)
 # Printing out results
-print ('''%s
+print('''%s
 %s URLs: %i
 %s Intel: %i
 %s Files: %i
@@ -527,8 +498,8 @@ len(intel), good, len(files), good, len(endpoints), good, len(fuzzable), good,
 len(custom), good, len(scripts), good, len(external),
 (('%s-%s' % (red, end)) * 50)))
 
-print ('%s Total time taken: %i minutes %i seconds' % (info, minutes, seconds))
-print ('%s Average request time: %s seconds' % (info, time_per_request))
+print('%s Total time taken: %i minutes %i seconds' % (info, minutes, seconds))
+print('%s Average request time: %s seconds' % (info, time_per_request))
 
 if args.dns:
     from plugins.dnsdumpster import dnsdumpster
@@ -543,4 +514,4 @@ if args.export:
     # exporter(directory, format, datasets)
     exporter(output_dir, args.export, datasets)
 
-print ('%s Results saved in %s%s%s directory' % (good, green, output_dir, end))
+print('%s Results saved in %s%s%s directory' % (good, green, output_dir, end))
