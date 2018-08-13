@@ -80,7 +80,7 @@ args = parser.parse_args()
 
 def update():
     print('%s Checking for updates' % run)
-    changes = '''--exclude option to exclude urls with regex;minor refactor''' # Changes must be seperated by ;
+    changes = '''fixed several major bugs''' # Changes must be seperated by ;
     latest_commit = get('https://raw.githubusercontent.com/s0md3v/Photon/master/photon.py').text
 
     if changes not in latest_commit: # just a hack to see if a new version is available
