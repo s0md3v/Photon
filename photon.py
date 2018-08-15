@@ -232,7 +232,7 @@ def requester(url):
 ####
 
 def zap(url):
-    response = get(url + '/robots.txt').text # makes request to robots.txt
+    response = get(url + '/robots.txt', verify=False).text # makes request to robots.txt
     if '<body' not in response: # making sure robots.txt isn't some fancy 404 page
         matches = findall(r'Allow: (.*)|Disallow: (.*)', response) # If you know it, you know it
         if matches:
@@ -243,7 +243,7 @@ def zap(url):
                     storage.add(url) # add the url to storage list for crawling
                     robots.add(url) # add the url to robots list
             print('%s URLs retrieved from robots.txt: %s' % (good, len(robots)))
-    response = get(url + '/sitemap.xml').text # makes request to sitemap.xml
+    response = get(url + '/sitemap.xml',verify=False).text # makes request to sitemap.xml
     if '<body' not in response: # making sure robots.txt isn't some fancy 404 page
         matches = findall(r'<loc>[^<]*</loc>', response) # regex for extracting urls
         if matches: # if there are any matches
