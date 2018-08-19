@@ -24,6 +24,7 @@ Photon extracts the following data while crawling by default:
 - URLs with parameters (`example.com/gallery.php?id=2`)
 - Intel (emails, social media accounts, amazon buckets etc.)
 - Files (pdf, png, xml etc.)
+- Secret keys (auth/API keys & hashes)
 - JavaScript files & Endpoints present in them
 - Strings based on custom regex pattern
 
