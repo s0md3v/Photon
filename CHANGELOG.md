@@ -1,3 +1,7 @@
+#### v1.1.0
+- Added `--keys` option
+- Fixed a bug related to SSL certifcate verfication
+
 #### v1.0.9
 - Code refactor
 - Better identification of external URLs
