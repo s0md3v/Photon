@@ -70,6 +70,7 @@ parser.add_argument('--exclude', help='exclude urls matching this regex', dest='
 # Switches
 parser.add_argument('--dns', help='dump dns data', dest='dns', action='store_true')
 parser.add_argument('--ninja', help='ninja mode', dest='ninja', action='store_true')
+parser.add_argument('--keys', help='find secret keys', dest='api', action='store_true')
 parser.add_argument('--update', help='update photon', dest='update', action='store_true')
 parser.add_argument('--only-urls', help='only extract urls', dest='only_urls', action='store_true')
 args = parser.parse_args()
@@ -119,12 +120,14 @@ else: # if the user hasn't supplied a url
 delay = args.delay or 0  # Delay between requests
 timeout = args.timeout or 6  # HTTP request timeout
 cook = args.cook or None  # Cookie
+api = bool(args.api)  # extract high entropy strings i.e. API keys and stuff
 ninja = bool(args.ninja)  # Ninja mode toggle
 crawl_level = args.level or 2  # Crawling level
 thread_count = args.threads or 2  # Number of threads
 only_urls = bool(args.only_urls)  # only urls mode is off by default
 
 # Variables we are gonna use later to store stuff
+keys = set() # high entropy strings, prolly secret keys
 files = set() # pdf, css, png etc.
 intel = set() # emails, website accounts, aws buckets etc.
 robots = set() # entries of robots.txt
@@ -358,6 +361,10 @@ def extractor(url):
         js_extractor(response)
     if args.regex and not supress_regex:
         regxy(args.regex, response)
+    if api:
+        matches = findall(r'[\w-]{16,45}', response)
+        for match in matches:
+            keys.add(match)
 
 ####
 # This function extracts endpoints from JavaScript Code
@@ -471,8 +478,8 @@ minutes, seconds, time_per_request = timer(diff)
 if not os.path.exists(output_dir): # if the directory doesn't exist
     os.mkdir(output_dir) # create a new directory
 
-datasets = [files, intel, robots, custom, failed, remove_regex(storage, args.exclude), scripts, external, fuzzable, endpoints]
-dataset_names = ['files', 'intel', 'robots', 'custom', 'failed', 'links', 'scripts', 'external', 'fuzzable', 'endpoints']
+datasets = [files, intel, robots, custom, failed, remove_regex(storage, args.exclude), scripts, external, fuzzable, endpoints, keys]
+dataset_names = ['files', 'intel', 'robots', 'custom', 'failed', 'links', 'scripts', 'external', 'fuzzable', 'endpoints', 'keys']
 
 def writer(datasets, dataset_names, output_dir):
     for dataset, dataset_name in zip(datasets, dataset_names):
@@ -488,19 +495,11 @@ def writer(datasets, dataset_names, output_dir):
 
 writer(datasets, dataset_names, output_dir)
 # Printing out results
-print('''%s
-%s URLs: %i
-%s Intel: %i
-%s Files: %i
-%s Endpoints: %i
-%s Fuzzable URLs: %i
-%s Custom strings: %i
-%s JavaScript Files: %i
-%s External References: %i
-%s''' % ((('%s-%s' % (red, end)) * 50), good, len(storage), good,
-len(intel), good, len(files), good, len(endpoints), good, len(fuzzable), good,
-len(custom), good, len(scripts), good, len(external),
-(('%s-%s' % (red, end)) * 50)))
+print (('%s-%s' % (red, end)) * 50)
+for dataset, dataset_name in zip(datasets, dataset_names):
+    if dataset:
+        print ('%s %s: %s' % (good, dataset_name, len(dataset)))
+print (('%s-%s' % (red, end)) * 50)
 
 print('%s Total time taken: %i minutes %i seconds' % (info, minutes, seconds))
 print('%s Average request time: %s seconds' % (info, time_per_request))
@@ -511,8 +510,8 @@ if args.dns:
 
 if args.export:
     datasets = {
-    'files': list(files), 'intel': list(intel), 'robots': list(robots), 'custom': list(custom), 'failed': list(failed),
-    'storage': list(storage), 'scripts': list(scripts), 'external': list(external), 'fuzzable': list(fuzzable), 'endpoints': list(endpoints)
+    'files': list(files), 'intel': list(intel), 'robots': list(robots), 'custom': list(custom), 'failed': list(failed), 'storage': list(storage),
+    'scripts': list(scripts), 'external': list(external), 'fuzzable': list(fuzzable), 'endpoints': list(endpoints), 'keys' : list(keys)
     }
     from plugins.exporter import exporter
     # exporter(directory, format, datasets)
