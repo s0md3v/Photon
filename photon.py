@@ -488,10 +488,12 @@ def writer(datasets, dataset_names, output_dir):
             if python3:
                 with open(filepath, 'w+', encoding='utf8') as f:
                     f.write(str('\n'.join(dataset)))
+                    f.write('\n')
             else:
                 with open(filepath, 'w+') as f:
                     joined = '\n'.join(dataset)
                     f.write(str(joined.encode('utf-8')))
+                    f.write('\n')
 
 writer(datasets, dataset_names, output_dir)
 # Printing out results
