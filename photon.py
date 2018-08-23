@@ -9,6 +9,7 @@ import random
 import warnings
 import argparse
 import threading
+from math import log
 from re import search, findall
 from requests import get, post
 
@@ -81,7 +82,7 @@ args = parser.parse_args()
 
 def update():
     print('%s Checking for updates' % run)
-    changes = '''fixed several major bugs''' # Changes must be seperated by ;
+    changes = '''added option to extract secret keys;several bug fixes''' # Changes must be seperated by ;
     latest_commit = get('https://raw.githubusercontent.com/s0md3v/Photon/master/photon.py').text
 
     if changes not in latest_commit: # just a hack to see if a new version is available
