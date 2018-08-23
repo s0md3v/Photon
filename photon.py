@@ -183,19 +183,16 @@ def requester(url):
         'DNT' : '1',
         'Connection' : 'close'}
         # make request and return response
-        try:
-            response = get(url, cookies=cook, headers=headers, verify=False, timeout=timeout, stream=True)
-            if 'text/html' in response.headers['content-type']:
-                if response.status_code != '404':
-                    return response.text
-                else:
-                    response.close()
-                    failed.add(url)
-                    return 'dummy'
+        response = get(url, cookies=cook, headers=headers, verify=False, timeout=timeout, stream=True)
+        if 'text/html' in response.headers['content-type']:
+            if response.status_code != '404':
+                return response.text
             else:
                 response.close()
+                failed.add(url)
                 return 'dummy'
-        except:
+        else:
+            response.close()
             return 'dummy'
 
     # pixlr.com API
