@@ -375,7 +375,7 @@ def extractor(url):
         matches = findall(r'[\w-]{16,45}', response)
         for match in matches:
             if entropy(match) >= 4:
-                keyss.add(url + ': ' + match)
+                keys.add(url + ': ' + match)
 
 ####
 # This function extracts endpoints from JavaScript Code
