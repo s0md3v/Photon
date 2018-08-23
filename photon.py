@@ -329,6 +329,18 @@ def js_extractor(response):
         bad_scripts.add(match)
 
 ####
+# This function calculates the entropy of a string
+####
+
+def entropy(payload):
+    entropy = 0
+    for number in range(256):
+        result = float(payload.encode('utf-8').count(chr(number)))/len(payload.encode('utf-8'))
+        if result != 0:
+            entropy = entropy - result * log(result, 2)
+    return entropy
+
+####
 # This function extracts stuff from the response body
 ####
 
@@ -361,7 +373,8 @@ def extractor(url):
     if api:
         matches = findall(r'[\w-]{16,45}', response)
         for match in matches:
-            keys.add(match)
+            if entropy(match) >= 4:
+                keyss.add(url + ': ' + match)
 
 ####
 # This function extracts endpoints from JavaScript Code
