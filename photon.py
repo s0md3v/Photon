@@ -290,9 +290,12 @@ def remove_regex(urls, regex):
 def is_link(url):
     # file extension that don't need to be crawled and are files
     conclusion = False # whether the the url should be crawled or not
+    extensions = (
+        '.png', '.jpg', '.jpeg', '.js', '.css', '.pdf', '.ico', '.bmp', '.svg', '.json', '.xml'
+    )
 
     if url not in processed: # if the url hasn't been crawled already
-        if '.png' in url or '.jpg' in url or '.jpeg' in url or '.js' in url or '.css' in url or '.pdf' in url or '.ico' in url or '.bmp' in url or '.svg' in url or '.json' in url or '.xml' in url:
+        if any(e in url for e in extensions):
             files.add(url)
         else:
             return True # url can be crawled
@@ -425,7 +428,17 @@ def flash(function, links): # This shit is NOT complicated, please enjoy
         sys.stdout.flush()
     print('')
 
-then = time.time() # records the time at which crawling started
+####
+# This function makes timer based on current time
+####
+
+def make_timer():
+    start_time = time.time()
+    return lambda: time.time() - start_time
+
+# Step 0. Make a timer
+
+timer = make_timer()
 
 # Step 1. Extract urls from robots.txt & sitemap.xml
 zap(main_url)
@@ -469,12 +482,15 @@ if not only_urls:
             if x != '': # if the value isn't empty
                 intel.add(x)
 
+    intels = (
+        'github.com', 'facebook.com', 'instagram.com', 'youtube.com'
+    )
+
     for url in external:
-        if 'github.com' in url or 'facebook.com' in url or 'instagram.com' in url or 'youtube.com' in url:
+        if any(i in url for i in intels):
             intel.add(url)
 
-now = time.time() # records the time at which crawling stopped
-diff = (now - then) # finds total time taken
+diff = timer() # finds total time taken
 
 def timer(diff):
     minutes, seconds = divmod(diff, 60) # Changes seconds into minutes and seconds
