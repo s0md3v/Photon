@@ -14,6 +14,7 @@ from re import search, findall
 from requests import get, post
 
 try:
+    import concurrent.futures
     from urllib.parse import urlparse # for python3
     python2, python3 = False, True
 except ImportError:
@@ -409,20 +410,28 @@ def threader(function, *urls):
     del threads[:]
 
 ####
-# This function processes the urls and sends them to "threader" function
+# This function processes the urls and uses a threadpool to execute a function
 ####
 
 def flash(function, links): # This shit is NOT complicated, please enjoy
     links = list(links) # convert links (set) to list
-    for begin in range(0, len(links), thread_count): # range with step
-        end = begin + thread_count
-        splitted = links[begin:end]
-        threader(function, splitted)
-        progress = end
-        if progress > len(links): # fix if overflow
-            progress = len(links)
-        sys.stdout.write('\r%s Progress: %i/%i' % (info, progress, len(links)))
-        sys.stdout.flush()
+    if sys.version_info < (3, 2):
+        for begin in range(0, len(links), thread_count): # range with step
+            end = begin + thread_count
+            splitted = links[begin:end]
+            threader(function, splitted)
+            progress = end
+            if progress > len(links): # fix if overflow
+                progress = len(links)
+            sys.stdout.write('\r%s Progress: %i/%i' % (info, progress, len(links)))
+            sys.stdout.flush()
+    else:
+        threadpool = concurrent.futures.ThreadPoolExecutor(max_workers=thread_count)
+        futures = (threadpool.submit(function, link) for link in links)
+        for i, _ in enumerate(concurrent.futures.as_completed(futures)):
+            if i + 1 == len(links) or (i + 1) % thread_count == 0:
+                sys.stdout.write('\r%s Progress: %i/%i' % (info, i, len(links)))
+                sys.stdout.flush()
     print('')
 
 then = time.time() # records the time at which crawling started
