@@ -156,6 +156,8 @@ else:
     except:
         main_url = 'http://' + main_inp
 
+schema = main_url.split('//')[0] # https: or http:?
+
 storage.add(main_url) # adding the root url to storage for crawling
 
 domain_name = urlparse(main_url).netloc # Extracts domain out of the url
@@ -359,7 +361,7 @@ def extractor(url):
                     external.add(link)
             elif link[:2] == '//':
                 if link.split('/')[2].startswith(domain_name):
-                    storage.add(link)
+                    storage.add(schema + link)
                 else:
                     external.add(link)
             elif link[:1] == '/':
