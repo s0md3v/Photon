@@ -1,3 +1,9 @@
+#### v1.1.1
+- Use of `ThreadPoolExecutor` for x2 speed (for python > 3.2)
+- Fixed mishandling of urls starting with `//`
+- Removed a redundant try-except statement
+- Evaluate entropy of found keys to avoid false positives
+
 #### v1.1.0
 - Added `--keys` option
 - Fixed a bug related to SSL certifcate verfication
