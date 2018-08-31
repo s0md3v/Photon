@@ -21,6 +21,12 @@ except ImportError:
     from urlparse import urlparse # for python2
     python2, python3 = True, False
 
+# needed for store_html
+try:
+    from urllib.parse import quote # for python3
+except ImportError:
+    from urllib import quote # for python2
+
 try:
     input = raw_input
 except NameError:
@@ -75,6 +81,7 @@ parser.add_argument('--ninja', help='ninja mode', dest='ninja', action='store_tr
 parser.add_argument('--keys', help='find secret keys', dest='api', action='store_true')
 parser.add_argument('--update', help='update photon', dest='update', action='store_true')
 parser.add_argument('--only-urls', help='only extract urls', dest='only_urls', action='store_true')
+parser.add_argument('--store-html', help='keep html files', dest='store_html', action='store_true')
 args = parser.parse_args()
 
 ####
@@ -127,6 +134,7 @@ ninja = bool(args.ninja)  # Ninja mode toggle
 crawl_level = args.level or 2  # Crawling level
 thread_count = args.threads or 2  # Number of threads
 only_urls = bool(args.only_urls)  # only urls mode is off by default
+store_html = bool(args.store_html) # store html files
 
 # Variables we are gonna use later to store stuff
 keys = set() # high entropy strings, prolly secret keys
@@ -163,6 +171,7 @@ storage.add(main_url) # adding the root url to storage for crawling
 domain_name = urlparse(main_url).netloc # Extracts domain out of the url
 
 output_dir = args.output or domain_name
+output_dir_html = output_dir + "_html" # folder to store html files
 
 ####
 # This function makes requests to webpage and returns response body
@@ -345,11 +354,29 @@ def entropy(payload):
     return entropy
 
 ####
+# this function store the crawled webpage in another folder
+# https://stackoverflow.com/questions/27253530/save-url-as-a-file-name-in-python
+####
+
+def write_html(response, url, filedir='~'):
+    filedir = os.path.expanduser(filedir)
+    filename = quote(url,'')
+    filepath = os.path.join(filedir, filename)
+    with open(filepath, "w") as f:
+        f.write(response)
+        
+####
 # This function extracts stuff from the response body
 ####
 
 def extractor(url):
     response = requester(url) # make request to the url
+    if store_html:
+        # create folder if needed                
+        if not os.path.exists(output_dir_html): # if the directory doesn't exist
+            os.mkdir(output_dir_html) # create a new directory
+        write_html(response, url, output_dir_html)
+
     matches = findall(r'<[aA].*href=["\']{0,1}(.*?)["\']', response)
     for link in matches: # iterate over the matches
         link = link.split('#')[0] # remove everything after a "#" to deal with in-page anchors
@@ -542,3 +569,7 @@ if args.export:
     exporter(output_dir, args.export, datasets)
 
 print('%s Results saved in %s%s%s directory' % (good, green, output_dir, end))
+
+if store_html:
+    print('%s HTML files saved in %s%s%s directory' % (good, green, output_dir_html, end))
+
