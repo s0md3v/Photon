@@ -432,7 +432,7 @@ def flash(function, links): # This shit is NOT complicated, please enjoy
         futures = (threadpool.submit(function, link) for link in links)
         for i, _ in enumerate(concurrent.futures.as_completed(futures)):
             if i + 1 == len(links) or (i + 1) % thread_count == 0:
-                sys.stdout.write('\r%s Progress: %i/%i' % (info, i, len(links)))
+                sys.stdout.write('\r%s Progress: %i/%i' % (info, i + 1, len(links)))
                 sys.stdout.flush()
     print('')
 
