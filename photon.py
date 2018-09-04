@@ -22,6 +22,8 @@ except ImportError:
     from urlparse import urlparse # for python2
     python2, python3 = True, False
 
+from core.config import intels, badTypes
+
 try:
     input = raw_input
 except NameError:
@@ -85,7 +87,7 @@ args = parser.parse_args()
 
 def update():
     print('%s Checking for updates' % run)
-    changes = '''added --wayback option;--dns now saves subdomains into subdomains.txt''' # Changes must be seperated by ;
+    changes = '''added --wayback option;--dns now saves subdomains into subdomains.txt;use /core/config.py for customization''' # Changes must be seperated by ;
     latest_commit = get('https://raw.githubusercontent.com/s0md3v/Photon/master/photon.py').text
 
     if changes not in latest_commit: # just a hack to see if a new version is available
@@ -310,7 +312,7 @@ def is_link(url):
     conclusion = False # whether the the url should be crawled or not
 
     if url not in processed: # if the url hasn't been crawled already
-        if '.png' in url or '.jpg' in url or '.jpeg' in url or '.js' in url or '.css' in url or '.pdf' in url or '.ico' in url or '.bmp' in url or '.svg' in url or '.json' in url or '.xml' in url:
+        if url.split('.')[-1].lower() in badTypes:
             files.add(url)
         else:
             return True # url can be crawled
@@ -496,7 +498,7 @@ if not only_urls:
                 intel.add(x)
 
     for url in external:
-        if 'github.com' in url or 'facebook.com' in url or 'instagram.com' in url or 'youtube.com' in url:
+        if get_fld(url, fix_protocol=True) in intels:
             intel.add(url)
 
 now = time.time() # records the time at which crawling stopped
