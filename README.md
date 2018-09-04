@@ -1,13 +1,31 @@
-![logo](https://image.ibb.co/eRSV3o/photon_github.png)
 
-[![python](https://img.shields.io/badge/Python-2.7--3.6-green.svg?style=style=flat-square)](https://www.python.org/downloads/)   [![pypi](https://img.shields.io/badge/PyPi-@photon-pink.svg?style=style=flat-square)](https://pypi.org/project/photon/)
-[![license](https://img.shields.io/badge/License-GPL_v3-orange.svg?style=style=flat-square)](https://www.gnu.org/licenses/gpl-3.0.en.html) [![version](https://img.shields.io/github/release/s0md3v/Photon.svg)](https://github.com/s0md3v/Photon/blob/master/CHANGELOG.md) ![build](https://img.shields.io/travis/com/s0md3v/Photon.svg) [![closed issues](	https://img.shields.io/github/issues-closed-raw/s0md3v/Photon.svg)](https://github.com/s0md3v/Photon/issues?q=is%3Aissue+is%3Aclosed) [![plugins](https://img.shields.io/badge/Plugins-2-yellow.svg?style=style=flat-square)](https://github.com/s0md3v/Photon/tree/master/plugins) ![awesome](https://cdn.rawgit.com/sindresorhus/awesome/d7305f38d29fed78fa85652e3a63e154dd8e8829/media/badge.svg)
+<h1 align="center">
+  <br>
+  <a href="https://github.com/s0md3v/Photon"><img src="https://image.ibb.co/h5OZAK/photonsmall.png" alt="Photon"></a>
+  <br>
+  Photon
+  <br>
+</h1>
 
-Photon is a lightning fast web crawler which extracts URLs, files, intel & endpoints from a target.
+<h4 align="center">Incredibly fast crawler designed for OSINT.</h4>
 
-160 requests per second while extensive data extraction is just another day for Photon!
+<p align="center">
+  <a href="https://pypi.org/project/photon/">
+    <img src="https://img.shields.io/badge/PyPi-@photon-red.svg?style=style=flat-square"
+         alt="pypi">
+  </a>
+  <a href="https://github.com/s0md3v/Photon/releases">
+    <img src="https://img.shields.io/github/release/s0md3v/Photon.svg">
+  </a>
+  <a href="https://github.com/s0md3v/Photon/issues?q=is%3Aissue+is%3Aclosed">
+      <img src="https://img.shields.io/github/issues-closed-raw/s0md3v/Photon.svg">
+  </a>
+  <a href="https://github.com/s0md3v/Photon/commits/master">
+    <img src="https://img.shields.io/travis/com/s0md3v/Photon.svg">
+  </a>
+</p>
 
-![demo](https://image.ibb.co/fdASuT/Screenshot_2018_07_27_00_55_33.png)
+![demo](https://image.ibb.co/kQSUcz/demo.png)
 
 ### Documentation
 - [Using Photon](https://github.com/s0md3v/Photon/wiki/Usage)
