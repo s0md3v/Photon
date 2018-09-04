@@ -495,10 +495,12 @@ if not only_urls:
         for x in match: # because "match" is a tuple
             if x != '': # if the value isn't empty
                 intel.add(x)
-
-    for url in external:
-        if get_fld(url, fix_protocol=True) in intels:
-            intel.add(url)
+        for url in external:
+            try:
+                if get_fld(url, fix_protocol=True) in intels:
+                    intel.add(url)
+            except:
+                pass
 
 now = time.time() # records the time at which crawling stopped
 diff = (now - then) # finds total time taken
@@ -516,8 +518,8 @@ minutes, seconds, time_per_request = timer(diff)
 if not os.path.exists(output_dir): # if the directory doesn't exist
     os.mkdir(output_dir) # create a new directory
 
-datasets = [files, intel, robots, custom, failed, remove_regex(storage, args.exclude), scripts, external, fuzzable, endpoints, keys]
-dataset_names = ['files', 'intel', 'robots', 'custom', 'failed', 'links', 'scripts', 'external', 'fuzzable', 'endpoints', 'keys']
+datasets = [files, intel, robots, custom, failed, storage, scripts, external, fuzzable, endpoints, keys]
+dataset_names = ['files', 'intel', 'robots', 'custom', 'failed', 'internal', 'scripts', 'external', 'fuzzable', 'endpoints', 'keys']
 
 def writer(datasets, dataset_names, output_dir):
     for dataset, dataset_name in zip(datasets, dataset_names):
@@ -538,11 +540,12 @@ writer(datasets, dataset_names, output_dir)
 print (('%s-%s' % (red, end)) * 50)
 for dataset, dataset_name in zip(datasets, dataset_names):
     if dataset:
-        print ('%s %s: %s' % (good, dataset_name, len(dataset)))
+        print ('%s %s: %s' % (good, dataset_name.capitalize(), len(dataset)))
 print (('%s-%s' % (red, end)) * 50)
 
+print('%s Total requests made: %i' % (info, len(processed)))
 print('%s Total time taken: %i minutes %i seconds' % (info, minutes, seconds))
-print('%s Average request time: %s seconds' % (info, time_per_request))
+print('%s Requests per second: %i' % (info, int(len(processed)/int(diff))))
 
 datasets = {
 'files': list(files), 'intel': list(intel), 'robots': list(robots), 'custom': list(custom), 'failed': list(failed), 'storage': list(storage),
@@ -553,11 +556,11 @@ if args.dns:
     print ('%s Enumerating subdomains' % run)
     from plugins.findSubdomains import findSubdomains
     subdomains = findSubdomains(domain)
-    print ('%s %i subdomains found.' % (info, len(subdomains)))
+    print ('%s %i subdomains found' % (info, len(subdomains)))
     writer([subdomains], ['subdomains'], output_dir)
     datasets['subdomains'] = subdomains
     from plugins.dnsdumpster import dnsdumpster
-    print ('%s Generating DNSmap' % run)
+    print ('%s Generating DNS map' % run)
     dnsdumpster(domain, output_dir)
 
 if args.export:
