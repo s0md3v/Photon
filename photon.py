@@ -38,14 +38,8 @@ else:
     good = '\033[1;32m[+]\033[1;m'
     info = '\033[1;33m[!]\033[1;m'
     que =  '\033[1;34m[?]\033[1;m'
-
-# Just a fancy ass banner
-print ('''%s      ____  __          __            
-     / %s__%s \/ /_  ____  / /_____  ____ 
-    / %s/_/%s / __ \/ %s__%s \/ __/ %s__%s \/ __ \\
-   / ____/ / / / %s/_/%s / /_/ %s/_/%s / / / /
-  /_/   /_/ /_/\____/\__/\____/_/ /_/ %s\n''' %
-  (red, white, red, white, red, white, red, white, red, white, red, white, red, end))
+    
+banner.banner()
 
 warnings.filterwarnings('ignore') # Disable SSL related warnings
 
