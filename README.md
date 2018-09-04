@@ -4,8 +4,6 @@ Photon is a lightning fast web crawler which extracts URLs, files, intel & endpo
 
 160 requests per second while extensive data extraction is just another day for Photon!
 
-![demo](https://image.ibb.co/fdASuT/Screenshot_2018_07_27_00_55_33.png)
-
 ## Main Features
 
 #### Data Extraction
