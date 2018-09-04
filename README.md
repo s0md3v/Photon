@@ -10,12 +10,12 @@
 <h4 align="center">Incredibly fast crawler designed for OSINT.</h4>
 
 <p align="center">
-  <a href="https://pypi.org/project/photon/">
-    <img src="https://img.shields.io/badge/PyPi-@photon-red.svg?style=style=flat-square"
-         alt="pypi">
-  </a>
   <a href="https://github.com/s0md3v/Photon/releases">
     <img src="https://img.shields.io/github/release/s0md3v/Photon.svg">
+  </a>
+  <a href="https://pypi.org/project/photon/">
+    <img src="https://img.shields.io/badge/pypi-@photon-red.svg?style=style=flat-square"
+         alt="pypi">
   </a>
   <a href="https://github.com/s0md3v/Photon/issues?q=is%3Aissue+is%3Aclosed">
       <img src="https://img.shields.io/github/issues-closed-raw/s0md3v/Photon.svg">
@@ -27,16 +27,10 @@
 
 ![demo](https://image.ibb.co/kQSUcz/demo.png)
 
-### Documentation
-- [Using Photon](https://github.com/s0md3v/Photon/wiki/Usage)
-- [Compatibility & Dependencies](https://github.com/s0md3v/Photon/wiki/Compatibility-&-Dependencies)
-
-> Photon is now also available as a [library](https://github.com/s0md3v/Photon/wiki/Photon-Library).
-
-## Main Features
+## Key Features
 
 #### Data Extraction
-Photon extracts the following data while crawling by default:
+Photon can extract the following data while crawling:
 
 - URLs (in-scope & out-of-scope)
 - URLs with parameters (`example.com/gallery.php?id=2`)
@@ -44,16 +38,15 @@ Photon extracts the following data while crawling by default:
 - Files (pdf, png, xml etc.)
 - Secret keys (auth/API keys & hashes)
 - JavaScript files & Endpoints present in them
-- Strings based on custom regex pattern
+- Strings matching custom regex pattern
+- Subdomains & DNS related data
 
 The extracted information is saved in an organized manner.\
-![save demo](https://image.ibb.co/ezTEyd/Screenshot_2018_07_22_12_24_44.png)
+![save demo](https://image.ibb.co/dS1BqK/carbon_2.png)
 
-#### Genius
+#### Feature Rich
 Crawling can be resource intensive but Photon has some tricks up it's sleeves. You can fetch URLs archived by [archive.org](https://archive.org/) to be used as seeds by using `--wayback` option.\
 Liked the idea? The extensive range of [options](https://github.com/s0md3v/Photon/wiki/Usage) provided by Photon lets you crawl the web exactly the way you want.\
-Here's a secret, most of the tools floating on the internet aren't properly multi-threaded even if they are supposed to. They either supply a list of items to threads which results in multiple threads accessing the same item or they simply put a thread lock and end up rendering multi-threading useless.\
-But Photon is different or should I say "genius"? Take a look at [this](https://github.com/s0md3v/Photon/blob/8b58580df1bdfe5f7b96eaf83957d018418ec8ae/photon.py#L357-L381) and decide yourself.
 
 #### Ninja Mode
 In Ninja Mode, 3 online services are used to make requests to the target on your behalf.\
