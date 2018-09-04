@@ -1,3 +1,9 @@
+#### v1.1.2
+- Added `--wayback`
+- Fixed progress bar for python > 3.2 
+- Added `/core/config.py` for easy customization
+- `--dns` now saves subdomains in `subdomains.txt`
+
 #### v1.1.1
 - Use of `ThreadPoolExecutor` for x2 speed (for python > 3.2)
 - Fixed mishandling of urls starting with `//`
