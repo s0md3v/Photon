@@ -10,6 +10,7 @@ import warnings
 import argparse
 import threading
 from math import log
+from tld import get_fld
 from re import search, findall
 from requests import get, post
 
@@ -75,6 +76,7 @@ parser.add_argument('--ninja', help='ninja mode', dest='ninja', action='store_tr
 parser.add_argument('--keys', help='find secret keys', dest='api', action='store_true')
 parser.add_argument('--update', help='update photon', dest='update', action='store_true')
 parser.add_argument('--only-urls', help='only extract urls', dest='only_urls', action='store_true')
+parser.add_argument('--wayback', help='fetch urls from archive.org as seeds', dest='archive', action='store_true')
 args = parser.parse_args()
 
 ####
@@ -160,9 +162,11 @@ schema = main_url.split('//')[0] # https: or http:?
 
 storage.add(main_url) # adding the root url to storage for crawling
 
-domain_name = urlparse(main_url).netloc # Extracts domain out of the url
+host = urlparse(main_url).netloc # Extracts host out of the url
 
-output_dir = args.output or domain_name
+domain = get_fld(host, fix_protocol=True) # Extracts top level domain out of the host
+
+output_dir = args.output or host
 
 ####
 # This function makes requests to webpage and returns response body
@@ -179,7 +183,7 @@ def requester(url):
     time.sleep(delay) # pause/sleep the program for specified time
     def normal(url):
         headers = {
-        'Host' : domain_name, # ummm this is the hostname?
+        'Host' : host, # ummm this is the hostname?
         'User-Agent' : random.choice(user_agents), # selecting a random user-agent
         'Accept' : 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
         'Accept-Language' : 'en-US,en;q=0.5',
@@ -236,6 +240,17 @@ def requester(url):
 ####
 
 def zap(url):
+    if args.archive:
+        from core.verify import verify
+        from plugins.wayback import timeMachine
+        print ('%s Fetching URLs from archive.org' % run)
+        if False:
+            archived_urls = timeMachine(domain, 'domain')
+        else:
+            archived_urls = timeMachine(host, 'host')
+        print ('%s Retrieved %i URLs from archive.org' % (good, len(archived_urls) - 1))
+        for url in archived_urls:
+            storage.add(url)
     response = get(url + '/robots.txt', verify=False).text # makes request to robots.txt
     if '<body' not in response: # making sure robots.txt isn't some fancy 404 page
         matches = findall(r'Allow: (.*)|Disallow: (.*)', response) # If you know it, you know it
@@ -360,7 +375,7 @@ def extractor(url):
                 else:
                     external.add(link)
             elif link[:2] == '//':
-                if link.split('/')[2].startswith(domain_name):
+                if link.split('/')[2].startswith(host):
                     storage.add(schema + link)
                 else:
                     external.add(link)
@@ -530,7 +545,7 @@ print('%s Average request time: %s seconds' % (info, time_per_request))
 
 if args.dns:
     from plugins.dnsdumpster import dnsdumpster
-    dnsdumpster(domain_name, output_dir, colors)
+    dnsdumpster(domain, output_dir, colors)
 
 if args.export:
     datasets = {
