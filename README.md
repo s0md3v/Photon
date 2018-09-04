@@ -17,9 +17,6 @@ Photon is a lightning fast web crawler which extracts URLs, files, intel & endpo
 
 ## Main Features
 
-The extensive range of [options](https://github.com/s0md3v/Photon/wiki/Usage) provided by Photon lets you crawl the web exactly the way you want, which is a cool thing on its own.
-However, the features of Photon that make it awesome are follows:
-
 #### Data Extraction
 Photon extracts the following data while crawling by default:
 
@@ -34,7 +31,9 @@ Photon extracts the following data while crawling by default:
 The extracted information is saved in an organized manner.\
 ![save demo](https://image.ibb.co/ezTEyd/Screenshot_2018_07_22_12_24_44.png)
 
-#### Intelligent Multithreading
+#### Genius
+Crawling can be resource intensive but Photon has some tricks up it's sleeves. You can fetch URLs archived by [archive.org](https://archive.org/) to be used as seeds by using `--wayback` option.\
+Liked the idea? The extensive range of [options](https://github.com/s0md3v/Photon/wiki/Usage) provided by Photon lets you crawl the web exactly the way you want.\
 Here's a secret, most of the tools floating on the internet aren't properly multi-threaded even if they are supposed to. They either supply a list of items to threads which results in multiple threads accessing the same item or they simply put a thread lock and end up rendering multi-threading useless.\
 But Photon is different or should I say "genius"? Take a look at [this](https://github.com/s0md3v/Photon/blob/8b58580df1bdfe5f7b96eaf83957d018418ec8ae/photon.py#L357-L381) and decide yourself.
 
