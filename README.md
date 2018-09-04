@@ -1,24 +1,45 @@
-![logo](https://image.ibb.co/eRSV3o/photon_github.png)
 
-[![python](https://img.shields.io/badge/Python-2.7--3.6-green.svg?style=style=flat-square)](https://www.python.org/downloads/)   [![pypi](https://img.shields.io/badge/PyPi-@photon-pink.svg?style=style=flat-square)](https://pypi.org/project/photon/)
-[![license](https://img.shields.io/badge/License-GPL_v3-orange.svg?style=style=flat-square)](https://www.gnu.org/licenses/gpl-3.0.en.html) [![version](https://img.shields.io/github/release/s0md3v/Photon.svg)](https://github.com/s0md3v/Photon/blob/master/CHANGELOG.md) ![build](https://img.shields.io/travis/com/s0md3v/Photon.svg) [![closed issues](	https://img.shields.io/github/issues-closed-raw/s0md3v/Photon.svg)](https://github.com/s0md3v/Photon/issues?q=is%3Aissue+is%3Aclosed) [![plugins](https://img.shields.io/badge/Plugins-2-yellow.svg?style=style=flat-square)](https://github.com/s0md3v/Photon/tree/master/plugins) ![awesome](https://cdn.rawgit.com/sindresorhus/awesome/d7305f38d29fed78fa85652e3a63e154dd8e8829/media/badge.svg)
+<h1 align="center">
+  <br>
+  <a href="https://github.com/s0md3v/Photon"><img src="https://image.ibb.co/h5OZAK/photonsmall.png" alt="Photon"></a>
+  <br>
+  Photon
+  <br>
+</h1>
 
-Photon is a lightning fast web crawler which extracts URLs, files, intel & endpoints from a target.
+<h4 align="center">Incredibly fast crawler designed for OSINT.</h4>
 
-160 requests per second while extensive data extraction is just another day for Photon!
+<p align="center">
+  <a href="https://github.com/s0md3v/Photon/releases">
+    <img src="https://img.shields.io/github/release/s0md3v/Photon.svg">
+  </a>
+  <a href="https://pypi.org/project/photon/">
+    <img src="https://img.shields.io/badge/pypi-@photon-red.svg?style=style=flat-square"
+         alt="pypi">
+  </a>
+  <a href="https://github.com/s0md3v/Photon/issues?q=is%3Aissue+is%3Aclosed">
+      <img src="https://img.shields.io/github/issues-closed-raw/s0md3v/Photon.svg">
+  </a>
+  <a href="https://github.com/s0md3v/Photon/commits/master">
+    <img src="https://img.shields.io/travis/com/s0md3v/Photon.svg">
+  </a>
+</p>
 
-![demo](https://image.ibb.co/fdASuT/Screenshot_2018_07_27_00_55_33.png)
+![demo](https://image.ibb.co/kQSUcz/demo.png)
 
-### Documentation
-- [Using Photon](https://github.com/s0md3v/Photon/wiki/Usage)
-- [Compatibility & Dependencies](https://github.com/s0md3v/Photon/wiki/Compatibility-&-Dependencies)
+<p align="center">
+  <a href="https://github.com/s0md3v/Photon/wiki">Photon Wiki</a> •
+  <a href="https://github.com/s0md3v/Photon/wiki/Usage">How To Use</a> •
+  <a href="https://github.com/s0md3v/Photon/wiki/Compatibility-&-Dependencies">Compatibility</a> •
+  <a href="https://github.com/s0md3v/Photon/wiki/Photon-Library">Photon Library</a> •
+  <a href="#contribution--license">Contribution</a> •
+  <a href="https://github.com/s0md3v/Photon/projects/1">Roadmap</a>
+</p>
 
-> Photon is now also available as a [library](https://github.com/s0md3v/Photon/wiki/Photon-Library).
-
-## Main Features
+### Key Features
 
 #### Data Extraction
-Photon extracts the following data while crawling by default:
+Photon can extract the following data while crawling:
 
 - URLs (in-scope & out-of-scope)
 - URLs with parameters (`example.com/gallery.php?id=2`)
@@ -26,43 +47,31 @@ Photon extracts the following data while crawling by default:
 - Files (pdf, png, xml etc.)
 - Secret keys (auth/API keys & hashes)
 - JavaScript files & Endpoints present in them
-- Strings based on custom regex pattern
+- Strings matching custom regex pattern
+- Subdomains & DNS related data
 
-The extracted information is saved in an organized manner.\
-![save demo](https://image.ibb.co/ezTEyd/Screenshot_2018_07_22_12_24_44.png)
+The extracted information is saved in an organized manner or can be [exported as json](https://github.com/s0md3v/Photon/wiki/Usage#export-formatted-result).\
+![save demo](https://image.ibb.co/dS1BqK/carbon_2.png)
+
+#### Flexible
+Control timeout, delay, add seeds, exclude URLs matching a regex pattern and other cool stuff.
+The extensive range of [options](https://github.com/s0md3v/Photon/wiki/Usage) provided by Photon lets you crawl the web exactly the way you want.\
 
 #### Genius
-Crawling can be resource intensive but Photon has some tricks up it's sleeves. You can fetch URLs archived by [archive.org](https://archive.org/) to be used as seeds by using `--wayback` option.\
-Liked the idea? The extensive range of [options](https://github.com/s0md3v/Photon/wiki/Usage) provided by Photon lets you crawl the web exactly the way you want.\
-Here's a secret, most of the tools floating on the internet aren't properly multi-threaded even if they are supposed to. They either supply a list of items to threads which results in multiple threads accessing the same item or they simply put a thread lock and end up rendering multi-threading useless.\
-But Photon is different or should I say "genius"? Take a look at [this](https://github.com/s0md3v/Photon/blob/8b58580df1bdfe5f7b96eaf83957d018418ec8ae/photon.py#L357-L381) and decide yourself.
-
-#### Ninja Mode
-In Ninja Mode, 3 online services are used to make requests to the target on your behalf.\
-So basically, now you have 4 clients making requests to the same server simultaneously which gives you a speed boost if you have a slow connection, minimizes the risk of connection reset as well as delays requests from a single client.\
-Here's a comparison generated by [Quark](https://github.com/s0md3v/Quark) where the lines represent threads:
-
-![ninja demo](https://image.ibb.co/jJSDg8/ninja.png)
+Photon's smart thread management & refined logic gives you top notch performance.\
+Still, crawling can be resource intensive but Photon has some tricks up it's sleeves. You can fetch URLs archived by [archive.org](https://archive.org/) to be used as seeds by using `--wayback` option.\
+In Ninja Mode which can be accessed by `--ninja`, 3 online services are used to make requests to the target on your behalf.\
+So basically, now you have 4 clients making requests to the same server simultaneously which gives you a speed boost if you have a slow connection, minimizes the risk of connection reset as well as delays requests from a single client.
 
 #### Plugins
-Photon's capabilites can be further extended by using plugins.
+- **[wayback](https://github.com/s0md3v/Photon/wiki/Usage#use-urls-from-archiveorg-as-seeds)**
+- **[dnsdumpster](https://github.com/s0md3v/Photon/wiki/Usage#dumping-dns-data)**
+- **[Exporter](https://github.com/s0md3v/Photon/wiki/Usage#export-formatted-result)**
 
-Available plugins:
+#### Frequent & Seamless Updates
+Photon is under heavy development and updates for fixing bugs. optimizing performance & new features are being rolled regularly.
 
-- **[wayback](https://github.com/s0md3v/Photon/wiki/Usage#use-urls-from-archiveorg-as-seeds)**: Fetches URLs crawled by archive.org to use as seeds.
-- **[dnsdumpster](https://github.com/s0md3v/Photon/wiki/Usage#dumping-dns-data)**: Generates an image containing the DNS data of the target domain.
-- **[Exporter](https://github.com/s0md3v/Photon/wiki/Usage#export-formatted-result)**: Plugin to export results in JSON, support for more formats is being worked on.
-
-Plugins in active development:
-
-- **Quark**: A plugin to plot a graph making it easier to inspect relationships between different webpages using [Quark](https://github.com/s0md3v/Quark).
-- **XSStrike**: Modular & *targeted* version of [XSStrike](https://github.com/s0md3v/XSStrike) to be used with Photon.
-- **FindSubdomains**: Plugin to find subdomains.
-
-#### Frequent & Seemless Updates
-The project is under heavy development and updates for fixing bugs. optimizing performance & new features are being rolled everyday.
-
-If you would like to see features and issues that are being worked on, you can do that on [Development]() project board.
+If you would like to see features and issues that are being worked on, you can do that on [Development](https://github.com/s0md3v/Photon/projects/1) project board.
 
 Updates can be installed & checked for with the `--update` option. Photon has seamless update capabilities which means you can update Photon without losing any of your saved data.
 
