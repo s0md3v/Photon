@@ -243,7 +243,6 @@ def requester(url):
 
 def zap(url):
     if args.archive:
-        from core.verify import verify
         from plugins.wayback import timeMachine
         print ('%s Fetching URLs from archive.org' % run)
         if False:
