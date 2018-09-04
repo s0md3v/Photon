@@ -27,6 +27,15 @@
 
 ![demo](https://image.ibb.co/kQSUcz/demo.png)
 
+<p align="center">
+  <a href="#key-features">Key Features</a> •
+  <a href="https://github.com/s0md3v/Photon/wiki/Usage">How To Use</a> •
+  <a href="https://github.com/s0md3v/Photon/wiki/Compatibility-&-Dependencies">Compatibility</a> •
+  <a href="https://github.com/s0md3v/Photon/wiki/Photon-Library">Photon Library</a> •
+  <a href="#contribution--license">Contribution</a> •
+  <a href="https://github.com/s0md3v/Photon/projects/1">Roadmap</a>
+</p>
+
 ## Key Features
 
 #### Data Extraction
