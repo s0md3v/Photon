@@ -244,7 +244,7 @@ def zap(url):
         from core.verify import verify
         from plugins.wayback import timeMachine
         print ('%s Fetching URLs from archive.org' % run)
-        if True:
+        if False:
             archived_urls = timeMachine(domain, 'domain')
         else:
             archived_urls = timeMachine(host, 'host')
