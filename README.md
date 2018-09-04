@@ -49,6 +49,7 @@ Photon's capabilites can be further extended by using plugins.
 
 Available plugins:
 
+- **[wayback](https://github.com/s0md3v/Photon/wiki/Usage#use-urls-from-archiveorg-as-seeds)**: Fetches URLs crawled by archive.org to use as seeds.
 - **[dnsdumpster](https://github.com/s0md3v/Photon/wiki/Usage#dumping-dns-data)**: Generates an image containing the DNS data of the target domain.
 - **[Exporter](https://github.com/s0md3v/Photon/wiki/Usage#export-formatted-result)**: Plugin to export results in JSON, support for more formats is being worked on.
 
@@ -56,7 +57,7 @@ Plugins in active development:
 
 - **Quark**: A plugin to plot a graph making it easier to inspect relationships between different webpages using [Quark](https://github.com/s0md3v/Quark).
 - **XSStrike**: Modular & *targeted* version of [XSStrike](https://github.com/s0md3v/XSStrike) to be used with Photon.
-- **dnsdumpster**: A new version of the plugin is in development which will save the DNS data in a nicely formatted HTML file.
+- **FindSubdomains**: Plugin to find subdomains.
 
 #### Frequent & Seemless Updates
 The project is under heavy development and updates for fixing bugs. optimizing performance & new features are being rolled everyday.
