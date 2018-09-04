@@ -1,12 +1,7 @@
 import re
 import requests
 
-def dnsdumpster(domain, output_dir, colors):
-    if colors:
-        run = '\033[1;97m[~]\033[1;m'
-    else:
-        run = ''
-    print ('%s Retrieving DNS related data' % run)
+def dnsdumpster(domain, output_dir):
     response = requests.Session().get('https://dnsdumpster.com/').text
     csrf_token = re.search(r"name='csrfmiddlewaretoken' value='(.*?)'", response).group(1)
 
@@ -19,5 +14,3 @@ def dnsdumpster(domain, output_dir, colors):
     if image.status_code == 200:
         with open('%s/%s.png' % (output_dir, domain), 'wb') as f:
             f.write(image.content)
-    else:
-        print ('%s Failed to retrieve DNS image' % run)
