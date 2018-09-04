@@ -71,7 +71,7 @@ parser.add_argument('-t', '--threads', help='number of threads', dest='threads',
 parser.add_argument('-d', '--delay', help='delay between requests', dest='delay', type=float)
 parser.add_argument('--exclude', help='exclude urls matching this regex', dest='exclude', type=str)
 # Switches
-parser.add_argument('--dns', help='dump dns data', dest='dns', action='store_true')
+parser.add_argument('--dns', help='enumerate subdomains & dns data', dest='dns', action='store_true')
 parser.add_argument('--ninja', help='ninja mode', dest='ninja', action='store_true')
 parser.add_argument('--keys', help='find secret keys', dest='api', action='store_true')
 parser.add_argument('--update', help='update photon', dest='update', action='store_true')
@@ -85,7 +85,7 @@ args = parser.parse_args()
 
 def update():
     print('%s Checking for updates' % run)
-    changes = '''x2 faster for python > 3.2;reduced false positives in secret keys;bug fixes''' # Changes must be seperated by ;
+    changes = '''added --wayback option;--dns now saves subdomains into subdomains.txt''' # Changes must be seperated by ;
     latest_commit = get('https://raw.githubusercontent.com/s0md3v/Photon/master/photon.py').text
 
     if changes not in latest_commit: # just a hack to see if a new version is available
@@ -543,15 +543,23 @@ print (('%s-%s' % (red, end)) * 50)
 print('%s Total time taken: %i minutes %i seconds' % (info, minutes, seconds))
 print('%s Average request time: %s seconds' % (info, time_per_request))
 
+datasets = {
+'files': list(files), 'intel': list(intel), 'robots': list(robots), 'custom': list(custom), 'failed': list(failed), 'storage': list(storage),
+'scripts': list(scripts), 'external': list(external), 'fuzzable': list(fuzzable), 'endpoints': list(endpoints), 'keys' : list(keys)
+}
+
 if args.dns:
+    print ('%s Enumerating subdomains' % run)
+    from plugins.findSubdomains import findSubdomains
+    subdomains = findSubdomains(domain)
+    print ('%s %i subdomains found.' % (info, len(subdomains)))
+    writer([subdomains], ['subdomains'], output_dir)
+    datasets['subdomains'] = subdomains
     from plugins.dnsdumpster import dnsdumpster
-    dnsdumpster(domain, output_dir, colors)
+    print ('%s Generating DNSmap' % run)
+    dnsdumpster(domain, output_dir)
 
 if args.export:
-    datasets = {
-    'files': list(files), 'intel': list(intel), 'robots': list(robots), 'custom': list(custom), 'failed': list(failed), 'storage': list(storage),
-    'scripts': list(scripts), 'external': list(external), 'fuzzable': list(fuzzable), 'endpoints': list(endpoints), 'keys' : list(keys)
-    }
     from plugins.exporter import exporter
     # exporter(directory, format, datasets)
     exporter(output_dir, args.export, datasets)
