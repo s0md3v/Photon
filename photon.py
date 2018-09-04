@@ -545,7 +545,7 @@ print (('%s-%s' % (red, end)) * 50)
 
 print('%s Total requests made: %i' % (info, len(processed)))
 print('%s Total time taken: %i minutes %i seconds' % (info, minutes, seconds))
-print('%s Requests per second: %i' % (info, int(len(processed)/int(diff))))
+print('%s Requests per second: %i' % (info, int(len(processed)/diff)))
 
 datasets = {
 'files': list(files), 'intel': list(intel), 'robots': list(robots), 'custom': list(custom), 'failed': list(failed), 'storage': list(storage),
