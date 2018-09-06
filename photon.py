@@ -1,16 +1,18 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+from __future__ import print_function
+
 # Let's import what we need
 import os
 import sys
+import tld
 import time
 import random
 import warnings
 import argparse
 import threading
 from math import log
-from tld import get_fld
 from re import search, findall
 from requests import get, post
 
@@ -65,13 +67,16 @@ parser.add_argument('-c', '--cookie', help='cookie', dest='cook')
 parser.add_argument('-r', '--regex', help='regex pattern', dest='regex')
 parser.add_argument('-e', '--export', help='export format', dest='export')
 parser.add_argument('-o', '--output', help='output directory', dest='output')
-parser.add_argument('-s', '--seeds', help='additional seed urls', dest='seeds', nargs="+", default=[])
-parser.add_argument('--user-agent', help='custom user agent(s)', dest='user_agent')
 parser.add_argument('-l', '--level', help='levels to crawl', dest='level', type=int)
-parser.add_argument('--timeout', help='http request timeout', dest='timeout', type=float)
 parser.add_argument('-t', '--threads', help='number of threads', dest='threads', type=int)
 parser.add_argument('-d', '--delay', help='delay between requests', dest='delay', type=float)
-parser.add_argument('--exclude', help='exclude urls matching this regex', dest='exclude', type=str)
+parser.add_argument('-s', '--seeds', help='additional seed urls', dest='seeds', nargs="+", default=[])
+
+parser.add_argument('--stdout', help='send variables to stdout', dest='std')
+parser.add_argument('--user-agent', help='custom user agent(s)', dest='user_agent')
+parser.add_argument('--exclude', help='exclude urls matching this regex', dest='exclude')
+parser.add_argument('--timeout', help='http request timeout', dest='timeout', type=float)
+
 # Switches
 parser.add_argument('--dns', help='enumerate subdomains & dns data', dest='dns', action='store_true')
 parser.add_argument('--ninja', help='ninja mode', dest='ninja', action='store_true')
@@ -87,7 +92,7 @@ args = parser.parse_args()
 
 def update():
     print('%s Checking for updates' % run)
-    changes = '''added --wayback option;--dns now saves subdomains into subdomains.txt;use /core/config.py for customization''' # Changes must be seperated by ;
+    changes = '''bug fixes;minor refactor;added --stdout option''' # Changes must be seperated by ;
     latest_commit = get('https://raw.githubusercontent.com/s0md3v/Photon/master/photon.py').text
 
     if changes not in latest_commit: # just a hack to see if a new version is available
@@ -144,7 +149,7 @@ external = set() # urls that don't belong to the target i.e. out-of-scope
 fuzzable = set() # urls that have get params in them e.g. example.com/page.php?id=2
 endpoints = set() # urls found from javascript files
 processed = set() # urls that have been crawled
-storage = set([s for s in args.seeds]) # urls that belong to the target i.e. in-scope
+internal = set([s for s in args.seeds]) # urls that belong to the target i.e. in-scope
 
 everything = []
 bad_intel = set() # unclean intel urls
@@ -162,13 +167,24 @@ else:
 
 schema = main_url.split('//')[0] # https: or http:?
 
-storage.add(main_url) # adding the root url to storage for crawling
+internal.add(main_url) # adding the root url to internal for crawling
 
 host = urlparse(main_url).netloc # Extracts host out of the url
 
-domain = get_fld(host, fix_protocol=True) # Extracts top level domain out of the host
-
 output_dir = args.output or host
+
+####
+# This function extracts top level domain from a url
+####
+
+def topLevel(url):
+    try:
+        toplevel = tld.get_fld(host, fix_protocol=True)
+    except tld.exceptions.TldDomainNotFound:
+        toplevel = urlparse(main_url).netloc
+    return toplevel
+
+domain = topLevel(main_url)
 
 ####
 # This function makes requests to webpage and returns response body
@@ -238,6 +254,13 @@ def requester(url):
         return normal(url)
 
 ####
+# This function extracts links from .xml files
+####
+
+def xmlParser(response):
+    return findall(r'<loc>(.*?)</loc>', response) # regex for extracting urls
+
+####
 # This function extracts links from robots.txt and sitemap.xml
 ####
 
@@ -251,7 +274,7 @@ def zap(url):
             archived_urls = timeMachine(host, 'host')
         print ('%s Retrieved %i URLs from archive.org' % (good, len(archived_urls) - 1))
         for url in archived_urls:
-            storage.add(url)
+            internal.add(url)
     response = get(url + '/robots.txt', verify=False).text # makes request to robots.txt
     if '<body' not in response: # making sure robots.txt isn't some fancy 404 page
         matches = findall(r'Allow: (.*)|Disallow: (.*)', response) # If you know it, you know it
@@ -260,16 +283,16 @@ def zap(url):
                 match = ''.join(match) # one item in match will always be empty so will combine both items
                 if '*' not in match: # if the url doesn't use a wildcard
                     url = main_url + match
-                    storage.add(url) # add the url to storage list for crawling
+                    internal.add(url) # add the url to internal list for crawling
                     robots.add(url) # add the url to robots list
             print('%s URLs retrieved from robots.txt: %s' % (good, len(robots)))
-    response = get(url + '/sitemap.xml',verify=False).text # makes request to sitemap.xml
+    response = get(url + '/sitemap.xml', verify=False).text # makes request to sitemap.xml
     if '<body' not in response: # making sure robots.txt isn't some fancy 404 page
-        matches = findall(r'<loc>[^<]*</loc>', response) # regex for extracting urls
+        matches = xmlParser(response)
         if matches: # if there are any matches
             print('%s URLs retrieved from sitemap.xml: %s' % (good, len(matches)))
             for match in matches:
-                storage.add(match.split('<loc>')[1][:-6]) #cleaning up the url & adding it to the storage list for crawling
+                internal.add(match) #cleaning up the url & adding it to the internal list for crawling
 
 ####
 # This functions checks whether a url matches a regular expression
@@ -372,18 +395,18 @@ def extractor(url):
         if is_link(link): # checks if the urls should be crawled
             if link[:4] == 'http':
                 if link.startswith(main_url):
-                    storage.add(link)
+                    internal.add(link)
                 else:
                     external.add(link)
             elif link[:2] == '//':
                 if link.split('/')[2].startswith(host):
-                    storage.add(schema + link)
+                    internal.add(schema + link)
                 else:
                     external.add(link)
             elif link[:1] == '/':
-                storage.add(main_url + link)
+                internal.add(main_url + link)
             else:
-                storage.add(main_url + '/' + link)
+                internal.add(main_url + '/' + link)
 
     if not only_urls:
         intel_extractor(response)
@@ -441,15 +464,13 @@ def flash(function, links): # This shit is NOT complicated, please enjoy
             progress = end
             if progress > len(links): # fix if overflow
                 progress = len(links)
-            sys.stdout.write('\r%s Progress: %i/%i' % (info, progress, len(links)))
-            sys.stdout.flush()
+            print('\r%s Progress: %i/%i' % (info, progress, len(links)), end='\r')
     else:
         threadpool = concurrent.futures.ThreadPoolExecutor(max_workers=thread_count)
         futures = (threadpool.submit(function, link) for link in links)
         for i, _ in enumerate(concurrent.futures.as_completed(futures)):
             if i + 1 == len(links) or (i + 1) % thread_count == 0:
-                sys.stdout.write('\r%s Progress: %i/%i' % (info, i + 1, len(links)))
-                sys.stdout.flush()
+                print('%s Progress: %i/%i' % (info, i + 1, len(links)), end='\r')
     print('')
 
 then = time.time() # records the time at which crawling started
@@ -458,15 +479,15 @@ then = time.time() # records the time at which crawling started
 zap(main_url)
 
 # this is so the level 1 emails are parsed as well
-storage = set(remove_regex(storage, args.exclude))
+internal = set(remove_regex(internal, args.exclude))
 
 # Step 2. Crawl recursively to the limit specified in "crawl_level"
 for level in range(crawl_level):
-    links = remove_regex(storage - processed, args.exclude) # links to crawl = all links - already crawled links
+    links = remove_regex(internal - processed, args.exclude) # links to crawl = (all links - already crawled links) - links not to crawl
     if not links: # if links to crawl are 0 i.e. all links have been crawled
         break
-    elif len(storage) <= len(processed): # if crawled links are somehow more than all links. Possible? ;/
-        if len(storage) > 2 + len(args.seeds): # if you know it, you know it
+    elif len(internal) <= len(processed): # if crawled links are somehow more than all links. Possible? ;/
+        if len(internal) > 2 + len(args.seeds): # if you know it, you know it
             break
     print('%s Level %i: %i URLs' % (run, level + 1, len(links)))
     try:
@@ -487,7 +508,7 @@ if not only_urls:
     print('%s Crawling %i JavaScript files' % (run, len(scripts)))
     flash(jscanner, scripts)
 
-    for url in storage:
+    for url in internal:
         if '=' in url:
             fuzzable.add(url)
 
@@ -497,7 +518,7 @@ if not only_urls:
                 intel.add(x)
         for url in external:
             try:
-                if get_fld(url, fix_protocol=True) in intels:
+                if tld.get_fld(url, fix_protocol=True) in intels:
                     intel.add(url)
             except:
                 pass
@@ -518,7 +539,7 @@ minutes, seconds, time_per_request = timer(diff)
 if not os.path.exists(output_dir): # if the directory doesn't exist
     os.mkdir(output_dir) # create a new directory
 
-datasets = [files, intel, robots, custom, failed, storage, scripts, external, fuzzable, endpoints, keys]
+datasets = [files, intel, robots, custom, failed, internal, scripts, external, fuzzable, endpoints, keys]
 dataset_names = ['files', 'intel', 'robots', 'custom', 'failed', 'internal', 'scripts', 'external', 'fuzzable', 'endpoints', 'keys']
 
 def writer(datasets, dataset_names, output_dir):
@@ -548,7 +569,7 @@ print('%s Total time taken: %i minutes %i seconds' % (info, minutes, seconds))
 print('%s Requests per second: %i' % (info, int(len(processed)/diff)))
 
 datasets = {
-'files': list(files), 'intel': list(intel), 'robots': list(robots), 'custom': list(custom), 'failed': list(failed), 'storage': list(storage),
+'files': list(files), 'intel': list(intel), 'robots': list(robots), 'custom': list(custom), 'failed': list(failed), 'internal': list(internal),
 'scripts': list(scripts), 'external': list(external), 'fuzzable': list(fuzzable), 'endpoints': list(endpoints), 'keys' : list(keys)
 }
 
@@ -569,3 +590,7 @@ if args.export:
     exporter(output_dir, args.export, datasets)
 
 print('%s Results saved in %s%s%s directory' % (good, green, output_dir, end))
+
+if args.std:
+    for string in datasets[args.std]:
+        sys.stdout.write(string + '\n')
