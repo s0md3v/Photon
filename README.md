@@ -20,7 +20,7 @@
   <a href="https://github.com/s0md3v/Photon/issues?q=is%3Aissue+is%3Aclosed">
       <img src="https://img.shields.io/github/issues-closed-raw/s0md3v/Photon.svg">
   </a>
-  <a href="https://github.com/s0md3v/Photon/commits/master">
+  <a href="https://travis-ci.com/s0md3v/Photon">
     <img src="https://img.shields.io/travis/com/s0md3v/Photon.svg">
   </a>
 </p>
