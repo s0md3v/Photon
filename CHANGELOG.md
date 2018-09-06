@@ -1,3 +1,9 @@
+#### v1.1.3
+- Added `--stdout` option
+- Fixed a bug in `zap()` function
+- Fixed crashing when target is an IP address
+- Minor refactor
+
 #### v1.1.2
 - Added `--wayback`
 - Fixed progress bar for python > 3.2 
