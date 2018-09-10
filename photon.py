@@ -221,6 +221,10 @@ def requester(url):
             response.close()
             return 'dummy'
 
+    # developer.facebook.com API
+    def facebook(url):
+        return get('https://developers.facebook.com/tools/debug/echo/?q=' + url, verify=False).text
+
     # pixlr.com API
     def pixlr(url):
         if url == main_url:
@@ -248,7 +252,7 @@ def requester(url):
 
     if ninja: # if the ninja mode is enabled
         # select a random request function i.e. random API
-        response = random.choice([photopea, normal, pixlr, code_beautify])(url)
+        response = random.choice([photopea, normal, facebook, pixlr, code_beautify])(url)
         return response or 'dummy'
     else:
         return normal(url)
