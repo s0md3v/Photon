@@ -38,17 +38,17 @@ if machine.lower().startswith(('os', 'win', 'darwin', 'ios')):
 if not colors:
     end = red = white = green = yellow = run = bad = good = info = que = ''
 else:
-    end = '\033[0m'
-    red = '\033[91m'
-    bold = '\033[1m'
-    white = '\033[1;97m'
-    green = '\033[1;32m'
-    yellow = '\033[1;33m'
-    run = '\033[1;97m[~]'+end
-    bad = '\033[1;31m[-]'+end
-    good = '\033[1;32m[+]'+end
-    info = '\033[1;33m[!]'+end
-    que = '\033[1;34m[?]'+end
+    end = '\033[0m'             # finish color
+    red = '\033[91m'            # red color
+    bold = '\033[1m'            # make text bold
+    white = '\033[1;97m'        # gray color
+    green = '\033[1;32m'        # green color
+    yellow = '\033[1;33m'       # yellow color
+    run = '\033[1;97m[*]'+end   # processing ...
+    bad = '\033[1;31m[-]'+end   # error or warning
+    good = '\033[1;32m[+]'+end  # good news
+    info = '\033[1;33m[!]'+end  # some info
+    que = '\033[1;34m[?]'+end   # user input
 
 # Just a fancy ass banner
 print('''%s      ____  __          __
@@ -211,6 +211,7 @@ def requester(url):
     processed.add(url) # mark the url as crawled
     time.sleep(delay) # pause/sleep the program for specified time
     def normal(url):
+        # set headers for request
         headers = {
         'Host' : host, # ummm this is the hostname?
         'User-Agent' : random.choice(user_agents), # selecting a random user-agent
@@ -241,6 +242,7 @@ def requester(url):
 
     # codebeautify.org API
     def code_beautify(url):
+        # set headers and get request done
         headers = {
         'User-Agent' : 'Mozilla/5.0 (X11; Linux x86_64; rv:61.0) Gecko/20100101 Firefox/61.0',
         'Accept' : 'text/plain, */*; q=0.01',
@@ -379,6 +381,7 @@ def intel_extractor(response):
         for match in matches: # iterate over the matches
         	verb('Bad Intel',match)
         	bad_intel.add(match) # add it to intel list
+
 ####
 # This function extracts js files from the response body
 ####
@@ -386,8 +389,13 @@ def intel_extractor(response):
 def js_extractor(response):
     matches = findall(r'src=[\'"](.*?\.js)["\']', response) # extract .js files
     for match in matches: # iterate over the matches
-    	verb('Bad JS Script', match)
-    	bad_scripts.add(match)
+        if match.startswith('/'): # scripts which start with '/' aren't bad js (got to know this after running with the -v option)
+            js_script = main_url + match # add to main url
+            verb('JS Script', js_script)
+            scripts.add(js_script) # add them to scripts list
+        else: # else they might be bad scripts
+        	verb('Bad JS Script', match)
+        	bad_scripts.add(match) # add to bad intel scripts
 
 ####
 # This function calculates the entropy of a string to find whether its a key or not
@@ -411,21 +419,21 @@ def extractor(url):
     for link in matches: # iterate over the matches
         link = link.split('#')[0] # remove everything after a "#" to deal with in-page anchors
         if is_link(link): # checks if the urls should be crawled
-            if link[:4] == 'http':
+            if link[:4] == 'http': # if url starts with 'http'
                 if link.startswith(main_url):
                 	verb('Internal Link', link)
-                	internal.add(link)
+                	internal.add(link) # add to main interanl list
                 else:
                 	verb('External Link', link)
                 	external.add(link)
-            elif link[:2] == '//':
+            elif link[:2] == '//': # if link startswith '//'
                 if link.split('/')[2].startswith(host):
                 	verb('Internal Link', schema + link)
                 	internal.add(schema + link)
                 else:
                 	verb('External Link', link)
                 	external.add(link)
-            elif link[:1] == '/':
+            elif link[:1] == '/': # if url starts with '/' (eg. /images/img.png)
             	verb('Internal Link', main_url + link)
             	internal.add(main_url + link)
             else:
@@ -435,12 +443,12 @@ def extractor(url):
     if not only_urls:
         intel_extractor(response)
         js_extractor(response)
-    if args.regex and not supress_regex:
+    if args.regex and not supress_regex: # check whether regex is not banned
         regxy(args.regex, response)
     if api:
-        matches = findall(r'[\w-]{16,45}', response)
+        matches = findall(r'[\w-]{16,45}', response) # regex for finding keys
         for match in matches:
-            if entropy(match) >= 4:
+            if entropy(match) >= 4: # if entropy score > 4 its a possible token or key
             	verb('Key', url + ': ' + match)
             	keys.add(url + ': ' + match)
 
@@ -486,7 +494,7 @@ def flash(function, links): # This shit is NOT complicated, please enjoy
         for begin in range(0, len(links), thread_count): # range with step
             end = begin + thread_count
             splitted = links[begin:end]
-            threader(function, splitted)
+            threader(function, splitted) # start the multithreading
             progress = end
             if progress > len(links): # fix if overflow
                 progress = len(links)
@@ -518,15 +526,15 @@ for level in range(crawl_level):
     print('%s Level %i: %i URLs' % (run, level + 1, len(links)))
     try:
         flash(extractor, links)
-    except KeyboardInterrupt:
+    except KeyboardInterrupt: # if user breaks runtime
         print('')
         break
 
 if not only_urls:
-    for match in bad_scripts:
+    for match in bad_scripts: # check if script not in bad js scripts
         if match.startswith(main_url):
         	verb('JS File', match)
-        	scripts.add(match)
+        	scripts.add(match) # add js scripts
         elif match.startswith('/') and not match.startswith('//'):
         	verb('JS File', main_url + match)
         	scripts.add(main_url + match)
@@ -540,18 +548,18 @@ if not only_urls:
     for url in internal:
         if '=' in url:
         	verb('Fuzzable Param', url)
-        	fuzzable.add(url)
+        	fuzzable.add(url) # append to fuzzable parameters list
 
     for match in bad_intel:
         for x in match: # because "match" is a tuple
             if x != '': # if the value isn't empty
             	verb('Intel', x)
-            	intel.add(x)
+            	intel.add(x) # append to fuzzable parameters list
         for url in external:
             try:
                 if tld.get_fld(url, fix_protocol=True) in intels:
                 	verb('Intel', url)
-                	intel.add(url)
+                	intel.add(url) # add to intel list
             except:
                 pass
 
@@ -562,7 +570,7 @@ def timer(diff):
     minutes, seconds = divmod(diff, 60) # Changes seconds into minutes and seconds
     try:
         time_per_request = diff / float(len(processed)) # Finds average time taken by requests
-    except ZeroDivisionError:
+    except ZeroDivisionError: # if float(len(processed)) == 0
         time_per_request = 0
     return minutes, seconds, time_per_request
 minutes, seconds, time_per_request = timer(diff)
@@ -589,7 +597,7 @@ def writer(datasets, dataset_names, output_dir):
             else: # else if python2
                 with open(filepath, 'w+') as f:
                     joined = '\n'.join(dataset)
-                    f.write(str(joined.encode('utf-8'))) # make sure no encoding #errors
+                    f.write(str(joined.encode('utf-8'))) # make sure no encoding errors
                     f.write('\n')
 
 writer(datasets, dataset_names, output_dir)
@@ -625,7 +633,7 @@ if args.export:
     # exporter(directory, format, datasets)
     exporter(output_dir, args.export, datasets)
 
-print('%s Results saved in %s%s%s directory' % (good, green, output_dir, end))
+print('%s Results saved in %s%s%s/ directory' % (good, green, output_dir, end))
 
 if args.std:
     for string in datasets[args.std]:
