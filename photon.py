@@ -307,8 +307,9 @@ def zap(url):
         if matches: # if there are any matches
             print('%s URLs retrieved from sitemap.xml: %s' % (good, len(matches)))
             for match in matches:
-            	verb('Internal Link', match);internal.add(match) 
-                # would consistently give out indentation error why i don't know... drives me crazy... only olution i found :(
+            	verb('Internal Link', match)
+		internal.add(match) 
+                # would consistently give out indentation error why i don't know... drives me crazy... only solution i found :(
 
 ####
 # This functions checks whether a url matches a regular expression
