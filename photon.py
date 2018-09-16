@@ -389,10 +389,14 @@ def intel_extractor(response):
 def js_extractor(response):
     matches = findall(r'src=[\'"](.*?\.js)["\']', response) # extract .js files
     for match in matches: # iterate over the matches
+        # using first 2 'if' and 'elif' cases, the no of bad js scripts have most probably gone down to 0
         if match.startswith('/'): # scripts which start with '/' aren't bad js (got to know this after running with the -v option)
             js_script = main_url + match # add to main url
             verb('JS Script', js_script)
             scripts.add(js_script) # add them to scripts list
+        elif match.startswith('http'): # if 'http' is there, it is a valid external js script but not a bad js (got to know this after -v)
+            verb('External JS Script', match)
+            scripts.add(match) # add them to scripts list
         else: # else they might be bad scripts
         	verb('Bad JS Script', match)
         	bad_scripts.add(match) # add to bad intel scripts
