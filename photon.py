@@ -94,7 +94,7 @@ args = parser.parse_args()
 
 def update():
     print('%s Checking for updates' % run)
-    changes = '''bug fixes;minor refactor;added --stdout option''' # Changes must be seperated by ;
+    changes = '''added the -v option; fixed 2 logic errors in detecting bad js scripts''' # Changes must be seperated by ;
     latest_commit = get('https://raw.githubusercontent.com/s0md3v/Photon/master/photon.py').text
 
     if changes not in latest_commit: # just a hack to see if a new version is available
