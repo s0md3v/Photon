@@ -38,16 +38,17 @@ if machine.lower().startswith(('os', 'win', 'darwin', 'ios')):
 if not colors:
     end = red = white = green = yellow = run = bad = good = info = que = ''
 else:
-    end = '\033[1;m'
+    end = '\033[0m'
     red = '\033[91m'
+    bold = '\033[1m'
     white = '\033[1;97m'
     green = '\033[1;32m'
     yellow = '\033[1;33m'
-    run = '\033[1;97m[~]\033[1;m'
-    bad = '\033[1;31m[-]\033[1;m'
-    good = '\033[1;32m[+]\033[1;m'
-    info = '\033[1;33m[!]\033[1;m'
-    que = '\033[1;34m[?]\033[1;m'
+    run = '\033[1;97m[~]'+end
+    bad = '\033[1;31m[-]'+end
+    good = '\033[1;32m[+]'+end
+    info = '\033[1;33m[!]'+end
+    que = '\033[1;34m[?]'+end
 
 # Just a fancy ass banner
 print('''%s      ____  __          __
@@ -62,10 +63,10 @@ warnings.filterwarnings('ignore') # Disable SSL related warnings
 # Processing command line arguments
 parser = argparse.ArgumentParser()
 # Options
-parser.add_argument('-u', '--url', help='root url', dest='root')
-parser.add_argument('-c', '--cookie', help='cookie', dest='cook')
+parser.add_argument('-u', '--url', help='main url (eg. http://www.example.com)', dest='root')
+parser.add_argument('-c', '--cookie', help='cookie to be used', dest='cook')
 parser.add_argument('-r', '--regex', help='regex pattern', dest='regex')
-parser.add_argument('-e', '--export', help='export format', dest='export')
+parser.add_argument('-e', '--export', help='export format type', dest='export')
 parser.add_argument('-o', '--output', help='output directory', dest='output')
 parser.add_argument('-l', '--level', help='levels to crawl', dest='level', type=int)
 parser.add_argument('-t', '--threads', help='number of threads', dest='threads', type=int)
@@ -78,6 +79,7 @@ parser.add_argument('--exclude', help='exclude urls matching this regex', dest='
 parser.add_argument('--timeout', help='http request timeout', dest='timeout', type=float)
 
 # Switches
+parser.add_argument('-v', '--verbose', help='verbose output', dest='verbose', action='store_true')
 parser.add_argument('--dns', help='enumerate subdomains & dns data', dest='dns', action='store_true')
 parser.add_argument('--ninja', help='ninja mode', dest='ninja', action='store_true')
 parser.add_argument('--keys', help='find secret keys', dest='api', action='store_true')
@@ -115,6 +117,15 @@ def update():
             print('%s Update successful!' % good)
     else:
         print('%s Photon is up to date!' % good)
+
+####
+# This function is for giving out a more verbose output
+####
+
+def verb(crawled_type, stuff): 
+	if args.verbose: # if '-v' is supplied
+		out = r'%s' % stuff # converting it to raw string
+		print('%s Found %s: %s%s%s' % (good, crawled_type, bold, stuff, end)) # print it out
 
 if args.update: # if the user has supplied --update argument
     update()
@@ -274,7 +285,8 @@ def zap(url):
             archived_urls = timeMachine(host, 'host')
         print ('%s Retrieved %i URLs from archive.org' % (good, len(archived_urls) - 1))
         for url in archived_urls:
-            internal.add(url)
+        	verb('Link', url)
+        	internal.add(url)
     response = get(url + '/robots.txt', verify=False).text # makes request to robots.txt
     if '<body' not in response: # making sure robots.txt isn't some fancy 404 page
         matches = findall(r'Allow: (.*)|Disallow: (.*)', response) # If you know it, you know it
@@ -283,6 +295,7 @@ def zap(url):
                 match = ''.join(match) # one item in match will always be empty so will combine both items
                 if '*' not in match: # if the url doesn't use a wildcard
                     url = main_url + match
+                    verb('Internal Link', url)
                     internal.add(url) # add the url to internal list for crawling
                     robots.add(url) # add the url to robots list
             print('%s URLs retrieved from robots.txt: %s' % (good, len(robots)))
@@ -292,6 +305,7 @@ def zap(url):
         if matches: # if there are any matches
             print('%s URLs retrieved from sitemap.xml: %s' % (good, len(matches)))
             for match in matches:
+            	verb('Internal Link', match) # print of -v is supplied
                 internal.add(match) #cleaning up the url & adding it to the internal list for crawling
 
 ####
@@ -335,7 +349,8 @@ def is_link(url):
 
     if url not in processed: # if the url hasn't been crawled already
         if url.split('.')[-1].lower() in badTypes:
-            files.add(url)
+        	verb('File', url)
+        	files.add(url)
         else:
             return True # url can be crawled
     return conclusion # return the conclusion :D
@@ -349,7 +364,8 @@ def regxy(pattern, response):
     try:
         matches = findall(r'%s' % pattern, response)
         for match in matches:
-            custom.add(match)
+        	verb('Link', match)
+        	custom.add(match)
     except:
         supress_regex = True
 
@@ -361,7 +377,8 @@ def intel_extractor(response):
     matches = findall(r'''([\w\.-]+s[\w\.-]+\.amazonaws\.com)|([\w\.-]+@[\w\.-]+\.[\.\w]+)''', response)
     if matches:
         for match in matches: # iterate over the matches
-            bad_intel.add(match) # add it to intel list
+        	verb('Bad Intel',match)
+        	bad_intel.add(match) # add it to intel list
 ####
 # This function extracts js files from the response body
 ####
@@ -369,10 +386,11 @@ def intel_extractor(response):
 def js_extractor(response):
     matches = findall(r'src=[\'"](.*?\.js)["\']', response) # extract .js files
     for match in matches: # iterate over the matches
-        bad_scripts.add(match)
+    	verb('Bad JS Script', match)
+    	bad_scripts.add(match)
 
 ####
-# This function calculates the entropy of a string
+# This function calculates the entropy of a string to find whether its a key or not
 ####
 
 def entropy(payload):
@@ -395,18 +413,24 @@ def extractor(url):
         if is_link(link): # checks if the urls should be crawled
             if link[:4] == 'http':
                 if link.startswith(main_url):
-                    internal.add(link)
+                	verb('Internal Link', link)
+                	internal.add(link)
                 else:
-                    external.add(link)
+                	verb('External Link', link)
+                	external.add(link)
             elif link[:2] == '//':
                 if link.split('/')[2].startswith(host):
-                    internal.add(schema + link)
+                	verb('Internal Link', schema + link)
+                	internal.add(schema + link)
                 else:
-                    external.add(link)
+                	verb('External Link', link)
+                	external.add(link)
             elif link[:1] == '/':
-                internal.add(main_url + link)
+            	verb('Internal Link', main_url + link)
+            	internal.add(main_url + link)
             else:
-                internal.add(main_url + '/' + link)
+            	verb('Internal Link', main_url + '/' + link)
+            	internal.add(main_url + '/' + link)
 
     if not only_urls:
         intel_extractor(response)
@@ -417,7 +441,8 @@ def extractor(url):
         matches = findall(r'[\w-]{16,45}', response)
         for match in matches:
             if entropy(match) >= 4:
-                keys.add(url + ': ' + match)
+            	verb('Key', url + ': ' + match)
+            	keys.add(url + ': ' + match)
 
 ####
 # This function extracts endpoints from JavaScript Code
@@ -429,7 +454,8 @@ def jscanner(url):
     for match in matches: # iterate over the matches, match is a tuple
         match = match[0] + match[1] # combining the items because one of them is always empty
         if not search(r'[}{><"\']', match) and not match == '/': # making sure it's not some js code
-            endpoints.add(match) # add it to the endpoints list
+        	verb('JS Endpoint', match)
+        	endpoints.add(match) # add it to the endpoints list
 
 ####
 # This function starts multiple threads for a function
@@ -470,7 +496,7 @@ def flash(function, links): # This shit is NOT complicated, please enjoy
         futures = (threadpool.submit(function, link) for link in links)
         for i, _ in enumerate(concurrent.futures.as_completed(futures)):
             if i + 1 == len(links) or (i + 1) % thread_count == 0:
-                print('%s Progress: %i/%i' % (info, i + 1, len(links)), end='\r')
+                print('\n%s Progress: %i/%i' % (info, i + 1, len(links)), end='\r') # had to put '\n' as it was causing some lines to bump in
     print('')
 
 then = time.time() # records the time at which crawling started
@@ -499,27 +525,33 @@ for level in range(crawl_level):
 if not only_urls:
     for match in bad_scripts:
         if match.startswith(main_url):
-            scripts.add(match)
+        	verb('JS File', match)
+        	scripts.add(match)
         elif match.startswith('/') and not match.startswith('//'):
-            scripts.add(main_url + match)
+        	verb('JS File', main_url + match)
+        	scripts.add(main_url + match)
         elif not match.startswith('http') and not match.startswith('//'):
-            scripts.add(main_url + '/' + match)
+        	verb('JS File', main_url + '/' + match)
+        	scripts.add(main_url + '/' + match)
     # Step 3. Scan the JavaScript files for enpoints
     print('%s Crawling %i JavaScript files' % (run, len(scripts)))
     flash(jscanner, scripts)
 
     for url in internal:
         if '=' in url:
-            fuzzable.add(url)
+        	verb('Fuzzable Param', url)
+        	fuzzable.add(url)
 
     for match in bad_intel:
         for x in match: # because "match" is a tuple
             if x != '': # if the value isn't empty
-                intel.add(x)
+            	verb('Intel', x)
+            	intel.add(x)
         for url in external:
             try:
                 if tld.get_fld(url, fix_protocol=True) in intels:
-                    intel.add(url)
+                	verb('Intel', url)
+                	intel.add(url)
             except:
                 pass
 
@@ -539,21 +571,25 @@ minutes, seconds, time_per_request = timer(diff)
 if not os.path.exists(output_dir): # if the directory doesn't exist
     os.mkdir(output_dir) # create a new directory
 
-datasets = [files, intel, robots, custom, failed, internal, scripts, external, fuzzable, endpoints, keys]
-dataset_names = ['files', 'intel', 'robots', 'custom', 'failed', 'internal', 'scripts', 'external', 'fuzzable', 'endpoints', 'keys']
+datasets = [files, intel, robots, custom, failed, internal, scripts, external, fuzzable, endpoints, keys] # list of all extracted types
+dataset_names = ['files', 'intel', 'robots', 'custom', 'failed', 'internal', 'scripts', 'external', 'fuzzable', 'endpoints', 'keys'] # as str
+
+####
+# This function writes the crawled links and files to different files
+####
 
 def writer(datasets, dataset_names, output_dir):
     for dataset, dataset_name in zip(datasets, dataset_names):
         if dataset:
             filepath = output_dir + '/' + dataset_name + '.txt'
-            if python3:
-                with open(filepath, 'w+', encoding='utf8') as f:
+            if python3: # if machine running python 3
+                with open(filepath, 'w+', encoding='utf8') as f: # make sure no encoding #errors
                     f.write(str('\n'.join(dataset)))
                     f.write('\n')
-            else:
+            else: # else if python2
                 with open(filepath, 'w+') as f:
                     joined = '\n'.join(dataset)
-                    f.write(str(joined.encode('utf-8')))
+                    f.write(str(joined.encode('utf-8'))) # make sure no encoding #errors
                     f.write('\n')
 
 writer(datasets, dataset_names, output_dir)
