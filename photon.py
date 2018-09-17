@@ -123,9 +123,9 @@ def update():
 ####
 
 def verb(crawled_type, stuff): 
-	if args.verbose: # if '-v' is supplied
-		out = r'%s' % stuff # converting it to raw string
-		print('%s Found %s: %s%s%s' % (good, crawled_type, bold, stuff, end)) # print it out
+    if args.verbose: # if '-v' is supplied
+        out = r'%s' % stuff # converting it to raw string
+        print('%s Found %s: %s%s%s' % (good, crawled_type, bold, stuff, end)) # print it out
 
 if args.update: # if the user has supplied --update argument
     update()
@@ -232,7 +232,7 @@ def requester(url):
         else:
             response.close()
             return 'dummy'
-	
+    
     # developer.facebook.com API
     def facebook(url):
         return get('https://developers.facebook.com/tools/debug/echo/?q=' + url, verify=False).text
@@ -291,8 +291,8 @@ def zap(url):
             archived_urls = timeMachine(host, 'host')
         print ('%s Retrieved %i URLs from archive.org' % (good, len(archived_urls) - 1))
         for url in archived_urls:
-        	verb('Link', url)
-        	internal.add(url)
+            verb('Link', url)
+            internal.add(url)
     response = get(url + '/robots.txt', verify=False).text # makes request to robots.txt
     if '<body' not in response: # making sure robots.txt isn't some fancy 404 page
         matches = findall(r'Allow: (.*)|Disallow: (.*)', response) # If you know it, you know it
@@ -354,8 +354,8 @@ def is_link(url):
 
     if url not in processed: # if the url hasn't been crawled already
         if url.split('.')[-1].lower() in badTypes:
-        	verb('File', url)
-        	files.add(url)
+            verb('File', url)
+            files.add(url)
         else:
             return True # url can be crawled
     return conclusion # return the conclusion :D
@@ -369,8 +369,8 @@ def regxy(pattern, response):
     try:
         matches = findall(r'%s' % pattern, response)
         for match in matches:
-        	verb('Link', match)
-        	custom.add(match)
+            verb('Link', match)
+            custom.add(match)
     except:
         supress_regex = True
 
@@ -382,8 +382,8 @@ def intel_extractor(response):
     matches = findall(r'''([\w\.-]+s[\w\.-]+\.amazonaws\.com)|([\w\.-]+@[\w\.-]+\.[\.\w]+)''', response)
     if matches:
         for match in matches: # iterate over the matches
-        	verb('Bad Intel',match)
-        	bad_intel.add(match) # add it to bad intel list
+            verb('Bad Intel',match)
+            bad_intel.add(match) # add it to bad intel list
 
 ####
 # This function extracts js files from the response body
@@ -401,8 +401,8 @@ def js_extractor(response):
             verb('External JS Script', match)
             scripts.add(match) # add them to scripts list
         else: # else they might be bad scripts
-        	verb('Bad JS Script', match)
-        	bad_scripts.add(match) # add to bad intel scripts
+            verb('Bad JS Script', match)
+            bad_scripts.add(match) # add to bad intel scripts
 
 ####
 # This function calculates the entropy of a string to find whether its a key or not
@@ -428,24 +428,24 @@ def extractor(url):
         if is_link(link): 
             if link[:4] == 'http':
                 if link.startswith(main_url):
-                	verb('Internal Link', link)
-                	internal.add(link)
+                    verb('Internal Link', link)
+                    internal.add(link)
                 else:
-                	verb('External Link', link)
-                	external.add(link)
+                    verb('External Link', link)
+                    external.add(link)
             elif link[:2] == '//': 
                 if link.split('/')[2].startswith(host):
-                	verb('Internal Link', schema + link)
-                	internal.add(schema + link)
+                    verb('Internal Link', schema + link)
+                    internal.add(schema + link)
                 else:
-                	verb('External Link', link)
-                	external.add(link)
+                    verb('External Link', link)
+                    external.add(link)
             elif link[:1] == '/': # if url starts with '/' i.e. its an internal link
-            	verb('Internal Link', main_url + link)
-            	internal.add(main_url + link)
+                verb('Internal Link', main_url + link)
+                internal.add(main_url + link)
             else:
-            	verb('Internal Link', main_url + '/' + link)
-            	internal.add(main_url + '/' + link)
+                verb('Internal Link', main_url + '/' + link)
+                internal.add(main_url + '/' + link)
 
     if not only_urls:
         intel_extractor(response)
@@ -456,8 +456,8 @@ def extractor(url):
         matches = findall(r'[\w-]{16,45}', response) # regex for finding keys
         for match in matches:
             if entropy(match) >= 4: # if entropy score > 4 its a possible token or key
-            	verb('Key', url + ': ' + match)
-            	keys.add(url + ': ' + match)
+                verb('Key', url + ': ' + match)
+                keys.add(url + ': ' + match)
 
 ####
 # This function extracts endpoints from JavaScript Code
@@ -469,8 +469,8 @@ def jscanner(url):
     for match in matches: # iterate over the matches, match is a tuple
         match = match[0] + match[1] # combining the items because one of them is always empty
         if not search(r'[}{><"\']', match) and not match == '/': # making sure it's not some js code
-        	verb('JS Endpoint', match)
-        	endpoints.add(match) # add it to the endpoints list
+            verb('JS Endpoint', match)
+            endpoints.add(match) # add it to the endpoints list
 
 ####
 # This function starts multiple threads for a function
@@ -540,33 +540,33 @@ for level in range(crawl_level):
 if not only_urls:
     for match in bad_scripts: # check if script not in bad js scripts
         if match.startswith(main_url):
-        	verb('JS File', match)
-        	scripts.add(match) # add js scripts
+            verb('JS File', match)
+            scripts.add(match) # add js scripts
         elif match.startswith('/') and not match.startswith('//'):
-        	verb('JS File', main_url + match)
-        	scripts.add(main_url + match)
+            verb('JS File', main_url + match)
+            scripts.add(main_url + match)
         elif not match.startswith('http') and not match.startswith('//'):
-        	verb('JS File', main_url + '/' + match)
-        	scripts.add(main_url + '/' + match)
+            verb('JS File', main_url + '/' + match)
+            scripts.add(main_url + '/' + match)
     # Step 3. Scan the JavaScript files for enpoints
     print('%s Crawling %i JavaScript files' % (run, len(scripts)))
     flash(jscanner, scripts)
 
     for url in internal:
         if '=' in url:
-        	verb('Fuzzable Param', url)
-        	fuzzable.add(url) # append to fuzzable parameters list
+            verb('Fuzzable Param', url)
+            fuzzable.add(url) # append to fuzzable parameters list
 
     for match in bad_intel:
         for x in match: # because "match" is a tuple
             if x != '': # if the value isn't empty
-            	verb('Intel', x)
-            	intel.add(x) # append to fuzzable parameters list
+                verb('Intel', x)
+                intel.add(x) # append to fuzzable parameters list
         for url in external:
             try:
                 if tld.get_fld(url, fix_protocol=True) in intels:
-                	verb('Intel', url)
-                	intel.add(url) # add to intel list
+                    verb('Intel', url)
+                    intel.add(url) # add to intel list
             except:
                 pass
 
