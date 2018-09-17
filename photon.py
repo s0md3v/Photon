@@ -349,7 +349,7 @@ def remove_regex(urls, regex):
 ####
 
 def is_link(url):
-    # file extension that don't need to be crawled and are files
+    # file extensions don't need to be crawled
     conclusion = False # whether the the url should be crawled or not
 
     if url not in processed: # if the url hasn't been crawled already
@@ -383,7 +383,7 @@ def intel_extractor(response):
     if matches:
         for match in matches: # iterate over the matches
         	verb('Bad Intel',match)
-        	bad_intel.add(match) # add it to intel list
+        	bad_intel.add(match) # add it to bad intel list
 
 ####
 # This function extracts js files from the response body
@@ -393,11 +393,11 @@ def js_extractor(response):
     matches = findall(r'src=[\'"](.*?\.js)["\']', response) # extract .js files
     for match in matches: # iterate over the matches
         # using first 2 'if' and 'elif' cases, the no of bad js scripts have most probably gone down to 0
-        if match.startswith('/'): # scripts which start with '/' aren't bad js (got to know this after running with the -v option)
+        if match.startswith('/'): # scripts which start with '/' aren't bad js 
             js_script = main_url + match # add to main url
             verb('JS Script', js_script)
             scripts.add(js_script) # add them to scripts list
-        elif match.startswith('http'): # if 'http' is there, it is a valid external js script but not a bad js (got to know this after -v)
+        elif match.startswith('http'): # if js script link starts with 'http' it is a valid external js script and not bad js
             verb('External JS Script', match)
             scripts.add(match) # add them to scripts list
         else: # else they might be bad scripts
@@ -425,22 +425,22 @@ def extractor(url):
     matches = findall(r'<[aA].*href=["\']{0,1}(.*?)["\']', response)
     for link in matches: # iterate over the matches
         link = link.split('#')[0] # remove everything after a "#" to deal with in-page anchors
-        if is_link(link): # checks if the urls should be crawled
-            if link[:4] == 'http': # if url starts with 'http'
+        if is_link(link): 
+            if link[:4] == 'http':
                 if link.startswith(main_url):
                 	verb('Internal Link', link)
-                	internal.add(link) # add to main interanl list
+                	internal.add(link)
                 else:
                 	verb('External Link', link)
                 	external.add(link)
-            elif link[:2] == '//': # if link startswith '//'
+            elif link[:2] == '//': 
                 if link.split('/')[2].startswith(host):
                 	verb('Internal Link', schema + link)
                 	internal.add(schema + link)
                 else:
                 	verb('External Link', link)
                 	external.add(link)
-            elif link[:1] == '/': # if url starts with '/' (eg. /images/img.png)
+            elif link[:1] == '/': # if url starts with '/' i.e. its an internal link
             	verb('Internal Link', main_url + link)
             	internal.add(main_url + link)
             else:
@@ -450,7 +450,7 @@ def extractor(url):
     if not only_urls:
         intel_extractor(response)
         js_extractor(response)
-    if args.regex and not supress_regex: # check whether regex is not banned
+    if args.regex and not supress_regex:
         regxy(args.regex, response)
     if api:
         matches = findall(r'[\w-]{16,45}', response) # regex for finding keys
