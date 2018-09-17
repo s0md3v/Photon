@@ -44,7 +44,7 @@ else:
     white = '\033[1;97m'        # gray color
     green = '\033[1;32m'        # green color
     yellow = '\033[1;33m'       # yellow color
-    run = '\033[1;97m[*]'+end   # processing ...
+    run = '\033[1;97m[~]'+end   # processing ...
     bad = '\033[1;31m[-]'+end   # error or warning
     good = '\033[1;32m[+]'+end  # good news
     info = '\033[1;33m[!]'+end  # some info
