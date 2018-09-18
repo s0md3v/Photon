@@ -1,3 +1,8 @@
+#### v1.1.4
+- Added `-v` option
+- Fixed progress animation for python2
+- Added `developer.facebook.com` API for Ninja mode
+
 #### v1.1.3
 - Added `--stdout` option
 - Fixed a bug in `zap()` function
