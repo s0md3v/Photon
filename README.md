@@ -68,6 +68,21 @@ So basically, now you have 4 clients making requests to the same server simultan
 - **[dnsdumpster](https://github.com/s0md3v/Photon/wiki/Usage#dumping-dns-data)**
 - **[Exporter](https://github.com/s0md3v/Photon/wiki/Usage#export-formatted-result)**
 
+#### Docker
+
+Photon can be launched using a lightweight Python-Alpine (103MB) Docker image.  
+```bash
+$ git clone https://github.com/s0md3v/Photon.git
+$ cd Photon
+$ docker build -t photon .
+$ docker run -it --name photon photon:latest -u google.com
+```
+To view results, you can either head over to the local docker volume, which you can find by running `docker inspect photon` or by mounting the target loot folder:
+
+```bash
+$ docker run -it --name photon -v "$PWD:/Photon/google.com" -u google.com
+```
+
 #### Frequent & Seamless Updates
 Photon is under heavy development and updates for fixing bugs. optimizing performance & new features are being rolled regularly.
 
