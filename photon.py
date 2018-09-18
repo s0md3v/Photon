@@ -54,7 +54,7 @@ print('''%s      ____  __          __
      / %s__%s \/ /_  ____  / /_____  ____
     / %s/_/%s / __ \/ %s__%s \/ __/ %s__%s \/ __ \\
    / ____/ / / / %s/_/%s / /_/ %s/_/%s / / / /
-  /_/   /_/ /_/\____/\__/\____/_/ /_/ %sv1.1.1%s\n''' %
+  /_/   /_/ /_/\____/\__/\____/_/ /_/ %sv1.1.4%s\n''' %
   (red, white, red, white, red, white, red, white, red, white, red, white, red, white, end))
 
 warnings.filterwarnings('ignore') # Disable SSL related warnings
@@ -93,7 +93,7 @@ args = parser.parse_args()
 
 def update():
     print('%s Checking for updates' % run)
-    changes = '''bug fixes;minor refactor;added --stdout option''' # Changes must be seperated by ;
+    changes = '''added -v option;progress animation fix for python2''' # Changes must be seperated by ;
     latest_commit = get('https://raw.githubusercontent.com/s0md3v/Photon/master/photon.py').text
 
     if changes not in latest_commit: # just a hack to see if a new version is available
