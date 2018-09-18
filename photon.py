@@ -54,7 +54,7 @@ print('''%s      ____  __          __
      / %s__%s \/ /_  ____  / /_____  ____
     / %s/_/%s / __ \/ %s__%s \/ __/ %s__%s \/ __ \\
    / ____/ / / / %s/_/%s / /_/ %s/_/%s / / / /
-  /_/   /_/ /_/\____/\__/\____/_/ /_/ %sv1.1.1%s\n''' %
+  /_/   /_/ /_/\____/\__/\____/_/ /_/ %sv1.1.4%s\n''' %
   (red, white, red, white, red, white, red, white, red, white, red, white, red, white, end))
 
 warnings.filterwarnings('ignore') # Disable SSL related warnings
@@ -70,6 +70,7 @@ parser.add_argument('-o', '--output', help='output directory', dest='output')
 parser.add_argument('-l', '--level', help='levels to crawl', dest='level', type=int)
 parser.add_argument('-t', '--threads', help='number of threads', dest='threads', type=int)
 parser.add_argument('-d', '--delay', help='delay between requests', dest='delay', type=float)
+parser.add_argument('-v', '--verbose', help='verbose output', dest='verbose', action='store_true')
 parser.add_argument('-s', '--seeds', help='additional seed urls', dest='seeds', nargs="+", default=[])
 
 parser.add_argument('--stdout', help='send variables to stdout', dest='std')
@@ -92,7 +93,7 @@ args = parser.parse_args()
 
 def update():
     print('%s Checking for updates' % run)
-    changes = '''bug fixes;minor refactor;added --stdout option''' # Changes must be seperated by ;
+    changes = '''added -v option;progress animation fix for python2''' # Changes must be seperated by ;
     latest_commit = get('https://raw.githubusercontent.com/s0md3v/Photon/master/photon.py').text
 
     if changes not in latest_commit: # just a hack to see if a new version is available
@@ -128,6 +129,7 @@ else: # if the user hasn't supplied a url
     print('\n' + parser.format_help().lower())
     quit()
 
+verbose = args.verbose
 delay = args.delay or 0  # Delay between requests
 timeout = args.timeout or 6  # HTTP request timeout
 cook = args.cook or None  # Cookie
@@ -258,6 +260,14 @@ def requester(url):
         return normal(url)
 
 ####
+# This function gives verbose output
+####
+
+def verb(kind, string):
+    if verbose:
+        print ('%s %s: %s' % (info, kind, string))
+
+####
 # This function extracts links from .xml files
 ####
 
@@ -278,6 +288,7 @@ def zap(url):
             archived_urls = timeMachine(host, 'host')
         print ('%s Retrieved %i URLs from archive.org' % (good, len(archived_urls) - 1))
         for url in archived_urls:
+            verb('Internal page', url)
             internal.add(url)
     response = get(url + '/robots.txt', verify=False).text # makes request to robots.txt
     if '<body' not in response: # making sure robots.txt isn't some fancy 404 page
@@ -296,6 +307,7 @@ def zap(url):
         if matches: # if there are any matches
             print('%s URLs retrieved from sitemap.xml: %s' % (good, len(matches)))
             for match in matches:
+                verb('Internal page', url)
                 internal.add(match) #cleaning up the url & adding it to the internal list for crawling
 
 ####
@@ -353,6 +365,7 @@ def regxy(pattern, response):
     try:
         matches = findall(r'%s' % pattern, response)
         for match in matches:
+            verb('Custom regex', match)
             custom.add(match)
     except:
         supress_regex = True
@@ -365,6 +378,7 @@ def intel_extractor(response):
     matches = findall(r'''([\w\.-]+s[\w\.-]+\.amazonaws\.com)|([\w\.-]+@[\w\.-]+\.[\.\w]+)''', response)
     if matches:
         for match in matches: # iterate over the matches
+            verb('Intel', match)
             bad_intel.add(match) # add it to intel list
 ####
 # This function extracts js files from the response body
@@ -373,6 +387,7 @@ def intel_extractor(response):
 def js_extractor(response):
     matches = findall(r'src=[\'"](.*?\.js)["\']', response) # extract .js files
     for match in matches: # iterate over the matches
+        verb('JS file', match)
         bad_scripts.add(match)
 
 ####
@@ -399,17 +414,23 @@ def extractor(url):
         if is_link(link): # checks if the urls should be crawled
             if link[:4] == 'http':
                 if link.startswith(main_url):
+                    verb('Internal page', link)
                     internal.add(link)
                 else:
+                    verb('External page', link)
                     external.add(link)
             elif link[:2] == '//':
                 if link.split('/')[2].startswith(host):
+                    verb('Internal page', link)
                     internal.add(schema + link)
                 else:
+                    verb('External page', link)
                     external.add(link)
             elif link[:1] == '/':
+                verb('Internal page', link)
                 internal.add(main_url + link)
             else:
+                verb('Internal page', link)
                 internal.add(main_url + '/' + link)
 
     if not only_urls:
@@ -421,6 +442,7 @@ def extractor(url):
         matches = findall(r'[\w-]{16,45}', response)
         for match in matches:
             if entropy(match) >= 4:
+                verb('Key', match)
                 keys.add(url + ': ' + match)
 
 ####
@@ -433,6 +455,7 @@ def jscanner(url):
     for match in matches: # iterate over the matches, match is a tuple
         match = match[0] + match[1] # combining the items because one of them is always empty
         if not search(r'[}{><"\']', match) and not match == '/': # making sure it's not some js code
+            verb('JS enpoint', match)
             endpoints.add(match) # add it to the endpoints list
 
 ####
@@ -469,6 +492,7 @@ def flash(function, links): # This shit is NOT complicated, please enjoy
             if progress > len(links): # fix if overflow
                 progress = len(links)
             print('\r%s Progress: %i/%i' % (info, progress, len(links)), end='\r')
+            sys.stdout.flush()
     else:
         threadpool = concurrent.futures.ThreadPoolExecutor(max_workers=thread_count)
         futures = (threadpool.submit(function, link) for link in links)
