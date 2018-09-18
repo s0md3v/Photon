@@ -505,13 +505,19 @@ def flash(function, links): # This shit is NOT complicated, please enjoy
             progress = end
             if progress > len(links): # fix if overflow
                 progress = len(links)
-            print('\r%s Progress: %i/%i' % (info, progress, len(links)), end='\r')
+            if args.verbose:
+                print('\n\r%s Progress: %i/%i' % (info, progress, len(links)), end='\r') # prevent line overflow
+            else:
+                print('\r%s Progress: %i/%i' % (info, progress, len(links)), end='\r') # regular animate printing
     else:
         threadpool = concurrent.futures.ThreadPoolExecutor(max_workers=thread_count)
         futures = (threadpool.submit(function, link) for link in links)
         for i, _ in enumerate(concurrent.futures.as_completed(futures)):
             if i + 1 == len(links) or (i + 1) % thread_count == 0:
-                print('\n%s Progress: %i/%i' % (info, i + 1, len(links)), end='\r') # had to put '\n' as it was causing some lines to bump in
+                if args.verbose:
+                    print('\n%s Progress: %i/%i' % (info, i + 1, len(links)), end='\r') # to prevent line print overflow
+                else:
+                    print('%s Progress: %i/%i' % (info, i + 1, len(links)), end='\r') # normal print
     print('')
 
 then = time.time() # records the time at which crawling started
