@@ -455,7 +455,7 @@ def jscanner(url):
     for match in matches: # iterate over the matches, match is a tuple
         match = match[0] + match[1] # combining the items because one of them is always empty
         if not search(r'[}{><"\']', match) and not match == '/': # making sure it's not some js code
-            verb('JS enpoint', match)
+            verb('JS endpoint', match)
             endpoints.add(match) # add it to the endpoints list
 
 ####
