@@ -114,6 +114,16 @@ def update():
             os.system('git clone --quiet https://github.com/s0md3v/Photon %s' % (folder))
             os.system('cp -r %s/%s/* %s && rm -r %s/%s/ 2>/dev/null' % (path, folder, path, path, folder))
             print('%s Update successful!' % good)
+            k=sys.argv.index('photon.py')
+            if k==len(sys.argv)-1:
+                argsOld=""
+            else:
+                argsOld=' '.join(sys.argv[sys.argv.index('photon.py')+1:])
+            if python3==True:
+                os.system('python3 photon.py %s' % (argsOld))
+            else:
+                os,system('python photon.py %s' % (argsOld))
+            raise SystemExit
     else:
         print('%s Photon is up to date!' % good)
 
