@@ -181,7 +181,7 @@ output_dir = args.output or host
 
 def topLevel(url):
     try:
-        toplevel = tld.get_fld(host, fix_protocol=True)
+        toplevel = tld.get_tld(host, fix_protocol=True)
     except tld.exceptions.TldDomainNotFound:
         toplevel = urlparse(main_url).netloc
     return toplevel
