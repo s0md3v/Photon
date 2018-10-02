@@ -181,7 +181,7 @@ output_dir = args.output or host
 
 def topLevel(url):
     try:
-        toplevel = tld.get_fld(host, fix_protocol=True)
+        toplevel = tld.get_tld(host, fix_protocol=True)
     except tld.exceptions.TldDomainNotFound:
         toplevel = urlparse(main_url).netloc
     return toplevel
@@ -546,7 +546,7 @@ if not only_urls:
                 intel.add(x)
         for url in external:
             try:
-                if tld.get_fld(url, fix_protocol=True) in intels:
+                if tld.get_tld(url, fix_protocol=True) in intels:
                     intel.add(url)
             except:
                 pass
