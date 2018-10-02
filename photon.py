@@ -546,7 +546,7 @@ if not only_urls:
                 intel.add(x)
         for url in external:
             try:
-                if tld.get_fld(url, fix_protocol=True) in intels:
+                if tld.get_tld(url, fix_protocol=True) in intels:
                     intel.add(url)
             except:
                 pass
