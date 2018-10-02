@@ -1,11 +1,17 @@
 language: python
-install:
-  - pip install -r requirements.txt
 os:
   - linux
 python:
-    - 2.7
-    - 3.6
+  - 2.7
+  - 3.6
+install:
+  - pip install -r requirements.txt
+  - pip install flake8
+before_script:
+  # stop the build if there are Python syntax errors or undefined names
+  - flake8 . --count --select=E901,E999,F821,F822,F823 --show-source --statistics
+  # exit-zero treats all errors as warnings.  The GitHub editor is 127 chars wide
+  - flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 script:
-  - python photon.py -u "github.com" -l 1 -d 1 -t 10 --regex "\d{10}" --dns
-  - python photon.py -u "github.com" -l 1 -t 10 --seeds="https://github.com/s0md3v" --only-urls --ninja
+  - python photon.py -u "https://stackoverflow.com" -l 1 -d 1 -t 100 --regex "\d{10}" --dns --output="d3v"
+  - python photon.py -u "https://stackoverflow.com" -l 1 -t 10 --seeds="https://stackoverflow.com/jobs" --only-urls --export=json --ninja
