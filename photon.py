@@ -184,7 +184,10 @@ def topLevel(url):
     toplevel = '.'.join(urlparse(main_url).netloc.split('.')[-2:]).split(ext)[0] + ext
     return toplevel
 
-domain = topLevel(main_url)
+try:
+    domain = topLevel(main_url)
+except:
+    domain = host
 
 ####
 # This function makes requests to webpage and returns response body
