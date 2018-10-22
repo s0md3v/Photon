@@ -149,6 +149,7 @@ failed = set() # urls that photon failed to crawl
 scripts = set() # javascript files
 external = set() # urls that don't belong to the target i.e. out-of-scope
 fuzzable = set() # urls that have get params in them e.g. example.com/page.php?id=2
+redirects = set() # urls that were redirected
 endpoints = set() # urls found from javascript files
 processed = set() # urls that have been crawled
 internal = set([s for s in args.seeds]) # urls that belong to the target i.e. in-scope
@@ -214,7 +215,10 @@ def requester(url):
         # make request and return response
         response = get(url, cookies=cook, headers=headers, verify=False, timeout=timeout, stream=True)
         if 'text/html' in response.headers['content-type']:
-            if response.status_code != '404':
+            code = str(response.status_code)
+            if code != '404':
+                if code[0] == '3':
+                    redirects.add(url + ':' + response.url)
                 return response.text
             else:
                 response.close()
@@ -568,8 +572,8 @@ minutes, seconds, time_per_request = timer(diff)
 if not os.path.exists(output_dir): # if the directory doesn't exist
     os.mkdir(output_dir) # create a new directory
 
-datasets = [files, intel, robots, custom, failed, internal, scripts, external, fuzzable, endpoints, keys]
-dataset_names = ['files', 'intel', 'robots', 'custom', 'failed', 'internal', 'scripts', 'external', 'fuzzable', 'endpoints', 'keys']
+datasets = [files, intel, robots, custom, failed, internal, redirects, scripts, external, fuzzable, endpoints, keys]
+dataset_names = ['files', 'intel', 'robots', 'custom', 'failed', 'internal', 'redirects', 'scripts', 'external', 'fuzzable', 'endpoints', 'keys']
 
 def writer(datasets, dataset_names, output_dir):
     for dataset, dataset_name in zip(datasets, dataset_names):
@@ -599,7 +603,7 @@ print('%s Requests per second: %i' % (info, int(len(processed)/diff)))
 
 datasets = {
 'files': list(files), 'intel': list(intel), 'robots': list(robots), 'custom': list(custom), 'failed': list(failed), 'internal': list(internal),
-'scripts': list(scripts), 'external': list(external), 'fuzzable': list(fuzzable), 'endpoints': list(endpoints), 'keys' : list(keys)
+'redirects': list(redirects), 'scripts': list(scripts), 'external': list(external), 'fuzzable': list(fuzzable), 'endpoints': list(endpoints), 'keys' : list(keys)
 }
 
 if args.dns:
