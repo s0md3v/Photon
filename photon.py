@@ -218,7 +218,7 @@ def requester(url):
             code = str(response.status_code)
             if code != '404':
                 if code[0] == '3':
-                    redirects.add(url + ':' + response.url)
+                    redirects.add(url + '==>' + response.url)
                 return response.text
             else:
                 response.close()
