@@ -13,6 +13,7 @@ import warnings
 import argparse
 import threading
 from math import log
+from core.prompt import prompt
 from re import search, findall
 from requests import get, post
 
@@ -54,7 +55,7 @@ print('''%s      ____  __          __
      / %s__%s \/ /_  ____  / /_____  ____
     / %s/_/%s / __ \/ %s__%s \/ __/ %s__%s \/ __ \\
    / ____/ / / / %s/_/%s / /_/ %s/_/%s / / / /
-  /_/   /_/ /_/\____/\__/\____/_/ /_/ %sv1.1.4%s\n''' %
+  /_/   /_/ /_/\____/\__/\____/_/ /_/ %sv1.1.5%s\n''' %
   (red, white, red, white, red, white, red, white, red, white, red, white, red, white, end))
 
 warnings.filterwarnings('ignore') # Disable SSL related warnings
@@ -72,13 +73,13 @@ parser.add_argument('-t', '--threads', help='number of threads', dest='threads',
 parser.add_argument('-d', '--delay', help='delay between requests', dest='delay', type=float)
 parser.add_argument('-v', '--verbose', help='verbose output', dest='verbose', action='store_true')
 parser.add_argument('-s', '--seeds', help='additional seed urls', dest='seeds', nargs="+", default=[])
-
 parser.add_argument('--stdout', help='send variables to stdout', dest='std')
 parser.add_argument('--user-agent', help='custom user agent(s)', dest='user_agent')
 parser.add_argument('--exclude', help='exclude urls matching this regex', dest='exclude')
 parser.add_argument('--timeout', help='http request timeout', dest='timeout', type=float)
 
 # Switches
+parser.add_argument('--headers', help='add headers', dest='headers', action='store_true')
 parser.add_argument('--dns', help='enumerate subdomains & dns data', dest='dns', action='store_true')
 parser.add_argument('--ninja', help='ninja mode', dest='ninja', action='store_true')
 parser.add_argument('--keys', help='find secret keys', dest='api', action='store_true')
@@ -93,7 +94,7 @@ args = parser.parse_args()
 
 def update():
     print('%s Checking for updates' % run)
-    changes = '''added -v option;progress animation fix for python2''' # Changes must be seperated by ;
+    changes = '''--headers option for interactive HTTP header input''' # Changes must be seperated by ;
     latest_commit = get('https://raw.githubusercontent.com/s0md3v/Photon/master/photon.py').text
 
     if changes not in latest_commit: # just a hack to see if a new version is available
@@ -129,7 +130,8 @@ else: # if the user hasn't supplied a url
     print('\n' + parser.format_help().lower())
     quit()
 
-verbose = args.verbose
+headers = args.headers # prompt for headers
+verbose = args.verbose # verbose output
 delay = args.delay or 0  # Delay between requests
 timeout = args.timeout or 6  # HTTP request timeout
 cook = args.cook or None  # Cookie
@@ -156,6 +158,28 @@ internal = set([s for s in args.seeds]) # urls that belong to the target i.e. in
 everything = []
 bad_intel = set() # unclean intel urls
 bad_scripts = set() # unclean javascript file urls
+
+
+####
+# This function extracts valid headers from interactive inpu
+####
+
+def extractHeaders(headers):
+    sorted_headers = {}
+    matches = findall(r'(.*):\s(.*)', headers)
+    for match in matches:
+        header = match[0]
+        value = match[1]
+        try:
+            if value[-1] == ',':
+                value = value[:-1]
+            sorted_headers[header] = value
+        except IndexError:
+            pass
+    return sorted_headers
+
+if headers:
+    headers = extractHeaders(prompt())
 
 # If the user hasn't supplied the root url with http(s), we will handle it
 if main_inp.startswith('http'):
@@ -203,7 +227,7 @@ def requester(url):
     processed.add(url) # mark the url as crawled
     time.sleep(delay) # pause/sleep the program for specified time
     def normal(url):
-        headers = {
+        finalHeaders = headers or {
         'Host' : host, # ummm this is the hostname?
         'User-Agent' : random.choice(user_agents), # selecting a random user-agent
         'Accept' : 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -212,7 +236,7 @@ def requester(url):
         'DNT' : '1',
         'Connection' : 'close'}
         # make request and return response
-        response = get(url, cookies=cook, headers=headers, verify=False, timeout=timeout, stream=True)
+        response = get(url, cookies=cook, headers=finalHeaders, verify=False, timeout=timeout, stream=True)
         if 'text/html' in response.headers['content-type']:
             if response.status_code != '404':
                 return response.text
