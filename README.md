@@ -80,7 +80,7 @@ $ docker run -it --name photon photon:latest -u google.com
 To view results, you can either head over to the local docker volume, which you can find by running `docker inspect photon` or by mounting the target loot folder:
 
 ```bash
-$ docker run -it --name photon -v "$PWD:/Photon/google.com" -u google.com
+$ docker run -it --name photon -v "$PWD:/Photon/google.com" photon:latest -u google.com
 ```
 
 #### Frequent & Seamless Updates
