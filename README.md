@@ -23,6 +23,9 @@
   <a href="https://travis-ci.com/s0md3v/Photon">
     <img src="https://img.shields.io/travis/com/s0md3v/Photon.svg">
   </a>
+  <a href="https://houndci.com">
+    <img src="https://img.shields.io/badge/Reviewed_by-Hound-8E64B0.svg">
+  </a>
 </p>
 
 ![demo](https://image.ibb.co/kQSUcz/demo.png)
