@@ -1,5 +1,7 @@
 import re
+
 import requests
+
 
 def dnsdumpster(domain, output_dir):
     response = requests.Session().get('https://dnsdumpster.com/').text

@@ -1,6 +1,7 @@
 import os
 import tempfile
 
+
 def prompt(default=None):
     editor = 'nano'
     with tempfile.NamedTemporaryFile(mode='r+') as tmpfile:

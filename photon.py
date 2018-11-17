@@ -3,18 +3,21 @@
 
 from __future__ import print_function
 
-import os
-import sys
-import tld
-import time
-import random
-import warnings
 import argparse
+import os
+import random
+import sys
 import threading
+import time
+import warnings
 from math import log
-from core.prompt import prompt
-from re import search, findall
+from re import findall, search
+
 from requests import get, post
+
+import tld
+from core.config import badTypes, intels
+from core.prompt import prompt
 
 try:
     import concurrent.futures
@@ -24,7 +27,6 @@ except ImportError:
     from urlparse import urlparse  # for Python 2
     python2, python3 = True, False
 
-from core.config import intels, badTypes
 
 try:
     input = raw_input
