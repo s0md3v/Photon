@@ -3,7 +3,6 @@
 
 from __future__ import print_function
 
-# Let's import what we need
 import os
 import sys
 import tld
@@ -19,10 +18,10 @@ from requests import get, post
 
 try:
     import concurrent.futures
-    from urllib.parse import urlparse # for python3
+    from urllib.parse import urlparse  # for Python 3
     python2, python3 = False, True
 except ImportError:
-    from urlparse import urlparse # for python2
+    from urlparse import urlparse  # for Python 2
     python2, python3 = True, False
 
 from core.config import intels, badTypes
@@ -32,10 +31,10 @@ try:
 except NameError:
     pass
 
-colors = True # Output should be colored
-machine = sys.platform # Detecting the os of current system
+colors = True  # Output should be colored
+machine = sys.platform  # Detecting the OS of current system
 if machine.lower().startswith(('os', 'win', 'darwin', 'ios')):
-    colors = False # Colors shouldn't be displayed in mac & windows
+    colors = False  # Colors shouldn't be displayed on macOS & Windows
 if not colors:
     end = red = white = green = yellow = run = bad = good = info = que = ''
 else:
@@ -58,7 +57,7 @@ print('''%s      ____  __          __
   /_/   /_/ /_/\____/\__/\____/_/ /_/ %sv1.1.5%s\n''' %
   (red, white, red, white, red, white, red, white, red, white, red, white, red, white, end))
 
-warnings.filterwarnings('ignore') # Disable SSL related warnings
+warnings.filterwarnings('ignore')  # Disable SSL related warnings
 
 # Processing command line arguments
 parser = argparse.ArgumentParser()
@@ -88,16 +87,17 @@ parser.add_argument('--only-urls', help='only extract urls', dest='only_urls', a
 parser.add_argument('--wayback', help='fetch urls from archive.org as seeds', dest='archive', action='store_true')
 args = parser.parse_args()
 
-####
-# This function git clones the latest version and merges it with the current directory
-####
 
 def update():
+    """Update the current installation.
+
+    git clones the latest version and merges it with the current directory.
+    """
     print('%s Checking for updates' % run)
-    changes = '''--headers option for interactive HTTP header input''' # Changes must be seperated by ;
+    changes = '''--headers option for interactive HTTP header input'''  # Changes must be seperated by ;
     latest_commit = get('https://raw.githubusercontent.com/s0md3v/Photon/master/photon.py').text
 
-    if changes not in latest_commit: # just a hack to see if a new version is available
+    if changes not in latest_commit:  # Just a hack to see if a new version is available
         changelog = search(r"changes = '''(.*?)'''", latest_commit)
         changelog = changelog.group(1).split(';') # splitting the changes to form a list
         print('%s A new version of Photon is available.' % good)
@@ -118,15 +118,15 @@ def update():
     else:
         print('%s Photon is up to date!' % good)
 
-if args.update: # if the user has supplied --update argument
+if args.update:  # If the user has supplied --update argument
     update()
-    quit() # quitting because files have been changed
+    quit()  # Quitting because files have been changed
 
-if args.root: # if the user has supplied a url
+if args.root:  # If the user has supplied a url
     main_inp = args.root
-    if main_inp.endswith('/'): # if the url ends with '/'
-        main_inp = main_inp[:-1] # we will remove it as it can cause problems later in the code
-else: # if the user hasn't supplied a url
+    if main_inp.endswith('/'):  # If the url ends with '/'
+        main_inp = main_inp[:-1]  # We will remove it as it can cause problems later in the code
+else:  # If the user hasn't supplied a url
     print('\n' + parser.format_help().lower())
     quit()
 
@@ -147,24 +147,21 @@ files = set() # pdf, css, png etc.
 intel = set() # emails, website accounts, aws buckets etc.
 robots = set() # entries of robots.txt
 custom = set() # string extracted by custom regex pattern
-failed = set() # urls that photon failed to crawl
+failed = set() # URLs that photon failed to crawl
 scripts = set() # javascript files
-external = set() # urls that don't belong to the target i.e. out-of-scope
-fuzzable = set() # urls that have get params in them e.g. example.com/page.php?id=2
-endpoints = set() # urls found from javascript files
-processed = set() # urls that have been crawled
-internal = set([s for s in args.seeds]) # urls that belong to the target i.e. in-scope
+external = set() # URLs that don't belong to the target i.e. out-of-scope
+fuzzable = set() # URLs that have get params in them e.g. example.com/page.php?id=2
+endpoints = set() # URLs found from javascript files
+processed = set() # URLs that have been crawled
+internal = set([s for s in args.seeds]) # URLs that belong to the target i.e. in-scope
 
 everything = []
-bad_intel = set() # unclean intel urls
-bad_scripts = set() # unclean javascript file urls
+bad_intel = set()  # unclean intel urls
+bad_scripts = set()  # unclean javascript file urls
 
-
-####
-# This function extracts valid headers from interactive inpu
-####
 
 def extractHeaders(headers):
+    """This function extracts valid headers from interactive inpu"""
     sorted_headers = {}
     matches = findall(r'(.*):\s(.*)', headers)
     for match in matches:
