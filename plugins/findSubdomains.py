@@ -1,5 +1,7 @@
 from re import findall
+
 from requests import get
+
 
 def findSubdomains(domain):
     result = set()

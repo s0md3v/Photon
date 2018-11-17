@@ -1,5 +1,7 @@
 import json
+
 from requests import get
+
 
 def timeMachine(host, mode):
     url = '''http://web.archive.org/cdx/search?url=%s&matchType=%s&collapse=urlkey&fl=original&filter=mimetype:text/html&filter=statuscode:200&output=json&from=20180101&to=20181231''' % (host, mode)
