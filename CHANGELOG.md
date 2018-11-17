@@ -1,6 +1,6 @@
 #### v1.1.4
 - Added `-v` option
-- Fixed progress animation for python2
+- Fixed progress animation for Python 2
 - Added `developer.facebook.com` API for Ninja mode
 
 #### v1.1.3
@@ -11,19 +11,19 @@
 
 #### v1.1.2
 - Added `--wayback`
-- Fixed progress bar for python > 3.2 
+- Fixed progress bar for Python > 3.2 
 - Added `/core/config.py` for easy customization
 - `--dns` now saves subdomains in `subdomains.txt`
 
 #### v1.1.1
-- Use of `ThreadPoolExecutor` for x2 speed (for python > 3.2)
+- Use of `ThreadPoolExecutor` for x2 speed (for Python > 3.2)
 - Fixed mishandling of urls starting with `//`
 - Removed a redundant try-except statement
 - Evaluate entropy of found keys to avoid false positives
 
 #### v1.1.0
 - Added `--keys` option
-- Fixed a bug related to SSL certifcate verfication
+- Fixed a bug related to SSL certificate verification
 
 #### v1.0.9
 - Code refactor
@@ -36,7 +36,7 @@
 - Better regex and code logic to favor performance
 - Fixed a bug that caused dnsdumpster to fail if target was a subdomain
 - Fixed a bug that caused a crash if run outside "Photon" directory
-- Fixed a bug in file saving (specific to python3)
+- Fixed a bug in file saving (specific to Python 3)
 
 #### v1.0.7
 - Added `--timeout` option
@@ -44,7 +44,7 @@
 - Added `--user-agent` option
 - Replaced lxml with regex
 - Better logic for favoring performance
-- Added bigger and seperate file for user-agents
+- Added bigger and separate file for user-agents
 
 #### v1.0.6
 - Fixed lot of bugs
@@ -80,8 +80,8 @@
 - Display total time taken and average time per request
 
 #### v1.0.1
-- Disabled colors on windows and mac
+- Disabled colors on Windows and macOS
 - Cross platform file handling
 
 #### v1.0.0
-- First stable release.
+- First stable release
