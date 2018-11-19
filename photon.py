@@ -338,12 +338,12 @@ def xmlParser(response):
 def zap(url):
     """Extract links from robots.txt and sitemap.xml."""
     if args.archive:
-        from plugins.wayback import timeMachine
+        from plugins.wayback import time_machine
         print('%s Fetching URLs from archive.org' % run)
         if False:
-            archived_urls = timeMachine(domain, 'domain')
+            archived_urls = time_machine(domain, 'domain')
         else:
-            archived_urls = timeMachine(host, 'host')
+            archived_urls = time_machine(host, 'host')
         print('%s Retrieved %i URLs from archive.org' % (
             good, len(archived_urls) - 1))
         for url in archived_urls:
