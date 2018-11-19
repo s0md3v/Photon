@@ -340,10 +340,7 @@ def zap(url):
     if args.archive:
         from plugins.wayback import timeMachine
         print('%s Fetching URLs from archive.org' % run)
-        if False:
-            archived_urls = timeMachine(domain, 'domain')
-        else:
-            archived_urls = timeMachine(host, 'host')
+        archived_urls = timeMachine(host, 'host')
         print('%s Retrieved %i URLs from archive.org' % (
             good, len(archived_urls) - 1))
         for url in archived_urls:
