@@ -4,7 +4,7 @@ from re import findall
 from requests import get
 
 
-def findSubdomains(domain):
+def find_subdomains(domain):
     """Find subdomains according to the TLD."""
     result = set()
     response = get('https://findsubdomains.com/subdomains-of/' + domain).text
