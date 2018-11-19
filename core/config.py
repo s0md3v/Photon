@@ -1,2 +1,24 @@
-intels = ['github.com', 'facebook.com', 'instagram.com', 'youtube.com']
-badTypes = ['png', 'jpg', 'jpeg', 'pdf', 'js', 'css', 'ico', 'bmp', 'svg', 'json', 'xml', 'xls', 'csv', 'docx']
+"""Configuration options for Photon."""
+intels = [
+    'facebook.com',
+    'github.com',
+    'instagram.com',
+    'youtube.com',
+]
+
+badTypes = [
+    'bmp',
+    'css',
+    'csv',
+    'docx',
+    'ico',
+    'jpeg',
+    'jpg',
+    'js',
+    'json',
+    'pdf',
+    'png',
+    'svg',
+    'xls',
+    'xml',
+]

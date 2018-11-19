@@ -1,8 +1,10 @@
+"""Support for an input prompt."""
 import os
 import tempfile
 
 
 def prompt(default=None):
+    """Present the user a prompt."""
     editor = 'nano'
     with tempfile.NamedTemporaryFile(mode='r+') as tmpfile:
         if default:
