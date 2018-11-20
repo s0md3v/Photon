@@ -95,7 +95,7 @@ parser.add_argument('--timeout', help='http request timeout', dest='timeout',
 # Switches
 parser.add_argument('--headers', help='add headers', dest='headers',
                     action='store_true')
-parser.add_argument('--dns', help='enumerate subdomains and dns data',
+parser.add_argument('--dns', help='enumerate subdomains and DNS data',
                     dest='dns', action='store_true')
 parser.add_argument('--ninja', help='ninja mode', dest='ninja',
                     action='store_true')
@@ -194,7 +194,7 @@ bad_scripts = set()  # Unclean javascript file urls
 
 
 def extract_headers(headers):
-    """This function extracts valid headers from interactive inpu"""
+    """This function extracts valid headers from interactive input."""
     sorted_headers = {}
     matches = findall(r'(.*):\s(.*)', headers)
     for match in matches:
@@ -308,13 +308,12 @@ def requester(url):
         return post('https://codebeautify.com/URLService', headers=headers,
                     data='path=' + url, verify=False).text
 
-    #
     def photopea(url):
         """Interact with the www.photopea.com API."""
         return get(
             'https://www.photopea.com/mirror.php?url=' + url, verify=False).text
 
-    if ninja: # if the ninja mode is enabled
+    if ninja:  # If the ninja mode is enabled
         # Select a random request function i.e. random API
         response = random.choice(
             [photopea, normal, facebook, pixlr, code_beautify])(url)
@@ -689,8 +688,8 @@ datasets = {
 
 if args.dns:
     print('%s Enumerating subdomains' % run)
-    from plugins.findSubdomains import findSubdomains
-    subdomains = findSubdomains(domain)
+    from plugins.find_subdomains import find_subdomains
+    subdomains = find_subdomains(domain)
     print('%s %i subdomains found' % (info, len(subdomains)))
     writer([subdomains], ['subdomains'], output_dir)
     datasets['subdomains'] = subdomains
