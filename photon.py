@@ -21,10 +21,10 @@ from core.prompt import prompt
 
 try:
     import concurrent.futures
-    from urllib.parse import urlparse  # For Python 3
+    from urllib.parse import urlparse, urljoin  # For Python 3
     python2, python3 = False, True
 except ImportError:
-    from urlparse import urlparse  # For Python 2
+    from urlparse import urlparse, urljoin  # For Python 2
     python2, python3 = True, False
 
 
@@ -349,7 +349,7 @@ def zap(url):
             verb('Internal page', url)
             internal.add(url)
     # Makes request to robots.txt
-    response = get(url + '/robots.txt', verify=False).text
+    response = get(urljoin(url, '/robots.txt'), verify=False).text
     # Making sure robots.txt isn't some fancy 404 page
     if '<body' not in response:
         # If you know it, you know it
@@ -369,7 +369,7 @@ def zap(url):
                     robots.add(url)
             print('%s URLs retrieved from robots.txt: %s' % (good, len(robots)))
     # Makes request to sitemap.xml
-    response = get(url + '/sitemap.xml', verify=False).text
+    response = get(urljoin(url, '/sitemap.xml'), verify=False).text
     # Making sure robots.txt isn't some fancy 404 page
     if '<body' not in response:
         matches = xmlParser(response)
