@@ -450,8 +450,9 @@ def intel_extractor(response):
 def js_extractor(response):
     """Extract js files from the response body"""
     # Extract .js files
-    matches = findall(r'src=[\'"](.*?\.js)["\']', response)
+    matches = findall(r'<(script|SCRIPT).*(src|SRC)=([^\s>]+)', response)
     for match in matches:
+        match = match[2].replace('\'', '').replace('"', '')
         verb('JS file', match)
         bad_scripts.add(match)
 
@@ -470,10 +471,10 @@ def entropy(payload):
 def extractor(url):
     """Extract details from the response body."""
     response = requester(url)
-    matches = findall(r'<[aA].*href=["\']{0,1}(.*?)["\']', response)
+    matches = findall(r'<[aA].*(href|HREF)=([^\s>]+)', response)
     for link in matches:
         # Remove everything after a "#" to deal with in-page anchors
-        link = link.split('#')[0]
+        link = link[1].replace('\'', '').replace('"', '').split('#')[0]
         # Checks if the URLs should be crawled
         if is_link(link):
             if link[:4] == 'http':
