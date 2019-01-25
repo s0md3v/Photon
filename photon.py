@@ -13,7 +13,8 @@ import warnings
 from math import log
 from re import findall, search
 
-from requests import get, post
+import requests
+from requests.exceptions import TooManyRedirects
 
 import tld
 from core.config import badTypes, intels
@@ -118,7 +119,7 @@ def update():
     print('%s Checking for updates' % run)
     # Changes must be separated by ;
     changes = "--headers option for interactive HTTP header input"
-    latest_commit = get('https://raw.githubusercontent.com/s0md3v/Photon/master/photon.py').text
+    latest_commit = requests.get('https://raw.githubusercontent.com/s0md3v/Photon/master/photon.py').text
     # Just a hack to see if a new version is available
     if changes not in latest_commit:
         changelog = search(r"changes = '''(.*?)'''", latest_commit)
@@ -144,6 +145,9 @@ def update():
     else:
         print('%s Photon is up to date!' % good)
 
+
+session = requests.Session()
+session.max_redirects = 3
 
 # If the user has supplied --update argument
 if args.update:
@@ -217,7 +221,7 @@ if main_inp.startswith('http'):
     main_url = main_inp
 else:
     try:
-        get('https://' + main_inp)
+        requests.get('https://' + main_inp)
         main_url = 'https://' + main_inp
     except:
         main_url = 'http://' + main_inp
@@ -269,8 +273,11 @@ def requester(url):
             'DNT': '1',
             'Connection': 'close',
         }
-        response = get(url, cookies=cook, headers=finalHeaders, verify=False,
+        try:
+            response = session.get(url, cookies=cook, headers=finalHeaders, verify=False,
                        timeout=timeout, stream=True)
+        except TooManyRedirects:
+            return 'dummy'
         if 'text/html' in response.headers['content-type']:
             if response.status_code != '404':
                 return response.text
@@ -284,7 +291,7 @@ def requester(url):
 
     def facebook(url):
         """Interact with the developer.facebook.com API."""
-        return get('https://developers.facebook.com/tools/debug/echo/?q=' + url,
+        return requests.get('https://developers.facebook.com/tools/debug/echo/?q=' + url,
                    verify=False).text
 
     def pixlr(url):
@@ -292,7 +299,7 @@ def requester(url):
         if url == main_url:
             # Because pixlr throws error if http://example.com is used
             url = main_url + '/'
-        return get('https://pixlr.com/proxy/?url=' + url,
+        return requests.get('https://pixlr.com/proxy/?url=' + url,
                    headers={'Accept-Encoding' : 'gzip'}, verify=False).text
 
     def code_beautify(url):
@@ -305,12 +312,12 @@ def requester(url):
             'Origin': 'https://codebeautify.org',
             'Connection': 'close',
         }
-        return post('https://codebeautify.com/URLService', headers=headers,
+        return requests.post('https://codebeautify.com/URLService', headers=headers,
                     data='path=' + url, verify=False).text
 
     def photopea(url):
         """Interact with the www.photopea.com API."""
-        return get(
+        return requests.get(
             'https://www.photopea.com/mirror.php?url=' + url, verify=False).text
 
     if ninja:  # If the ninja mode is enabled
@@ -349,7 +356,7 @@ def zap(url):
             verb('Internal page', url)
             internal.add(url)
     # Makes request to robots.txt
-    response = get(url + '/robots.txt', verify=False).text
+    response = requests.get(url + '/robots.txt', verify=False).text
     # Making sure robots.txt isn't some fancy 404 page
     if '<body' not in response:
         # If you know it, you know it
@@ -369,7 +376,7 @@ def zap(url):
                     robots.add(url)
             print('%s URLs retrieved from robots.txt: %s' % (good, len(robots)))
     # Makes request to sitemap.xml
-    response = get(url + '/sitemap.xml', verify=False).text
+    response = requests.get(url + '/sitemap.xml', verify=False).text
     # Making sure robots.txt isn't some fancy 404 page
     if '<body' not in response:
         matches = xmlParser(response)
