@@ -1,3 +1,15 @@
+#### v1.1.6
+- Reuse TCP connection for better performance
+- Handle redirect loops
+- CSV export support
+- Fixed `sitemap.xml` parsing
+- Improved regex 
+
+#### v1.1.5
+- fixed some minor bugs
+- fixed a bug in domain name parsing
+- added --headers option for interactive HTTP headers input
+
 #### v1.1.4
 - Added `-v` option
 - Fixed progress animation for Python 2
