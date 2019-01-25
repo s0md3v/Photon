@@ -290,7 +290,7 @@ if not only_urls:
             scripts.add(main_url + '/' + match)
     # Step 3. Scan the JavaScript files for endpoints
     print('%s Crawling %i JavaScript files' % (run, len(scripts)))
-    flash(jscanner, scripts)
+    flash(jscanner, scripts, thread_count)
 
     for url in internal:
         if '=' in url:
