@@ -16,6 +16,7 @@ import requests
 import core.config
 from core.updater import updater
 from core.flash import flash
+from core.mirror import mirror
 from core.prompt import prompt
 from core.requester import requester
 from core.config import badTypes, intels
@@ -76,6 +77,8 @@ parser.add_argument('--timeout', help='http request timeout', dest='timeout',
                     type=float)
 
 # Switches
+parser.add_argument('--clone', help='clone the website locally', dest='clone',
+                    action='store_true')
 parser.add_argument('--headers', help='add headers', dest='headers',
                     action='store_true')
 parser.add_argument('--dns', help='enumerate subdomains and DNS data',
@@ -109,6 +112,7 @@ else:
     print('\n' + parser.format_help().lower())
     quit()
 
+clone = args.clone
 headers = args.headers  # prompt for headers
 verbose = args.verbose  # verbose output
 delay = args.delay or 0  # Delay between requests
@@ -197,13 +201,15 @@ def js_extractor(response):
 
 def extractor(url):
     """Extract details from the response body."""
-    response = requester(url, main_url, delay, cook, headers, timeout, host, user_agents, ninja, failed, processed)
+    response = requester(url, main_url, delay, cook, headers, timeout, host, ninja, user_agents, failed, processed)
+    if clone:
+        mirror(url, response)
     matches = re.findall(r'<[aA].*(href|HREF)=([^\s>]+)', response)
     for link in matches:
         # Remove everything after a "#" to deal with in-page anchors
         link = link[1].replace('\'', '').replace('"', '').split('#')[0]
         # Checks if the URLs should be crawled
-        if is_link(link):
+        if is_link(link, processed, files):
             if link[:4] == 'http':
                 if link.startswith(main_url):
                     verb('Internal page', link)
