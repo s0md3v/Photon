@@ -10,7 +10,7 @@ def updater():
     """
     print('%s Checking for updates' % run)
     # Changes must be separated by ;
-    changes = "--headers option for interactive HTTP header input"
+    changes = "cloning (mirroring) feature;fixed sitemap.xml parsing;reuse tcp connection to boost speed;handle redirect loops;csv export support;other minor bug fixes"
     latest_commit = requester('https://raw.githubusercontent.com/s0md3v/Photon/master/photon.py', host='github.com').text
     # Just a hack to see if a new version is available
     if changes not in latest_commit:
