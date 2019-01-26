@@ -178,9 +178,6 @@ else:
     with open(sys.path[0] + '/core/user-agents.txt', 'r') as uas:
         user_agents = [agent.strip('\n') for agent in uas]
 
-
-supress_regex = False
-
 def intel_extractor(response):
     """Extract intel from the response body."""
     matches = re.findall(r'([\w\.-]+s[\w\.-]+\.amazonaws\.com)|([\w\.-]+@[\w\.-]+\.[\.\w]+)', response)
@@ -235,7 +232,7 @@ def extractor(url):
         intel_extractor(response)
         js_extractor(response)
     if args.regex and not supress_regex:
-        regxy(args.regex, response)
+        regxy(args.regex, response, custom)
     if api:
         matches = re.findall(r'[\w-]{16,45}', response)
         for match in matches:
