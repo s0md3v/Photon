@@ -1,4 +1,7 @@
 """Configuration options for Photon."""
+
+verbose = False
+
 intels = [
     'facebook.com',
     'github.com',
