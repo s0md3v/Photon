@@ -1,3 +1,7 @@
+#### v1.2.1
+- Added cloning ability
+- Refactored to be modular
+
 #### v1.1.6
 - Reuse TCP connection for better performance
 - Handle redirect loops
