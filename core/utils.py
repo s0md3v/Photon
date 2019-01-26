@@ -9,9 +9,8 @@ try:
 except:
     from urlparse import urlparse
 
-supress_regex = False
 
-def regxy(pattern, response, custom):
+def regxy(pattern, response, supress_regex, custom):
     """Extract a string based on regex pattern supplied by user."""
     try:
         matches = re.findall(r'%s' % pattern, response)
