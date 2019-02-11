@@ -1,12 +1,13 @@
 from __future__ import print_function
 
 import sys
+import threading
 from core.colors import info
 
 try:
     import concurrent.futures
 except ImportError:
-    import threading
+    pass
 
 def threader(function, *urls):
     """Start multiple threads for a function."""
