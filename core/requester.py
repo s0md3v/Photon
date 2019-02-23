@@ -5,8 +5,8 @@ import requests
 from requests.exceptions import TooManyRedirects
 
 
-session = requests.Session()
-session.max_redirects = 3
+SESSION = requests.Session()
+SESSION.max_redirects = 3
 
 def requester(url, main_url=None, delay=0, cook={}, headers={}, timeout=10, host=None, ninja=False, user_agents=['Photon'], failed=[], processed=[]):
     """Handle the requests and return the response body."""
