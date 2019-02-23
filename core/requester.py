@@ -34,7 +34,7 @@ def requester(
 
     def normal(url):
         """Default request"""
-        finalHeaders = headers or {
+        final_headers = headers or {
             'Host': host,
             # Selecting a random user-agent
             'User-Agent': random.choice(user_agents),
@@ -48,7 +48,7 @@ def requester(
             response = SESSION.get(
                 url,
                 cookies=cook,
-                headers=finalHeaders,
+                headers=final_headers,
                 verify=False,
                 timeout=timeout,
                 stream=True
