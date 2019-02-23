@@ -1,5 +1,5 @@
 import os
-import re
+
 
 def mirror(url, response):
     if response != 'dummy':

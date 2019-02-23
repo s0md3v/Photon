@@ -1,8 +1,9 @@
-import time
 import random
+import time
+
 import requests
-from requests import get, post
 from requests.exceptions import TooManyRedirects
+
 
 session = requests.Session()
 session.max_redirects = 3

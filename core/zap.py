@@ -1,8 +1,10 @@
 import re
 import requests
+
 from core.utils import verb, xml_parser
 from core.colors import run, good
 from plugins.wayback import time_machine
+
 
 def zap(input_url, archive, domain, host, internal, robots):
     """Extract links from robots.txt and sitemap.xml."""

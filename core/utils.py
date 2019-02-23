@@ -1,8 +1,10 @@
-import re
-import tld
 import math
-from core.config import verbose, bad_types
+import re
+
+import tld
+
 from core.colors import info
+from core.config import verbose, bad_types
 
 try:
     from urllib.parse import urlparse

@@ -13,16 +13,16 @@ import warnings
 
 import requests
 
+from core.colors import bad, good, info, run, green, red, white, end
 import core.config
-from core.updater import updater
+from core.config import intels
 from core.flash import flash
 from core.mirror import mirror
 from core.prompt import prompt
 from core.requester import requester
-from core.config import intels
-from core.zap import zap
+from core.updater import updater
 from core.utils import top_level, extract_headers, verb, is_link, entropy, regxy, remove_regex, timer, writer
-from core.colors import bad, good, info, run, green, red, white, end
+from core.zap import zap
 
 try:
     from urllib.parse import urlparse  # For Python 3
