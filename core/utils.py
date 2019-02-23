@@ -100,7 +100,7 @@ def entropy(string):
             entropy = entropy - result * math.log(result, 2)
     return entropy
 
-def xmlParser(response):
+def xml_parser(response):
     """Extract links from .xml files."""
     # Regex for extracting URLs
     return re.findall(r'<loc>(.*?)</loc>', response)

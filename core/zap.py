@@ -1,6 +1,6 @@
 import re
 import requests
-from core.utils import verb, xmlParser
+from core.utils import verb, xml_parser
 from core.colors import run, good
 from plugins.wayback import time_machine
 
@@ -41,7 +41,7 @@ def zap(input_url, archive, domain, host, internal, robots):
     response = requests.get(input_url + '/sitemap.xml').text
     # Making sure robots.txt isn't some fancy 404 page
     if '<body' not in response:
-        matches = xmlParser(response)
+        matches = xml_parser(response)
         if matches: # if there are any matches
             print('%s URLs retrieved from sitemap.xml: %s' % (
                 good, len(matches)))
