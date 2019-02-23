@@ -15,7 +15,7 @@ import requests
 
 from core.colors import bad, good, info, run, green, red, white, end
 import core.config
-from core.config import intels
+from core.config import INTELS
 from core.flash import flash
 from core.mirror import mirror
 from core.prompt import prompt
@@ -308,7 +308,7 @@ if not only_urls:
                 intel.add(x)
         for url in external:
             try:
-                if top_level(url, fix_protocol=True) in intels:
+                if top_level(url, fix_protocol=True) in INTELS:
                     intel.add(url)
             except:
                 pass

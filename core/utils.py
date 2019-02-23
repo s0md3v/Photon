@@ -4,7 +4,7 @@ import re
 import tld
 
 from core.colors import info
-from core.config import verbose, bad_types
+from core.config import verbose, BAD_TYPES
 
 try:
     from urllib.parse import urlparse
@@ -38,7 +38,7 @@ def is_link(url, processed, files):
         bool If `url` should be crawled
     """
     if url not in processed:
-        is_file = url.endswith(bad_types)
+        is_file = url.endswith(BAD_TYPES)
         if is_file:
             files.add(url)
         return is_file
