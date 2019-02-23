@@ -49,7 +49,7 @@ def remove_regex(urls, regex):
 
     Args:
         urls: iterable of urls
-        custom_regex: string regex to be parsed for
+        regex: string regex to be parsed for
 
     Returns:
         list of strings not matching regex
