@@ -1,7 +1,7 @@
 import re
 import tld
 import math
-from core.config import verbose, badTypes
+from core.config import verbose, bad_types
 from core.colors import info
 
 try:
@@ -36,7 +36,7 @@ def is_link(url, processed):
         bool If `url` should be crawled
     """
     if url not in processed:
-        is_file = url.endswith(badTypes)
+        is_file = url.endswith(bad_types)
         if is_file:
             files.add(url)
         return is_file

@@ -9,7 +9,7 @@ intels = [
     'youtube.com',
 ]
 
-badTypes = [
+bad_types = [
     'bmp',
     'css',
     'csv',

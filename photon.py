@@ -19,7 +19,7 @@ from core.flash import flash
 from core.mirror import mirror
 from core.prompt import prompt
 from core.requester import requester
-from core.config import badTypes, intels
+from core.config import intels
 from core.zap import zap
 from core.utils import top_level, extract_headers, verb, is_link, entropy, regxy, remove_regex, timer, writer
 from core.colors import bad, good, info, run, green, red, white, end
