@@ -1,6 +1,5 @@
 import re
 import requests
-from core.requester import requester
 from core.utils import verb, xmlParser
 from core.colors import run, good
 from plugins.wayback import time_machine
@@ -8,7 +7,6 @@ from plugins.wayback import time_machine
 def zap(input_url, archive, domain, host, internal, robots):
     """Extract links from robots.txt and sitemap.xml."""
     if archive:
-        from plugins.wayback import time_machine
         print('%s Fetching URLs from archive.org' % run)
         if False:
             archived_urls = time_machine(domain, 'domain')
