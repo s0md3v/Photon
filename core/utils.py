@@ -21,7 +21,7 @@ def regxy(pattern, response, supress_regex, custom):
         supress_regex = True
 
 
-def is_link(url, processed):
+def is_link(url, processed, files):
     """
     Determine whether or not a link should be crawled
     A url should not be crawled if it

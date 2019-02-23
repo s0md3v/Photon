@@ -209,7 +209,7 @@ def extractor(url):
         # Remove everything after a "#" to deal with in-page anchors
         link = link[1].replace('\'', '').replace('"', '').split('#')[0]
         # Checks if the URLs should be crawled
-        if is_link(link, processed):
+        if is_link(link, processed, files):
             if link[:4] == 'http':
                 if link.startswith(main_url):
                     verb('Internal page', link)
