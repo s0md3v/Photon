@@ -4,7 +4,7 @@ import re
 import tld
 
 from core.colors import info
-from core.config import verbose, BAD_TYPES
+from core.config import VERBOSE, BAD_TYPES
 
 try:
     from urllib.parse import urlparse
@@ -109,7 +109,7 @@ def xml_parser(response):
 
 def verb(kind, string):
     """Enable verbose output."""
-    if verbose:
+    if VERBOSE:
         print('%s %s: %s' % (info, kind, string))
 
 def extract_headers(headers):
