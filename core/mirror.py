@@ -3,8 +3,8 @@ import os
 
 def mirror(url, response):
     if response != 'dummy':
-        cleanUrl = url.replace('http://', '').replace('https://', '').rstrip('/')
-        parts = cleanUrl.split('?')[0].split('/')
+        clean_url = url.replace('http://', '').replace('https://', '').rstrip('/')
+        parts = clean_url.split('?')[0].split('/')
         root = parts[0]
         webpage = parts[-1]
         parts.remove(root)
