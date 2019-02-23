@@ -138,7 +138,7 @@ fuzzable = set()
 endpoints = set()  # URLs found from javascript files
 processed = set()  # URLs that have been crawled
 # URLs that belong to the target i.e. in-scope
-internal = set([s for s in args.seeds])
+internal = set(args.seeds)
 
 everything = []
 bad_intel = set()  # Unclean intel urls
