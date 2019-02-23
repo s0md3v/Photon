@@ -21,18 +21,26 @@ def regxy(pattern, response, supress_regex, custom):
         supress_regex = True
 
 
-def is_link(url, processed, files):
-    """Check whether an URL should be crawled or not."""
-    # File extension that don't need to be crawled and are files
-    # Whether the the url should be crawled or not
-    conclusion = False
-    # If the URL hasn't been crawled already
+def is_link(url, processed):
+    """
+    Determine whether or not a link should be crawled
+    A url should not be crawled if it
+        - Is a file
+        - Has already been crawled
+
+    Args:
+        url: str Url to be processed
+        processed: list[str] List of urls that have already been crawled
+
+    Returns:
+        bool If `url` should be crawled
+    """
     if url not in processed:
-        if url.split('.')[-1].lower() in badTypes:
+        is_file = url.endswith(badTypes)
+        if is_file:
             files.add(url)
-        else:
-            return True
-    return conclusion
+        return is_file
+    return False
 
 
 def remove_regex(urls, regex):
