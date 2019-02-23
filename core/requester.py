@@ -8,8 +8,25 @@ from requests.exceptions import TooManyRedirects
 SESSION = requests.Session()
 SESSION.max_redirects = 3
 
-def requester(url, main_url=None, delay=0, cook={}, headers={}, timeout=10, host=None, ninja=False, user_agents=['Photon'], failed=[], processed=[]):
+def requester(
+        url,
+        main_url=None,
+        delay=0,
+        cook=None,
+        headers=None,
+        timeout=10,
+        host=None,
+        ninja=False,
+        user_agents=None,
+        failed=None,
+        processed=None
+    ):
     """Handle the requests and return the response body."""
+    cook = cook or set()
+    headers = headers or set()
+    user_agents = user_agents or ['Photon']
+    failed = failed or set()
+    processed = processed or set()
     # Mark the URL as crawled
     processed.add(url)
     # Pause/sleep the program for specified time
