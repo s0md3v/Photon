@@ -28,8 +28,14 @@ def requester(url, main_url=None, delay=0, cook={}, headers={}, timeout=10, host
             'Connection': 'close',
         }
         try:
-            response = session.get(url, cookies=cook, headers=finalHeaders, verify=False,
-                       timeout=timeout, stream=True)
+            response = SESSION.get(
+                url,
+                cookies=cook,
+                headers=finalHeaders,
+                verify=False,
+                timeout=timeout,
+                stream=True
+            )
         except TooManyRedirects:
             return 'dummy'
         if 'text/html' in response.headers['content-type']:
@@ -45,16 +51,21 @@ def requester(url, main_url=None, delay=0, cook={}, headers={}, timeout=10, host
 
     def facebook(url):
         """Interact with the developer.facebook.com API."""
-        return requests.get('https://developers.facebook.com/tools/debug/echo/?q=' + url,
-                   verify=False).text
+        return requests.get(
+            'https://developers.facebook.com/tools/debug/echo/?q=' + url,
+            verify=False
+        ).text
 
     def pixlr(url):
         """Interact with the pixlr.com API."""
         if url == main_url:
             # Because pixlr throws error if http://example.com is used
             url = main_url + '/'
-        return requests.get('https://pixlr.com/proxy/?url=' + url,
-                   headers={'Accept-Encoding' : 'gzip'}, verify=False).text
+        return requests.get(
+            'https://pixlr.com/proxy/?url=' + url,
+            headers={'Accept-Encoding': 'gzip'},
+            verify=False
+        ).text
 
     def code_beautify(url):
         """Interact with the codebeautify.org API."""
@@ -66,8 +77,12 @@ def requester(url, main_url=None, delay=0, cook={}, headers={}, timeout=10, host
             'Origin': 'https://codebeautify.org',
             'Connection': 'close',
         }
-        return requests.post('https://codebeautify.com/URLService', headers=headers,
-                    data='path=' + url, verify=False).text
+        return requests.post(
+            'https://codebeautify.com/URLService',
+            headers=headers,
+            data='path=' + url,
+            verify=False
+        ).text
 
     def photopea(url):
         """Interact with the www.photopea.com API."""
