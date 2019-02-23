@@ -5,7 +5,6 @@ from __future__ import print_function
 
 import argparse
 import os
-import random
 import re
 import sys
 import time
@@ -13,7 +12,7 @@ import warnings
 
 import requests
 
-from core.colors import bad, good, info, run, green, red, white, end
+from core.colors import good, info, run, green, red, white, end
 import core.config
 from core.config import INTELS
 from core.flash import flash
