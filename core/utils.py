@@ -1,8 +1,10 @@
-import re
-import tld
 import math
-from core.config import verbose, badTypes
+import re
+
+import tld
+
 from core.colors import info
+from core.config import VERBOSE, BAD_TYPES
 
 try:
     from urllib.parse import urlparse
@@ -22,17 +24,25 @@ def regxy(pattern, response, supress_regex, custom):
 
 
 def is_link(url, processed, files):
-    """Check whether an URL should be crawled or not."""
-    # File extension that don't need to be crawled and are files
-    # Whether the the url should be crawled or not
-    conclusion = False
-    # If the URL hasn't been crawled already
+    """
+    Determine whether or not a link should be crawled
+    A url should not be crawled if it
+        - Is a file
+        - Has already been crawled
+
+    Args:
+        url: str Url to be processed
+        processed: list[str] List of urls that have already been crawled
+
+    Returns:
+        bool If `url` should be crawled
+    """
     if url not in processed:
-        if url.split('.')[-1].lower() in badTypes:
+        is_file = url.endswith(BAD_TYPES)
+        if is_file:
             files.add(url)
-        else:
-            return True
-    return conclusion
+        return is_file
+    return False
 
 
 def remove_regex(urls, regex):
@@ -41,7 +51,7 @@ def remove_regex(urls, regex):
 
     Args:
         urls: iterable of urls
-        custom_regex: string regex to be parsed for
+        regex: string regex to be parsed for
 
     Returns:
         list of strings not matching regex
@@ -92,14 +102,14 @@ def entropy(string):
             entropy = entropy - result * math.log(result, 2)
     return entropy
 
-def xmlParser(response):
+def xml_parser(response):
     """Extract links from .xml files."""
     # Regex for extracting URLs
     return re.findall(r'<loc>(.*?)</loc>', response)
 
 def verb(kind, string):
     """Enable verbose output."""
-    if verbose:
+    if VERBOSE:
         print('%s %s: %s' % (info, kind, string))
 
 def extract_headers(headers):

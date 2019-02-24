@@ -5,7 +5,6 @@ from __future__ import print_function
 
 import argparse
 import os
-import random
 import re
 import sys
 import time
@@ -13,16 +12,16 @@ import warnings
 
 import requests
 
+from core.colors import good, info, run, green, red, white, end
 import core.config
-from core.updater import updater
+from core.config import INTELS
 from core.flash import flash
 from core.mirror import mirror
 from core.prompt import prompt
 from core.requester import requester
-from core.config import badTypes, intels
-from core.zap import zap
+from core.updater import updater
 from core.utils import top_level, extract_headers, verb, is_link, entropy, regxy, remove_regex, timer, writer
-from core.colors import bad, good, info, run, green, red, white, end
+from core.zap import zap
 
 try:
     from urllib.parse import urlparse  # For Python 3
@@ -138,7 +137,7 @@ fuzzable = set()
 endpoints = set()  # URLs found from javascript files
 processed = set()  # URLs that have been crawled
 # URLs that belong to the target i.e. in-scope
-internal = set([s for s in args.seeds])
+internal = set(args.seeds)
 
 everything = []
 bad_intel = set()  # Unclean intel urls
@@ -308,7 +307,7 @@ if not only_urls:
                 intel.add(x)
         for url in external:
             try:
-                if top_level(url, fix_protocol=True) in intels:
+                if top_level(url, fix_protocol=True) in INTELS:
                     intel.add(url)
             except:
                 pass

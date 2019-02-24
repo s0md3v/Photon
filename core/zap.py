@@ -1,14 +1,14 @@
 import re
 import requests
-from core.requester import requester
-from core.utils import verb, xmlParser
+
+from core.utils import verb, xml_parser
 from core.colors import run, good
 from plugins.wayback import time_machine
 
-def zap(inputUrl, archive, domain, host, internal, robots):
+
+def zap(input_url, archive, domain, host, internal, robots):
     """Extract links from robots.txt and sitemap.xml."""
     if archive:
-        from plugins.wayback import time_machine
         print('%s Fetching URLs from archive.org' % run)
         if False:
             archived_urls = time_machine(domain, 'domain')
@@ -20,7 +20,7 @@ def zap(inputUrl, archive, domain, host, internal, robots):
             verb('Internal page', url)
             internal.add(url)
     # Makes request to robots.txt
-    response = requests.get(inputUrl + '/robots.txt').text
+    response = requests.get(input_url + '/robots.txt').text
     # Making sure robots.txt isn't some fancy 404 page
     if '<body' not in response:
         # If you know it, you know it
@@ -33,17 +33,17 @@ def zap(inputUrl, archive, domain, host, internal, robots):
                 match = ''.join(match)
                 # If the URL doesn't use a wildcard
                 if '*' not in match:
-                    url = inputUrl + match
+                    url = input_url + match
                     # Add the URL to internal list for crawling
                     internal.add(url)
                     # Add the URL to robots list
                     robots.add(url)
             print('%s URLs retrieved from robots.txt: %s' % (good, len(robots)))
     # Makes request to sitemap.xml
-    response = requests.get(inputUrl + '/sitemap.xml').text
+    response = requests.get(input_url + '/sitemap.xml').text
     # Making sure robots.txt isn't some fancy 404 page
     if '<body' not in response:
-        matches = xmlParser(response)
+        matches = xml_parser(response)
         if matches: # if there are any matches
             print('%s URLs retrieved from sitemap.xml: %s' % (
                 good, len(matches)))

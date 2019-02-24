@@ -1,15 +1,15 @@
 """Configuration options for Photon."""
 
-verbose = False
+VERBOSE = False
 
-intels = [
+INTELS = [
     'facebook.com',
     'github.com',
     'instagram.com',
     'youtube.com',
 ]
 
-badTypes = [
+BAD_TYPES = [
     'bmp',
     'css',
     'csv',

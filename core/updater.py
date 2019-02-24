@@ -1,7 +1,9 @@
-import re
 import os
-from core.requester import requester
+import re
+
 from core.colors import run, que, good, green, end, info
+from core.requester import requester
+
 
 def updater():
     """Update the current installation.

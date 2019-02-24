@@ -1,14 +1,32 @@
-import time
 import random
+import time
+
 import requests
-from requests import get, post
 from requests.exceptions import TooManyRedirects
 
-session = requests.Session()
-session.max_redirects = 3
 
-def requester(url, main_url=None, delay=0, cook={}, headers={}, timeout=10, host=None, ninja=False, user_agents=['Photon'], failed=[], processed=[]):
+SESSION = requests.Session()
+SESSION.max_redirects = 3
+
+def requester(
+        url,
+        main_url=None,
+        delay=0,
+        cook=None,
+        headers=None,
+        timeout=10,
+        host=None,
+        ninja=False,
+        user_agents=None,
+        failed=None,
+        processed=None
+    ):
     """Handle the requests and return the response body."""
+    cook = cook or set()
+    headers = headers or set()
+    user_agents = user_agents or ['Photon']
+    failed = failed or set()
+    processed = processed or set()
     # Mark the URL as crawled
     processed.add(url)
     # Pause/sleep the program for specified time
@@ -16,7 +34,7 @@ def requester(url, main_url=None, delay=0, cook={}, headers={}, timeout=10, host
 
     def normal(url):
         """Default request"""
-        finalHeaders = headers or {
+        final_headers = headers or {
             'Host': host,
             # Selecting a random user-agent
             'User-Agent': random.choice(user_agents),
@@ -27,8 +45,14 @@ def requester(url, main_url=None, delay=0, cook={}, headers={}, timeout=10, host
             'Connection': 'close',
         }
         try:
-            response = session.get(url, cookies=cook, headers=finalHeaders, verify=False,
-                       timeout=timeout, stream=True)
+            response = SESSION.get(
+                url,
+                cookies=cook,
+                headers=final_headers,
+                verify=False,
+                timeout=timeout,
+                stream=True
+            )
         except TooManyRedirects:
             return 'dummy'
         if 'text/html' in response.headers['content-type']:
@@ -44,16 +68,21 @@ def requester(url, main_url=None, delay=0, cook={}, headers={}, timeout=10, host
 
     def facebook(url):
         """Interact with the developer.facebook.com API."""
-        return requests.get('https://developers.facebook.com/tools/debug/echo/?q=' + url,
-                   verify=False).text
+        return requests.get(
+            'https://developers.facebook.com/tools/debug/echo/?q=' + url,
+            verify=False
+        ).text
 
     def pixlr(url):
         """Interact with the pixlr.com API."""
         if url == main_url:
             # Because pixlr throws error if http://example.com is used
             url = main_url + '/'
-        return requests.get('https://pixlr.com/proxy/?url=' + url,
-                   headers={'Accept-Encoding' : 'gzip'}, verify=False).text
+        return requests.get(
+            'https://pixlr.com/proxy/?url=' + url,
+            headers={'Accept-Encoding': 'gzip'},
+            verify=False
+        ).text
 
     def code_beautify(url):
         """Interact with the codebeautify.org API."""
@@ -65,8 +94,12 @@ def requester(url, main_url=None, delay=0, cook={}, headers={}, timeout=10, host
             'Origin': 'https://codebeautify.org',
             'Connection': 'close',
         }
-        return requests.post('https://codebeautify.com/URLService', headers=headers,
-                    data='path=' + url, verify=False).text
+        return requests.post(
+            'https://codebeautify.com/URLService',
+            headers=headers,
+            data='path=' + url,
+            verify=False
+        ).text
 
     def photopea(url):
         """Interact with the www.photopea.com API."""
