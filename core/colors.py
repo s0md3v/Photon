@@ -1,10 +1,8 @@
 import sys
 
-colors = True  # Output should be colored
-machine = sys.platform  # Detecting the os of current system
-if machine.lower().startswith(('os', 'win', 'darwin', 'ios')):
-    colors = False  # Colors shouldn't be displayed in mac & windows
-if not colors:
+
+if sys.platform.lower().startswith(('os', 'win', 'darwin', 'ios')):
+    # Colors shouldn't be displayed on Mac and Windows
     end = red = white = green = yellow = run = bad = good = info = que = ''
 else:
     white = '\033[97m'
