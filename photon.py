@@ -55,7 +55,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-u', '--url', help='root url', dest='root')
 parser.add_argument('-c', '--cookie', help='cookie', dest='cook')
 parser.add_argument('-r', '--regex', help='regex pattern', dest='regex')
-parser.add_argument('-e', '--export', help='export format', dest='export')
+parser.add_argument('-e', '--export', help='export format', dest='export', choices=['csv', 'json'])
 parser.add_argument('-o', '--output', help='output directory', dest='output')
 parser.add_argument('-l', '--level', help='levels to crawl', dest='level',
                     type=int)
