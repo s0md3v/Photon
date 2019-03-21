@@ -9,7 +9,7 @@ INTELS = [
     'youtube.com',
 ]
 
-BAD_TYPES = [
+BAD_TYPES = (
     'bmp',
     'css',
     'csv',
@@ -24,4 +24,4 @@ BAD_TYPES = [
     'svg',
     'xls',
     'xml',
-]
+)
