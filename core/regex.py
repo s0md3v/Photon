@@ -213,7 +213,7 @@ CREDIT_CARD = re.compile(r"[0-9]{4}[ ]?[-]?[0-9]{4}[ ]?[-]?[0-9]{4}[ ]?[-]?[0-9]
 
 rintels = [(GENERIC_URL, "GENERIC_URL"),
            (BRACKET_URL, "BRACKET_URL"),
-           # (BACKSLASH_URL, "BACKSLASH_URL"),
+           (BACKSLASH_URL, "BACKSLASH_URL"),
            (HEXENCODED_URL, "HEXENCODED_URL"),
            (URLENCODED_URL, "URLENCODED_URL"),
            (B64ENCODED_URL, "B64ENCODED_URL"),
