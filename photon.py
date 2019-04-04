@@ -206,7 +206,11 @@ supress_regex = False
 def intel_extractor(response):
     """Extract intel from the response body."""
     for rintel in rintels:
-        matches = rintel[0].findall(response)
+        if rintel[0] in ["MD5", "SHA1", "SHA256", "SHA512"]:
+            # prevent csrf token match
+            rintel[0].findall(re.sub('<[^<]+?>', '', response))
+        else:
+            matches = rintel[0].findall(response)
         if matches:
             for match in matches:
                 verb('Intel', match)
