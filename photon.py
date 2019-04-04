@@ -329,8 +329,16 @@ if not only_urls:
         if isinstance(match, tuple):
             for x in match:  # Because "match" is a tuple
                 if x != '':  # If the value isn't empty
+                    if intel_name == "CREDIT_CARD":
+                        if not luhn(match):
+                            # garbage number
+                            continue
                     intel.add("%s:%s" % (intel_name, x))
         else:
+            if intel_name == "CREDIT_CARD":
+                if not luhn(match):
+                    # garbage number
+                    continue
             intel.add("%s:%s" % (intel_name, match))
         for url in external:
             try:

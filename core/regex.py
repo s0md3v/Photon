@@ -209,6 +209,8 @@ YARA_PARSE = re.compile(r"""
         (?:$|\s)
     """, re.MULTILINE | re.DOTALL | re.VERBOSE)
 
+CREDIT_CARD = re.compile(r"[0-9]{4}[ ]?[-]?[0-9]{4}[ ]?[-]?[0-9]{4}[ ]?[-]?[0-9]{4}")
+
 rintels = [(GENERIC_URL, "GENERIC_URL"),
            (BRACKET_URL, "BRACKET_URL"),
            (BACKSLASH_URL, "BACKSLASH_URL"),
@@ -218,11 +220,13 @@ rintels = [(GENERIC_URL, "GENERIC_URL"),
            (IPV4, "IPV4"),
            (IPV6, "IPV6"),
            (EMAIL, "EMAIL"),
-           (MD5, "MD5"),
-           (SHA1, "SHA1"),
-           (SHA256, "SHA256"),
-           (SHA512, "SHA512"),
-           (YARA_PARSE, "YARA_PARSE")]
+        #    (MD5, "MD5"),
+        #    (SHA1, "SHA1"),
+        #    (SHA256, "SHA256"),
+        #    (SHA512, "SHA512"),
+           (YARA_PARSE, "YARA_PARSE"),
+           (CREDIT_CARD, "CREDIT_CARD")]
+
 
 rscript = re.compile(r'<(script|SCRIPT).*(src|SRC)=([^\s>]+)')
 rhref = re.compile(r'<[aA].*(href|HREF)=([^\s>]+)')
