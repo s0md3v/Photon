@@ -12,7 +12,7 @@ import warnings
 
 import requests
 
-from core.colors import good, info, run, green, red, white, end
+from core.colors import good, info, run, green, red, white, end, bad
 import core.config
 from core.config import INTELS
 from core.flash import flash
@@ -20,7 +20,19 @@ from core.mirror import mirror
 from core.prompt import prompt
 from core.requester import requester
 from core.updater import updater
-from core.utils import top_level, extract_headers, verb, is_link, entropy, regxy, remove_regex, timer, writer
+from core.utils import (luhn,
+                        UrlType,
+                        ProxyType,
+                        is_good_proxy,
+                        top_level,
+                        extract_headers,
+                        verb, is_link,
+                        entropy, regxy,
+                        remove_regex,
+                        timer,
+                        writer)
+from core.regex import rintels, rendpoint, rhref, rscript, rentropy
+
 from core.zap import zap
 
 try:
@@ -42,7 +54,7 @@ print('''%s      ____  __          __
      / %s__%s \/ /_  ____  / /_____  ____
     / %s/_/%s / __ \/ %s__%s \/ __/ %s__%s \/ __ \\
    / ____/ / / / %s/_/%s / /_/ %s/_/%s / / / /
-  /_/   /_/ /_/\____/\__/\____/_/ /_/ %sv1.2.1%s\n''' %
+  /_/   /_/ /_/\____/\__/\____/_/ /_/ %sv2.0.0%s\n''' %
       (red, white, red, white, red, white, red, white, red, white, red, white,
        red, white, end))
 
@@ -52,7 +64,7 @@ warnings.filterwarnings('ignore')
 # Processing command line arguments
 parser = argparse.ArgumentParser()
 # Options
-parser.add_argument('-u', '--url', help='root url', dest='root')
+parser.add_argument('-u', '--url', help='root url', dest='root', type=UrlType)
 parser.add_argument('-c', '--cookie', help='cookie', dest='cook')
 parser.add_argument('-r', '--regex', help='regex pattern', dest='regex')
 parser.add_argument('-e', '--export', help='export format', dest='export', choices=['csv', 'json'])
@@ -74,6 +86,8 @@ parser.add_argument('--exclude', help='exclude URLs matching this regex',
                     dest='exclude')
 parser.add_argument('--timeout', help='http request timeout', dest='timeout',
                     type=float)
+parser.add_argument('-p', '--proxy', help='Proxy server IP:PORT or DOMAIN:PORT', dest='proxies',
+                    type=ProxyType)
 
 # Switches
 parser.add_argument('--clone', help='clone the website locally', dest='clone',
@@ -119,6 +133,15 @@ timeout = args.timeout or 6  # HTTP request timeout
 cook = args.cook or None  # Cookie
 api = bool(args.api)  # Extract high entropy strings i.e. API keys and stuff
 ninja = bool(args.ninja)  # Ninja mode toggle
+
+proxies = None
+if args.proxies:
+    proxies = {"http": args.proxies,
+               "https": args.proxies}
+    if not is_good_proxy(proxies):
+        print("%s Proxy doesn't seem to work" % bad)
+        exit()
+
 crawl_level = args.level or 2  # Crawling level
 thread_count = args.threads or 2  # Number of threads
 only_urls = bool(args.only_urls)  # Only URLs mode is off by default
@@ -182,17 +205,18 @@ supress_regex = False
 
 def intel_extractor(response):
     """Extract intel from the response body."""
-    matches = re.findall(r'([\w\.-]+s[\w\.-]+\.amazonaws\.com)|([\w\.-]+@[\w\.-]+\.[\.\w]+)', response)
-    if matches:
-        for match in matches:
-            verb('Intel', match)
-            bad_intel.add(match)
+    for rintel in rintels:
+        matches = rintel[0].findall(response)
+        if matches:
+            for match in matches:
+                verb('Intel', match)
+                bad_intel.add((match, rintel[1]))
 
 
 def js_extractor(response):
     """Extract js files from the response body"""
     # Extract .js files
-    matches = re.findall(r'<(script|SCRIPT).*(src|SRC)=([^\s>]+)', response)
+    matches = rscript.findall(response)
     for match in matches:
         match = match[2].replace('\'', '').replace('"', '')
         verb('JS file', match)
@@ -200,10 +224,10 @@ def js_extractor(response):
 
 def extractor(url):
     """Extract details from the response body."""
-    response = requester(url, main_url, delay, cook, headers, timeout, host, ninja, user_agents, failed, processed)
+    response = requester(url, main_url, delay, cook, headers, timeout, host, ninja, proxies, user_agents, failed, processed)
     if clone:
         mirror(url, response)
-    matches = re.findall(r'<[aA].*(href|HREF)=([^\s>]+)', response)
+    matches = rhref.findall(response)
     for link in matches:
         # Remove everything after a "#" to deal with in-page anchors
         link = link[1].replace('\'', '').replace('"', '').split('#')[0]
@@ -236,7 +260,7 @@ def extractor(url):
     if args.regex and not supress_regex:
         regxy(args.regex, response, supress_regex, custom)
     if api:
-        matches = re.findall(r'[\w-]{16,45}', response)
+        matches = rentropy.findall(response)
         for match in matches:
             if entropy(match) >= 4:
                 verb('Key', match)
@@ -245,9 +269,9 @@ def extractor(url):
 
 def jscanner(url):
     """Extract endpoints from JavaScript code."""
-    response = requester(url, main_url, delay, cook, headers, timeout, host, ninja, user_agents, failed, processed)
+    response = requester(url, main_url, delay, cook, headers, timeout, host, ninja, proxies, user_agents, failed, processed)
     # Extract URLs/endpoints
-    matches = re.findall(r'[\'"](/.*?)[\'"]|[\'"](http.*?)[\'"]', response)
+    matches = rendpoint.findall(response)
     # Iterate over the matches, match is a tuple
     for match in matches:
         # Combining the items because one of them is always empty
@@ -301,10 +325,13 @@ if not only_urls:
         if '=' in url:
             fuzzable.add(url)
 
-    for match in bad_intel:
-        for x in match:  # Because "match" is a tuple
-            if x != '':  # If the value isn't empty
-                intel.add(x)
+    for match, intel_name in bad_intel:
+        if isinstance(match, tuple):
+            for x in match:  # Because "match" is a tuple
+                if x != '':  # If the value isn't empty
+                    intel.add("%s:%s" % (intel_name, x))
+        else:
+            intel.add("%s:%s" % (intel_name, match))
         for url in external:
             try:
                 if top_level(url, fix_protocol=True) in INTELS:
@@ -337,14 +364,14 @@ print(('%s-%s' % (red, end)) * 50)
 
 print('%s Total requests made: %i' % (info, len(processed)))
 print('%s Total time taken: %i minutes %i seconds' % (info, minutes, seconds))
-print('%s Requests per second: %i' % (info, int(len(processed)/diff)))
+print('%s Requests per second: %i' % (info, int(len(processed) / diff)))
 
 datasets = {
     'files': list(files), 'intel': list(intel), 'robots': list(robots),
     'custom': list(custom), 'failed': list(failed), 'internal': list(internal),
     'scripts': list(scripts), 'external': list(external),
     'fuzzable': list(fuzzable), 'endpoints': list(endpoints),
-    'keys' : list(keys)
+    'keys': list(keys)
 }
 
 if args.dns:

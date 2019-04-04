@@ -17,6 +17,7 @@ def requester(
         timeout=10,
         host=None,
         ninja=False,
+        proxies=None,
         user_agents=None,
         failed=None,
         processed=None
@@ -51,11 +52,14 @@ def requester(
                 headers=final_headers,
                 verify=False,
                 timeout=timeout,
-                stream=True
+                stream=True,
+                proxies=proxies
             )
         except TooManyRedirects:
             return 'dummy'
-        if 'text/html' in response.headers['content-type']:
+
+        if 'text/html' in response.headers['content-type'] or \
+           'text/plain' in response.headers['content-type']:
             if response.status_code != '404':
                 return response.text
             else:
@@ -70,7 +74,8 @@ def requester(
         """Interact with the developer.facebook.com API."""
         return requests.get(
             'https://developers.facebook.com/tools/debug/echo/?q=' + url,
-            verify=False
+            verify=False,
+            proxies=proxies
         ).text
 
     def pixlr(url):
@@ -81,7 +86,8 @@ def requester(
         return requests.get(
             'https://pixlr.com/proxy/?url=' + url,
             headers={'Accept-Encoding': 'gzip'},
-            verify=False
+            verify=False,
+            proxies=proxies
         ).text
 
     def code_beautify(url):
@@ -98,7 +104,8 @@ def requester(
             'https://codebeautify.com/URLService',
             headers=headers,
             data='path=' + url,
-            verify=False
+            verify=False,
+            proxies=proxies
         ).text
 
     def photopea(url):
