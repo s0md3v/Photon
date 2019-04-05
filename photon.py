@@ -176,7 +176,7 @@ if main_inp.startswith('http'):
     main_url = main_inp
 else:
     try:
-        requests.get('https://' + main_inp)
+        requests.get('https://' + main_inp, proxies=proxies)
         main_url = 'https://' + main_inp
     except:
         main_url = 'http://' + main_inp
@@ -288,7 +288,7 @@ def jscanner(url):
 then = time.time()
 
 # Step 1. Extract urls from robots.txt & sitemap.xml
-zap(main_url, args.archive, domain, host, internal, robots)
+zap(main_url, args.archive, domain, host, internal, robots, proxies)
 
 # This is so the level 1 emails are parsed as well
 internal = set(remove_regex(internal, args.exclude))
