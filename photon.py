@@ -25,12 +25,6 @@ from core.zap import zap
 
 from urllib.parse import urlparse  # For Python 3
 
-try:
-    input = raw_input
-except NameError:
-    pass
-
-
 # Just a fancy ass banner
 print('''%s      ____  __          __
      / %s__%s \/ /_  ____  / /_____  ____
@@ -76,8 +70,6 @@ parser.add_argument('--headers', help='add headers', dest='headers',
                     action='store_true')
 parser.add_argument('--dns', help='enumerate subdomains and DNS data',
                     dest='dns', action='store_true')
-parser.add_argument('--ninja', help='ninja mode', dest='ninja',
-                    action='store_true')
 parser.add_argument('--keys', help='find secret keys', dest='api',
                     action='store_true')
 parser.add_argument('--update', help='update photon', dest='update',
@@ -112,7 +104,6 @@ delay = args.delay or 0  # Delay between requests
 timeout = args.timeout or 6  # HTTP request timeout
 cook = args.cook or None  # Cookie
 api = bool(args.api)  # Extract high entropy strings i.e. API keys and stuff
-ninja = bool(args.ninja)  # Ninja mode toggle
 crawl_level = args.level or 2  # Crawling level
 thread_count = args.threads or 2  # Number of threads
 only_urls = bool(args.only_urls)  # Only URLs mode is off by default
@@ -203,7 +194,7 @@ def remove_file(url):
 
 def extractor(url):
     """Extract details from the response body."""
-    response = requester(url, main_url, delay, cook, headers, timeout, host, ninja, user_agents, failed, processed)
+    response = requester(url, main_url, delay, cook, headers, timeout, host, user_agents, failed, processed)
     if clone:
         mirror(url, response)
     matches = re.findall(r'<[aA][^>]*?(href|HREF)=([^\s>]+)', response)
@@ -254,7 +245,7 @@ def extractor(url):
 
 def jscanner(url):
     """Extract endpoints from JavaScript code."""
-    response = requester(url, main_url, delay, cook, headers, timeout, host, ninja, user_agents, failed, processed)
+    response = requester(url, main_url, delay, cook, headers, timeout, host, user_agents, failed, processed)
     # Extract URLs/endpoints
     matches = re.findall(r'[\'"](/.*?)[\'"]|[\'"](http.*?)[\'"]', response)
     # Iterate over the matches, match is a tuple
