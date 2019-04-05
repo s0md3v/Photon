@@ -135,12 +135,11 @@ external = set()  # URLs that don't belong to the target i.e. out-of-scope
 # URLs that have get params in them e.g. example.com/page.php?id=2
 fuzzable = set()
 endpoints = set()  # URLs found from javascript files
-processed = set()  # URLs that have been crawled
+processed = set(['dummy'])  # URLs that have been crawled
 # URLs that belong to the target i.e. in-scope
 internal = set(args.seeds)
 
 everything = []
-bad_intel = set()  # Unclean intel urls
 bad_scripts = set()  # Unclean javascript file urls
 
 core.config.verbose = verbose
@@ -186,7 +185,7 @@ def intel_extractor(url, response):
     if matches:
         for match in matches:
             verb('Intel', match)
-            bad_intel.add(url + ':' + match)
+            intel.add(url + ':' + ''.join(list(match)))
 
 
 def js_extractor(response):
@@ -200,7 +199,11 @@ def js_extractor(response):
 
 def remove_file(url):
     if url.count('/') > 2:
-        return url.replace(re.search(r'/[^/]*?$', url).group(), '')
+        replacable = re.search(r'/[^/]*?$', url).group()
+        if replacable != '/':
+            return url.replace(replacable, '')
+        else:
+            return url
     else:
         return url
 
@@ -225,7 +228,7 @@ def extractor(url):
             elif link[:2] == '//':
                 if link.split('/')[2].startswith(host):
                     verb('Internal page', link)
-                    internal.add(schema + link)
+                    internal.add(schema + '://' + link)
                 else:
                     verb('External page', link)
                     external.add(link)
@@ -234,7 +237,13 @@ def extractor(url):
                 internal.add(remove_file(url) + link)
             else:
                 verb('Internal page', link)
-                internal.add(remove_file(url) + '/' + link)
+                usable_url = remove_file(url)
+                if usable_url.endswith('/'):
+                    internal.add(usable_url + link)
+                elif link.startswith('/'):
+                    internal.add(usable_url + link)
+                else:
+                    internal.add(usable_url + '/' + link)
 
     if not only_urls:
         intel_extractor(url, response)
@@ -307,10 +316,8 @@ if not only_urls:
         if '=' in url:
             fuzzable.add(url)
 
-    for match in bad_intel:
-        for x in match:  # Because "match" is a tuple
-            if x != '':  # If the value isn't empty
-                intel.add(x)
+    for match in intel:
+        intel.add(match)
         for url in external:
             try:
                 if top_level(url, fix_protocol=True) in INTELS:
