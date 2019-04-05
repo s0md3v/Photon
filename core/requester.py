@@ -16,7 +16,6 @@ def requester(
         headers=None,
         timeout=10,
         host=None,
-        ninja=False,
         user_agents=None,
         failed=None,
         processed=None
@@ -32,7 +31,7 @@ def requester(
     # Pause/sleep the program for specified time
     time.sleep(delay)
 
-    def normal(url):
+    def make_request(url):
         """Default request"""
         final_headers = headers or {
             'Host': host,
@@ -66,50 +65,4 @@ def requester(
             response.close()
             return 'dummy'
 
-    def facebook(url):
-        """Interact with the developer.facebook.com API."""
-        return requests.get(
-            'https://developers.facebook.com/tools/debug/echo/?q=' + url,
-            verify=False
-        ).text
-
-    def pixlr(url):
-        """Interact with the pixlr.com API."""
-        if url == main_url:
-            # Because pixlr throws error if http://example.com is used
-            url = main_url + '/'
-        return requests.get(
-            'https://pixlr.com/proxy/?url=' + url,
-            headers={'Accept-Encoding': 'gzip'},
-            verify=False
-        ).text
-
-    def code_beautify(url):
-        """Interact with the codebeautify.org API."""
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:61.0) Gecko/20100101 Firefox/61.0',
-            'Accept': 'text/plain, */*; q=0.01',
-            'Accept-Encoding': 'gzip',
-            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-            'Origin': 'https://codebeautify.org',
-            'Connection': 'close',
-        }
-        return requests.post(
-            'https://codebeautify.com/URLService',
-            headers=headers,
-            data='path=' + url,
-            verify=False
-        ).text
-
-    def photopea(url):
-        """Interact with the www.photopea.com API."""
-        return requests.get(
-            'https://www.photopea.com/mirror.php?url=' + url, verify=False).text
-
-    if ninja:  # If the ninja mode is enabled
-        # Select a random request function i.e. random API
-        response = random.choice(
-            [photopea, normal, facebook, pixlr, code_beautify])(url)
-        return response or 'dummy'
-    else:
-        return normal(url)
+    return make_request(url)

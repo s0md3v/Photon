@@ -6,13 +6,28 @@ from __future__ import print_function
 import argparse
 import os
 import re
+import requests
 import sys
 import time
 import warnings
 
-import requests
-
 from core.colors import good, info, run, green, red, white, end
+
+# Just a fancy ass banner
+print('''%s      ____  __          __
+     / %s__%s \/ /_  ____  / /_____  ____
+    / %s/_/%s / __ \/ %s__%s \/ __/ %s__%s \/ __ \\
+   / ____/ / / / %s/_/%s / /_/ %s/_/%s / / / /
+  /_/   /_/ /_/\____/\__/\____/_/ /_/ %sv1.2.2%s\n''' %
+      (red, white, red, white, red, white, red, white, red, white, red, white,
+       red, white, end))
+
+try:
+    from urllib.parse import urlparse  # For Python 3
+except ImportError:
+    print ('%s Photon runs only on Python 3.2 and above.' % info)
+    quit()
+
 import core.config
 from core.config import INTELS
 from core.flash import flash
@@ -23,28 +38,6 @@ from core.updater import updater
 from core.utils import top_level, extract_headers, verb, is_link, entropy, regxy, remove_regex, timer, writer
 from core.zap import zap
 
-try:
-    from urllib.parse import urlparse  # For Python 3
-    python2, python3 = False, True
-except ImportError:
-    from urlparse import urlparse  # For Python 2
-    python2, python3 = True, False
-
-
-try:
-    input = raw_input
-except NameError:
-    pass
-
-
-# Just a fancy ass banner
-print('''%s      ____  __          __
-     / %s__%s \/ /_  ____  / /_____  ____
-    / %s/_/%s / __ \/ %s__%s \/ __/ %s__%s \/ __ \\
-   / ____/ / / / %s/_/%s / /_/ %s/_/%s / / / /
-  /_/   /_/ /_/\____/\__/\____/_/ /_/ %sv1.2.1%s\n''' %
-      (red, white, red, white, red, white, red, white, red, white, red, white,
-       red, white, end))
 
 # Disable SSL related warnings
 warnings.filterwarnings('ignore')
@@ -82,8 +75,6 @@ parser.add_argument('--headers', help='add headers', dest='headers',
                     action='store_true')
 parser.add_argument('--dns', help='enumerate subdomains and DNS data',
                     dest='dns', action='store_true')
-parser.add_argument('--ninja', help='ninja mode', dest='ninja',
-                    action='store_true')
 parser.add_argument('--keys', help='find secret keys', dest='api',
                     action='store_true')
 parser.add_argument('--update', help='update photon', dest='update',
@@ -118,7 +109,6 @@ delay = args.delay or 0  # Delay between requests
 timeout = args.timeout or 6  # HTTP request timeout
 cook = args.cook or None  # Cookie
 api = bool(args.api)  # Extract high entropy strings i.e. API keys and stuff
-ninja = bool(args.ninja)  # Ninja mode toggle
 crawl_level = args.level or 2  # Crawling level
 thread_count = args.threads or 2  # Number of threads
 only_urls = bool(args.only_urls)  # Only URLs mode is off by default
@@ -135,12 +125,11 @@ external = set()  # URLs that don't belong to the target i.e. out-of-scope
 # URLs that have get params in them e.g. example.com/page.php?id=2
 fuzzable = set()
 endpoints = set()  # URLs found from javascript files
-processed = set()  # URLs that have been crawled
+processed = set(['dummy'])  # URLs that have been crawled
 # URLs that belong to the target i.e. in-scope
 internal = set(args.seeds)
 
 everything = []
-bad_intel = set()  # Unclean intel urls
 bad_scripts = set()  # Unclean javascript file urls
 
 core.config.verbose = verbose
@@ -180,13 +169,13 @@ else:
 
 supress_regex = False
 
-def intel_extractor(response):
+def intel_extractor(url, response):
     """Extract intel from the response body."""
     matches = re.findall(r'([\w\.-]+s[\w\.-]+\.amazonaws\.com)|([\w\.-]+@[\w\.-]+\.[\.\w]+)', response)
     if matches:
         for match in matches:
             verb('Intel', match)
-            bad_intel.add(match)
+            intel.add(url + ':' + ''.join(list(match)))
 
 
 def js_extractor(response):
@@ -198,12 +187,22 @@ def js_extractor(response):
         verb('JS file', match)
         bad_scripts.add(match)
 
+def remove_file(url):
+    if url.count('/') > 2:
+        replacable = re.search(r'/[^/]*?$', url).group()
+        if replacable != '/':
+            return url.replace(replacable, '')
+        else:
+            return url
+    else:
+        return url
+
 def extractor(url):
     """Extract details from the response body."""
-    response = requester(url, main_url, delay, cook, headers, timeout, host, ninja, user_agents, failed, processed)
+    response = requester(url, main_url, delay, cook, headers, timeout, host, user_agents, failed, processed)
     if clone:
         mirror(url, response)
-    matches = re.findall(r'<[aA].*(href|HREF)=([^\s>]+)', response)
+    matches = re.findall(r'<[aA][^>]*?(href|HREF)=([^\s>]+)', response)
     for link in matches:
         # Remove everything after a "#" to deal with in-page anchors
         link = link[1].replace('\'', '').replace('"', '').split('#')[0]
@@ -219,19 +218,25 @@ def extractor(url):
             elif link[:2] == '//':
                 if link.split('/')[2].startswith(host):
                     verb('Internal page', link)
-                    internal.add(schema + link)
+                    internal.add(schema + '://' + link)
                 else:
                     verb('External page', link)
                     external.add(link)
             elif link[:1] == '/':
                 verb('Internal page', link)
-                internal.add(main_url + link)
+                internal.add(remove_file(url) + link)
             else:
                 verb('Internal page', link)
-                internal.add(main_url + '/' + link)
+                usable_url = remove_file(url)
+                if usable_url.endswith('/'):
+                    internal.add(usable_url + link)
+                elif link.startswith('/'):
+                    internal.add(usable_url + link)
+                else:
+                    internal.add(usable_url + '/' + link)
 
     if not only_urls:
-        intel_extractor(response)
+        intel_extractor(url, response)
         js_extractor(response)
     if args.regex and not supress_regex:
         regxy(args.regex, response, supress_regex, custom)
@@ -245,7 +250,7 @@ def extractor(url):
 
 def jscanner(url):
     """Extract endpoints from JavaScript code."""
-    response = requester(url, main_url, delay, cook, headers, timeout, host, ninja, user_agents, failed, processed)
+    response = requester(url, main_url, delay, cook, headers, timeout, host, user_agents, failed, processed)
     # Extract URLs/endpoints
     matches = re.findall(r'[\'"](/.*?)[\'"]|[\'"](http.*?)[\'"]', response)
     # Iterate over the matches, match is a tuple
@@ -301,10 +306,8 @@ if not only_urls:
         if '=' in url:
             fuzzable.add(url)
 
-    for match in bad_intel:
-        for x in match:  # Because "match" is a tuple
-            if x != '':  # If the value isn't empty
-                intel.add(x)
+    for match in intel:
+        intel.add(match)
         for url in external:
             try:
                 if top_level(url, fix_protocol=True) in INTELS:
