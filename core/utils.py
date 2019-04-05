@@ -9,10 +9,11 @@ from core.config import VERBOSE, BAD_TYPES
 
 try:
     from urllib.parse import urlparse
-    import urllib.request
+    from urllib.request import ProxyHandler, build_opener, install_opener, Request, urlopen
     import urllib.error
-except:
+except ImportError:
     from urlparse import urlparse
+    from urllib2 import ProxyHandler, build_opener, install_opener, Request, urlopen
 
 
 def regxy(pattern, response, supress_regex, custom):
@@ -184,13 +185,13 @@ def luhn(purported):
 
 def is_good_proxy(pip):
     try:
-        proxy_handler = urllib.request.ProxyHandler(pip)
-        opener = urllib.request.build_opener(proxy_handler)
+        proxy_handler = ProxyHandler(pip)
+        opener = build_opener(proxy_handler)
         opener.addheaders = [('User-agent', 'Mozilla/5.0')]
-        urllib.request.install_opener(opener)
+        install_opener(opener)
         # change the URL to test here
-        req = urllib.request.Request('http://www.example.com')
-        sock = urllib.request.urlopen(req, timeout=2)
+        req = Request('http://www.example.com')
+        sock = urlopen(req, timeout=2)
     except urllib.error.HTTPError as e:
         return False
     except Exception as detail:
