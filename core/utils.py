@@ -45,7 +45,8 @@ def is_link(url, processed, files):
         is_file = url.endswith(BAD_TYPES)
         if is_file:
             files.add(url)
-        return is_file
+            return False
+        return True
     return False
 
 
@@ -83,7 +84,7 @@ def writer(datasets, dataset_names, output_dir):
             filepath = output_dir + '/' + dataset_name + '.txt'
             with open(filepath, 'w+') as out_file:
                 joined = '\n'.join(dataset)
-                out_file.write(str(joined.encode('utf-8')))
+                out_file.write(str(joined.encode('utf-8').decode('utf-8')))
                 out_file.write('\n')
 
 
