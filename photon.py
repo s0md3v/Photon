@@ -237,7 +237,7 @@ def extractor(url):
                 internal.add(remove_file(url) + '/' + link)
 
     if not only_urls:
-        intel_extractor(link, response)
+        intel_extractor(url, response)
         js_extractor(response)
     if args.regex and not supress_regex:
         regxy(args.regex, response, supress_regex, custom)
