@@ -23,13 +23,7 @@ from core.updater import updater
 from core.utils import top_level, extract_headers, verb, is_link, entropy, regxy, remove_regex, timer, writer
 from core.zap import zap
 
-try:
-    from urllib.parse import urlparse  # For Python 3
-    python2, python3 = False, True
-except ImportError:
-    from urlparse import urlparse  # For Python 2
-    python2, python3 = True, False
-
+from urllib.parse import urlparse  # For Python 3
 
 try:
     input = raw_input
