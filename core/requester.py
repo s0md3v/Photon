@@ -1,17 +1,68 @@
-from __future__ import print_function
-import concurrent.futures
+import random
+import time
 
-from core.colors import info
+import requests
+from requests.exceptions import TooManyRedirects
 
-def flash(function, links, thread_count):
-    """Process the URLs and uses a threadpool to execute a function."""
-    # Convert links (set) to list
-    links = list(links)
-    threadpool = concurrent.futures.ThreadPoolExecutor(
-            max_workers=thread_count)
-    futures = (threadpool.submit(function, link) for link in links)
-    for i, _ in enumerate(concurrent.futures.as_completed(futures)):
-        if i + 1 == len(links) or (i + 1) % thread_count == 0:
-            print('%s Progress: %i/%i' % (info, i + 1, len(links)),
-                    end='\r')
-    print('')
+
+SESSION = requests.Session()
+SESSION.max_redirects = 3
+
+def requester(
+        url,
+        main_url=None,
+        delay=0,
+        cook=None,
+        headers=None,
+        timeout=10,
+        host=None,
+        user_agents=None,
+        failed=None,
+        processed=None
+    ):
+    """Handle the requests and return the response body."""
+    cook = cook or set()
+    headers = headers or set()
+    user_agents = user_agents or ['Photon']
+    failed = failed or set()
+    processed = processed or set()
+    # Mark the URL as crawled
+    processed.add(url)
+    # Pause/sleep the program for specified time
+    time.sleep(delay)
+
+    def make_request(url):
+        """Default request"""
+        final_headers = headers or {
+            'Host': host,
+            # Selecting a random user-agent
+            'User-Agent': random.choice(user_agents),
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.5',
+            'Accept-Encoding': 'gzip',
+            'DNT': '1',
+            'Connection': 'close',
+        }
+        try:
+            response = SESSION.get(
+                url,
+                cookies=cook,
+                headers=final_headers,
+                verify=False,
+                timeout=timeout,
+                stream=True
+            )
+        except TooManyRedirects:
+            return 'dummy'
+        if 'text/html' in response.headers['content-type']:
+            if response.status_code != '404':
+                return response.text
+            else:
+                response.close()
+                failed.add(url)
+                return 'dummy'
+        else:
+            response.close()
+            return 'dummy'
+
+    return make_request(url)
