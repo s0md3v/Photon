@@ -153,6 +153,7 @@ internal = set(args.seeds)
 
 everything = []
 bad_scripts = set()  # Unclean javascript file urls
+bad_intel = set() # needed for intel filtering
 
 core.config.verbose = verbose
 
@@ -200,7 +201,7 @@ def intel_extractor(url, response):
         if matches:
             for match in matches:
                 verb('Intel', match)
-                bad_intel.add((match, rintel[1]))
+                bad_intel.add((match, rintel[1], url))
 
 
 def js_extractor(response):
@@ -331,7 +332,7 @@ if not only_urls:
         if '=' in url:
             fuzzable.add(url)
 
-    for match, intel_name in bad_intel:
+    for match, intel_name, url in bad_intel:
         if isinstance(match, tuple):
             for x in match:  # Because "match" is a tuple
                 if x != '':  # If the value isn't empty
@@ -345,7 +346,7 @@ if not only_urls:
                 if not luhn(match):
                     # garbage number
                     continue
-            intel.add("%s:%s" % (intel_name, match))
+            intel.add("%s:%s:%s" % (url, intel_name, match))
         for url in external:
             try:
                 if top_level(url, fix_protocol=True) in INTELS:
