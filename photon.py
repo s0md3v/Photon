@@ -6,13 +6,28 @@ from __future__ import print_function
 import argparse
 import os
 import re
+import requests
 import sys
 import time
 import warnings
 
-import requests
-
 from core.colors import good, info, run, green, red, white, end
+
+# Just a fancy ass banner
+print('''%s      ____  __          __
+     / %s__%s \/ /_  ____  / /_____  ____
+    / %s/_/%s / __ \/ %s__%s \/ __/ %s__%s \/ __ \\
+   / ____/ / / / %s/_/%s / /_/ %s/_/%s / / / /
+  /_/   /_/ /_/\____/\__/\____/_/ /_/ %sv1.2.2%s\n''' %
+      (red, white, red, white, red, white, red, white, red, white, red, white,
+       red, white, end))
+
+try:
+    from urllib.parse import urlparse  # For Python 3
+except ImportError:
+    print ('%s Photon runs only on Python 3.2 and above.' % info)
+    quit()
+
 import core.config
 from core.config import INTELS
 from core.flash import flash
@@ -23,16 +38,6 @@ from core.updater import updater
 from core.utils import top_level, extract_headers, verb, is_link, entropy, regxy, remove_regex, timer, writer
 from core.zap import zap
 
-from urllib.parse import urlparse  # For Python 3
-
-# Just a fancy ass banner
-print('''%s      ____  __          __
-     / %s__%s \/ /_  ____  / /_____  ____
-    / %s/_/%s / __ \/ %s__%s \/ __/ %s__%s \/ __ \\
-   / ____/ / / / %s/_/%s / /_/ %s/_/%s / / / /
-  /_/   /_/ /_/\____/\__/\____/_/ /_/ %sv1.2.2%s\n''' %
-      (red, white, red, white, red, white, red, white, red, white, red, white,
-       red, white, end))
 
 # Disable SSL related warnings
 warnings.filterwarnings('ignore')
