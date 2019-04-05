@@ -1,3 +1,9 @@
+#### v1.3.0
+- Added more intels (GENERIC_URL, BRACKET_URL, BACKSLASH_URL, HEXENCODED_URL, URLENCODED_URL, B64ENCODED_URL, IPV4, IPV6, EMAIL, MD5, SHA1, SHA256, SHA512, YARA_PARSE, CREDIT_CARD)
+- Intel search only applied to text (not inside javascript or html tags)
+- proxy support with `-p, --proxy` option (http proxy only)
+- minor fixes and pep8 format
+
 #### v1.2.1
 - Added cloning ability
 - Refactored to be modular
