@@ -42,7 +42,7 @@ print('''%s      ____  __          __
      / %s__%s \/ /_  ____  / /_____  ____
     / %s/_/%s / __ \/ %s__%s \/ __/ %s__%s \/ __ \\
    / ____/ / / / %s/_/%s / /_/ %s/_/%s / / / /
-  /_/   /_/ /_/\____/\__/\____/_/ /_/ %sv1.2.1%s\n''' %
+  /_/   /_/ /_/\____/\__/\____/_/ /_/ %sv1.2.2%s\n''' %
       (red, white, red, white, red, white, red, white, red, white, red, white,
        red, white, end))
 
@@ -180,13 +180,13 @@ else:
 
 supress_regex = False
 
-def intel_extractor(response):
+def intel_extractor(url, response):
     """Extract intel from the response body."""
     matches = re.findall(r'([\w\.-]+s[\w\.-]+\.amazonaws\.com)|([\w\.-]+@[\w\.-]+\.[\.\w]+)', response)
     if matches:
         for match in matches:
             verb('Intel', match)
-            bad_intel.add(match)
+            bad_intel.add(url + ':' + match)
 
 
 def js_extractor(response):
@@ -198,12 +198,18 @@ def js_extractor(response):
         verb('JS file', match)
         bad_scripts.add(match)
 
+def remove_file(url):
+    if url.count('/') > 2:
+        return url.replace(re.search(r'/[^/]*?$', url).group(), '')
+    else:
+        return url
+
 def extractor(url):
     """Extract details from the response body."""
     response = requester(url, main_url, delay, cook, headers, timeout, host, ninja, user_agents, failed, processed)
     if clone:
         mirror(url, response)
-    matches = re.findall(r'<[aA].*(href|HREF)=([^\s>]+)', response)
+    matches = re.findall(r'<[aA][^>]*?(href|HREF)=([^\s>]+)', response)
     for link in matches:
         # Remove everything after a "#" to deal with in-page anchors
         link = link[1].replace('\'', '').replace('"', '').split('#')[0]
@@ -225,13 +231,13 @@ def extractor(url):
                     external.add(link)
             elif link[:1] == '/':
                 verb('Internal page', link)
-                internal.add(main_url + link)
+                internal.add(remove_file(url) + link)
             else:
                 verb('Internal page', link)
-                internal.add(main_url + '/' + link)
+                internal.add(remove_file(url) + '/' + link)
 
     if not only_urls:
-        intel_extractor(response)
+        intel_extractor(link, response)
         js_extractor(response)
     if args.regex and not supress_regex:
         regxy(args.regex, response, supress_regex, custom)
