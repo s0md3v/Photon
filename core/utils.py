@@ -143,21 +143,6 @@ def top_level(url, fix_protocol=True):
     return toplevel
 
 
-def get_proxies_from_web():
-    reponse = requests.get("https://free-proxy-list.net/anonymous-proxy.html")
-
-    regex = re.compile(
-        r'<td>([0-9]+.[0-9]+.[0-9]+.[0-9]+)</td><td>([0-9]+)</td>')
-
-    proxy_pool = []
-    for match in regex.findall(reponse.text):
-        proxy = f"{match[0]}:{match[1]}"
-        proxy_pool.append({"http": proxy,
-                           "https": proxy})
-
-    return proxy_pool
-
-
 def is_proxy_list(v, proxies):
     if os.path.isfile(v):
         with open(v, 'r') as _file:
@@ -183,12 +168,10 @@ def ProxyType(v):
         return proxies
     elif re.match(r"((http|socks5):\/\/.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}:(\d{1,5})", v):
         proxies.append({"http": v,
-                       "https": v})
+                        "https": v})
         return proxies
     elif is_proxy_list(v, proxies):
         return proxies
-    elif v == "generate":
-        return get_proxies_from_web()
     else:
         raise argparse.ArgumentTypeError(
             "Proxy should follow IP:PORT or DOMAIN:PORT format")
