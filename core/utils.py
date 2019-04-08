@@ -7,13 +7,10 @@ import tld
 from core.colors import info
 from core.config import VERBOSE, BAD_TYPES
 
-try:
-    from urllib.parse import urlparse
-    from urllib.request import ProxyHandler, build_opener, install_opener, Request, urlopen
-    import urllib.error
-except ImportError:
-    from urlparse import urlparse
-    from urllib2 import ProxyHandler, build_opener, install_opener, Request, urlopen
+from urllib.parse import urlparse
+from urllib.request import ProxyHandler, build_opener, install_opener, Request, urlopen
+import urllib.error
+
 
 
 def regxy(pattern, response, supress_regex, custom):
@@ -192,7 +189,7 @@ def is_good_proxy(pip):
         install_opener(opener)
         # change the URL to test here
         req = Request('http://www.example.com')
-        sock = urlopen(req, timeout=2)
+        sock = urlopen(req, timeout=3)
     except urllib.error.HTTPError as e:
         return False
     except Exception as detail:
