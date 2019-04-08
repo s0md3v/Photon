@@ -56,7 +56,7 @@ warnings.filterwarnings('ignore')
 # Processing command line arguments
 parser = argparse.ArgumentParser()
 # Options
-parser.add_argument('-u', '--url', help='root url', dest='root', type=UrlType)
+parser.add_argument('-u', '--url', help='root url', dest='root')
 parser.add_argument('-c', '--cookie', help='cookie', dest='cook')
 parser.add_argument('-r', '--regex', help='regex pattern', dest='regex')
 parser.add_argument('-e', '--export', help='export format', dest='export', choices=['csv', 'json'])
@@ -128,7 +128,7 @@ if args.proxies:
     proxies = {"http": args.proxies,
                "https": args.proxies}
     if not is_good_proxy(proxies):
-        print("%s Proxy doesn't seem to work" % bad)
+        print("%s Proxy doesn't seem to work or timedout" % bad)
         exit()
 
 crawl_level = args.level or 2  # Crawling level

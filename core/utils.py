@@ -144,17 +144,6 @@ def top_level(url, fix_protocol=True):
     return toplevel
 
 
-def UrlType(v):
-    """ Check if string is a URL """
-    if re.match(r"(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)", v):
-        # If all the checks pass, just return the string as is
-        return v
-    elif re.match(r"(http(s)?:\/\/)?(\blocalhost\b)", v):
-        return v
-    else:
-        raise argparse.ArgumentTypeError("Must be a valid url.")
-
-
 def ProxyType(v):
     """ Match IP:PORT or DOMAIN:PORT in a losse manner """
     if re.match(r"(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}):(\d{1,5})", v):
