@@ -37,7 +37,7 @@ from core.prompt import prompt
 from core.requester import requester
 from core.updater import updater
 from core.utils import (luhn,
-                        ProxyType,
+                        proxy_type,
                         is_good_proxy,
                         top_level,
                         extract_headers,
@@ -79,7 +79,7 @@ parser.add_argument('--exclude', help='exclude URLs matching this regex',
 parser.add_argument('--timeout', help='http request timeout', dest='timeout',
                     type=float)
 parser.add_argument('-p', '--proxy', help='Proxy server IP:PORT or DOMAIN:PORT', dest='proxies',
-                    type=ProxyType)
+                    type=proxy_type)
 
 # Switches
 parser.add_argument('--clone', help='clone the website locally', dest='clone',

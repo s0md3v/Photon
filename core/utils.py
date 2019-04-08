@@ -159,7 +159,7 @@ def is_proxy_list(v, proxies):
     return False
 
 
-def ProxyType(v):
+def proxy_type(v):
     """ Match IP:PORT or DOMAIN:PORT in a losse manner """
     proxies = []
     if re.match(r"((http|socks5):\/\/.)?(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}):(\d{1,5})", v):
