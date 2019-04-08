@@ -6,7 +6,7 @@ from core.colors import run, good
 from plugins.wayback import time_machine
 
 
-def zap(input_url, archive, domain, host, internal, robots):
+def zap(input_url, archive, domain, host, internal, robots, proxies):
     """Extract links from robots.txt and sitemap.xml."""
     if archive:
         print('%s Fetching URLs from archive.org' % run)
@@ -20,7 +20,7 @@ def zap(input_url, archive, domain, host, internal, robots):
             verb('Internal page', url)
             internal.add(url)
     # Makes request to robots.txt
-    response = requests.get(input_url + '/robots.txt').text
+    response = requests.get(input_url + '/robots.txt', proxies=proxies).text
     # Making sure robots.txt isn't some fancy 404 page
     if '<body' not in response:
         # If you know it, you know it
@@ -40,7 +40,7 @@ def zap(input_url, archive, domain, host, internal, robots):
                     robots.add(url)
             print('%s URLs retrieved from robots.txt: %s' % (good, len(robots)))
     # Makes request to sitemap.xml
-    response = requests.get(input_url + '/sitemap.xml').text
+    response = requests.get(input_url + '/sitemap.xml', proxies=proxies).text
     # Making sure robots.txt isn't some fancy 404 page
     if '<body' not in response:
         matches = xml_parser(response)

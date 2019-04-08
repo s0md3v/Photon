@@ -16,6 +16,7 @@ def requester(
         headers=None,
         timeout=10,
         host=None,
+        proxies=None,
         user_agents=None,
         failed=None,
         processed=None
@@ -50,11 +51,14 @@ def requester(
                 headers=final_headers,
                 verify=False,
                 timeout=timeout,
-                stream=True
+                stream=True,
+                proxies=proxies
             )
         except TooManyRedirects:
             return 'dummy'
-        if 'text/html' in response.headers['content-type']:
+
+        if 'text/html' in response.headers['content-type'] or \
+           'text/plain' in response.headers['content-type']:
             if response.status_code != '404':
                 return response.text
             else:
