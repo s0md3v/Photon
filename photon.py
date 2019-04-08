@@ -10,6 +10,7 @@ import requests
 import sys
 import time
 import warnings
+import random
 
 from core.colors import good, info, run, green, red, white, end, bad
 
@@ -122,13 +123,21 @@ timeout = args.timeout or 6  # HTTP request timeout
 cook = args.cook or None  # Cookie
 api = bool(args.api)  # Extract high entropy strings i.e. API keys and stuff
 
-proxies = None
+proxies = []
 if args.proxies:
-    proxies = {"http": args.proxies,
-               "https": args.proxies}
-    if not is_good_proxy(proxies):
-        print("%s Proxy doesn't seem to work or timedout" % bad)
-        exit()
+    print("%s Testing proxies, can take a while..." % info)
+    for proxy in args.proxies:
+        if is_good_proxy(proxy):
+            proxies.append(proxy)
+        else:
+            print("%s Proxy %s doesn't seem to work or timedout" %
+                  (bad, proxy['http']))
+    print("%s Done" % info)
+    if not proxies:
+        print("%s no working proxies, quitting!" % bad)
+else:
+    proxies.append(None)
+    exit()
 
 crawl_level = args.level or 2  # Crawling level
 thread_count = args.threads or 2  # Number of threads
@@ -164,7 +173,7 @@ if main_inp.startswith('http'):
     main_url = main_inp
 else:
     try:
-        requests.get('https://' + main_inp, proxies=proxies)
+        requests.get('https://' + main_inp, proxies=random.choice(proxies))
         main_url = 'https://' + main_inp
     except:
         main_url = 'http://' + main_inp
