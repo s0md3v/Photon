@@ -12,5 +12,5 @@ before_script:
   # exit-zero treats all errors as warnings.  The GitHub editor is 127 chars wide
   - flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 script:
-  - python photon.py -u "https://stackoverflow.com" -l 1 -d 1 -t 100 --regex "\d{10}" --dns --output="d3v"
-  - python photon.py -u "https://rocket.chat" -l 1 -t 10 --seeds="https://stackoverflow.com/jobs" --only-urls --export=json --wayback
+  - python photon.py -u "https://somdev.me" -l 1 -d 1 -t 100 --regex "\d{10}" --dns --output="d3v"
+  - python photon.py -u "https://somdev.me" -l 1 -t 10 --seeds="https://somdev.me/posts" --only-urls --export=json --wayback
