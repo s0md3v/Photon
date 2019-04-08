@@ -36,7 +36,6 @@ from core.prompt import prompt
 from core.requester import requester
 from core.updater import updater
 from core.utils import (luhn,
-                        UrlType,
                         ProxyType,
                         is_good_proxy,
                         top_level,
