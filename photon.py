@@ -135,9 +135,9 @@ if args.proxies:
     print("%s Done" % info)
     if not proxies:
         print("%s no working proxies, quitting!" % bad)
+        exit()
 else:
     proxies.append(None)
-    exit()
 
 crawl_level = args.level or 2  # Crawling level
 thread_count = args.threads or 2  # Number of threads
