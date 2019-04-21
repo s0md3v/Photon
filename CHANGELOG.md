@@ -1,3 +1,8 @@
+#### v1.3.2
+- add support for socks proxies
+- add rotating proxies
+- `-p` now takes `IP:PORT` or `DOMAIN:PORT` with `http://`, `socks5://` or nothing (default is `http`) or a `file` with a list of proxies (`http://` or `socks5://` or nothing). 
+
 #### v1.3.1
 - Added more intels (GENERIC_URL, BRACKET_URL, BACKSLASH_URL, HEXENCODED_URL, URLENCODED_URL, B64ENCODED_URL, IPV4, IPV6, EMAIL, MD5, SHA1, SHA256, SHA512, YARA_PARSE, CREDIT_CARD)
 - proxy support with `-p, --proxy` option (http proxy only)

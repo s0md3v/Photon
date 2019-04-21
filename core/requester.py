@@ -52,7 +52,7 @@ def requester(
                 verify=False,
                 timeout=timeout,
                 stream=True,
-                proxies=proxies
+                proxies=random.choice(proxies)
             )
         except TooManyRedirects:
             return 'dummy'

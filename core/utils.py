@@ -1,4 +1,6 @@
+import requests
 import math
+import os.path
 import re
 import argparse
 
@@ -8,9 +10,6 @@ from core.colors import info
 from core.config import VERBOSE, BAD_TYPES
 
 from urllib.parse import urlparse
-from urllib.request import ProxyHandler, build_opener, install_opener, Request, urlopen
-import urllib.error
-
 
 
 def regxy(pattern, response, supress_regex, custom):
@@ -144,12 +143,35 @@ def top_level(url, fix_protocol=True):
     return toplevel
 
 
-def ProxyType(v):
+def is_proxy_list(v, proxies):
+    if os.path.isfile(v):
+        with open(v, 'r') as _file:
+            for line in _file:
+                line = line.strip()
+                if re.match(r"((http|socks5):\/\/.)?(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}):(\d{1,5})", line) or \
+                   re.match(r"((http|socks5):\/\/.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}:(\d{1,5})", line):
+                    proxies.append({"http": line,
+                                    "https": line})
+                else:
+                    print("%s ignored" % line)
+        if proxies:
+            return True
+    return False
+
+
+def proxy_type(v):
     """ Match IP:PORT or DOMAIN:PORT in a losse manner """
-    if re.match(r"(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}):(\d{1,5})", v):
-        return v
-    elif re.match(r"[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}", v.split(':')[0]):
-        return v
+    proxies = []
+    if re.match(r"((http|socks5):\/\/.)?(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}):(\d{1,5})", v):
+        proxies.append({"http": v,
+                        "https": v})
+        return proxies
+    elif re.match(r"((http|socks5):\/\/.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}:(\d{1,5})", v):
+        proxies.append({"http": v,
+                        "https": v})
+        return proxies
+    elif is_proxy_list(v, proxies):
+        return proxies
     else:
         raise argparse.ArgumentTypeError(
             "Proxy should follow IP:PORT or DOMAIN:PORT format")
@@ -172,15 +194,11 @@ def luhn(purported):
 
 def is_good_proxy(pip):
     try:
-        proxy_handler = ProxyHandler(pip)
-        opener = build_opener(proxy_handler)
-        opener.addheaders = [('User-agent', 'Mozilla/5.0')]
-        install_opener(opener)
-        # change the URL to test here
-        req = Request('http://www.example.com')
-        sock = urlopen(req, timeout=3)
-    except urllib.error.HTTPError as e:
+        requests.get('http://example.com', proxies=pip, timeout=3)
+    except requests.exceptions.ConnectTimeout as e:
         return False
     except Exception as detail:
         return False
+
     return True
+
