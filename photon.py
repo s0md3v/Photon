@@ -172,10 +172,16 @@ if headers:
 if main_inp.startswith('http'):
     main_url = main_inp
 else:
+    response = None
     try:
-        requests.get('https://' + main_inp, proxies=random.choice(proxies))
+        response = requests.get('https://' + main_inp, proxies=random.choice(proxies))
+    except requests.ConnectionError:
+        sys.stdout.write("Error, host not found.\n")
+        sys.exit(0)
+
+    if response.status_code == 200:
         main_url = 'https://' + main_inp
-    except:
+    else:
         main_url = 'http://' + main_inp
 
 schema = main_url.split('//')[0] # https: or http:?
