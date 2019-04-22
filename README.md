@@ -63,10 +63,6 @@ Photon's smart thread management & refined logic gives you top notch performance
 
 Still, crawling can be resource intensive but Photon has some tricks up it's sleeves. You can fetch URLs archived by [archive.org](https://archive.org/) to be used as seeds by using `--wayback` option.
 
-In Ninja Mode which can be accessed by `--ninja`, 4 online services are used to make requests to the target on your behalf.
-
-So basically, now you have 4 clients making requests to the same server simultaneously which gives you a speed boost if you have a slow connection, minimizes the risk of connection reset as well as delays requests from a single client.
-
 #### Plugins
 - **[wayback](https://github.com/s0md3v/Photon/wiki/Usage#use-urls-from-archiveorg-as-seeds)**
 - **[dnsdumpster](https://github.com/s0md3v/Photon/wiki/Usage#dumping-dns-data)**
