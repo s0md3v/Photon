@@ -16,8 +16,8 @@ def requester(
         headers=None,
         timeout=10,
         host=None,
-        proxies=None,
-        user_agents=None,
+        proxies=[None],
+        user_agents=[None],
         failed=None,
         processed=None
     ):
@@ -52,7 +52,7 @@ def requester(
                 verify=False,
                 timeout=timeout,
                 stream=True,
-                proxies=random.choice(proxies) if proxies is not None else None
+                proxies=random.choice(proxies)
             )
         except TooManyRedirects:
             return 'dummy'
