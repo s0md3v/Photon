@@ -166,7 +166,12 @@ bad_intel = set() # needed for intel filtering
 core.config.verbose = verbose
 
 if headers:
-    headers = extract_headers(prompt())
+    try:
+        prompt = prompt()
+    except FileNotFoundError as e:
+        print('Could not load headers prompt: {}'.format(e))
+        quit()
+    headers = extract_headers(prompt)
 
 # If the user hasn't supplied the root URL with http(s), we will handle it
 if main_inp.startswith('http'):
