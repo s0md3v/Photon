@@ -172,17 +172,16 @@ if headers:
 if main_inp.startswith('http'):
     main_url = main_inp
 else:
-    response = None
     try:
-        response = requests.get('https://' + main_inp, proxies=random.choice(proxies))
-    except requests.ConnectionError:
-        sys.stdout.write("Error, host not found.\n")
-        sys.exit(0)
-
-    if response.status_code == 200:
+        requests.get('https://' + main_inp, proxies=random.choice(proxies))
         main_url = 'https://' + main_inp
-    else:
-        main_url = 'http://' + main_inp
+    except requests.ConnectionError:
+        try:
+            requests.get('http://' + main_inp, proxies=random.choice(proxies))
+            main_url = 'http://' + main_inp
+        except requests.ConnectionError:
+            sys.stdout.write("Host not found.\n")
+            sys.exit(0)
 
 schema = main_url.split('//')[0] # https: or http:?
 # Adding the root URL to internal for crawling
