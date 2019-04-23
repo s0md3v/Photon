@@ -86,6 +86,8 @@ parser.add_argument('--clone', help='clone the website locally', dest='clone',
                     action='store_true')
 parser.add_argument('--headers', help='add headers', dest='headers',
                     action='store_true')
+parser.add_argument('--headers_file', help='use headers file', dest='headers_file',
+                    type=str)
 parser.add_argument('--dns', help='enumerate subdomains and DNS data',
                     dest='dns', action='store_true')
 parser.add_argument('--keys', help='find secret keys', dest='api',
@@ -116,7 +118,6 @@ else:
     quit()
 
 clone = args.clone
-headers = args.headers  # prompt for headers
 verbose = args.verbose  # verbose output
 delay = args.delay or 0  # Delay between requests
 timeout = args.timeout or 6  # HTTP request timeout
@@ -165,13 +166,21 @@ bad_intel = set() # needed for intel filtering
 
 core.config.verbose = verbose
 
-if headers:
+# Headers: Can be by prompt or file
+headers = None
+if args.headers:
     try:
         prompt = prompt()
     except FileNotFoundError as e:
         print('Could not load headers prompt: {}'.format(e))
         quit()
     headers = extract_headers(prompt)
+elif args.headers_file:
+    if not os.path.isfile(args.headers_file):
+        print("Could not find file {}".format(args.headers_file))
+        exit()
+    file_content = open(args.headers_file, "r").read()
+    headers = extract_headers(file_content)
 
 # If the user hasn't supplied the root URL with http(s), we will handle it
 if main_inp.startswith('http'):
