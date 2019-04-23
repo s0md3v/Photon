@@ -16,8 +16,8 @@ def requester(
         headers=None,
         timeout=10,
         host=None,
-        proxies=None,
-        user_agents=None,
+        proxies=[None],
+        user_agents=[None],
         failed=None,
         processed=None
     ):
