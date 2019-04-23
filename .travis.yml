@@ -14,5 +14,6 @@ before_script:
 script:
   - python photon.py -u "https://somdev.me" -l 1 -d 1 -t 100 --regex "\d{10}" --dns --output="d3v"
   - python photon.py -u "https://somdev.me" -l 1 -t 10 --seeds="https://somdev.me/posts" --only-urls --export=json --wayback
-  - python3 photon.py -u email1.tesla.com
-  - python3 photon.py -u asdasd.asd
+  - python photon.py -u email1.tesla.com
+  - python photon.py -u asdasd.asd
+  - python photon.py -u somdev.me
