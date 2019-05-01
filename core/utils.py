@@ -38,6 +38,8 @@ def is_link(url, processed, files):
         bool If `url` should be crawled
     """
     if url not in processed:
+        if url.startswith('#') or url.startswith('javascript:'):
+            return False
         is_file = url.endswith(BAD_TYPES)
         if is_file:
             files.add(url)
