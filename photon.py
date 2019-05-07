@@ -225,7 +225,8 @@ def remove_file(url):
 def extractor(url):
     """Extract details from the response body."""
     response = requester(url, main_url, delay, cook, headers, timeout, host, proxies, user_agents, failed, processed)
-
+    if clone:
+        mirror(url, response)
     matches = rhref.findall(response)
     for link in matches:
         # Remove everything after a "#" to deal with in-page anchors
@@ -270,11 +271,6 @@ def extractor(url):
             if entropy(match) >= 4:
                 verb('Key', match)
                 keys.add(url + ': ' + match)
-
-    # First we process link, then we create files in the mirror folder,
-    # otherwise not all links are processed.
-    if clone:
-        mirror(url, response)
 
 
 def jscanner(url):
