@@ -14,7 +14,7 @@ RUN chown -R photon Photon
 USER photon
 
 WORKDIR Photon
-RUN pip install -r requirements.txt
+RUN pip install --user -r requirements.txt
 
 VOLUME [ "/Photon" ]
 # ENTRYPOINT ["sh"]
