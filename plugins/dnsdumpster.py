@@ -8,7 +8,7 @@ def dnsdumpster(domain, output_dir):
     """Query dnsdumpster.com."""
     response = requests.Session().get('https://dnsdumpster.com/').text
     csrf_token = re.search(
-        r"name='csrfmiddlewaretoken' value='(.*?)'", response).group(1)
+        r'name=\"csrfmiddlewaretoken\" value=\"(.*?)\"', response).group(1)
 
     cookies = {'csrftoken': csrf_token}
     headers = {'Referer': 'https://dnsdumpster.com/'}
