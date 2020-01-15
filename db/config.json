@@ -1,0 +1,69 @@
+{
+    "files" : [
+        "txt",
+        "csv",
+        "docx",
+        "json",
+        "pdf",
+        "xls"
+    ],
+    "websites" : {
+        "facebook.com" : "social",
+        "github.com" : "social",
+        "twitter.com" : "social",
+        "linkedin.com" : "social",
+        "reddit.com" : "social",
+        "instagram.com" : "social",
+        "youtube.com" : "social",
+        "cloudfront.net" : "bucket",
+        "appspot.com" : "bucket",
+        "amazonaws.com" : "bucket",
+        "digitaloceanspaces.com" : "bucket",
+        "storage.cloud.google.com" : "bucket",
+        "storage.googleapis.com" : "bucket",
+        "storage-download.googleapis.com" : "bucket",
+        "content-storage-upload.googleapis.com" : "bucket",
+        "content-storage-download.googleapis.com" : "bucket",
+        "1drv.com" : "bucket",
+        "onedrive.live.com" : "bucket",
+        "blob.core.windows.net" : "bucket",
+        "rackcdn.com" : "bucket",
+        "objects.cdn.dream.io" : "bucket",
+        "objects-us-west-1.dream.io" : "bucket",
+        "firebaseio.com" : "bucket"
+    },
+    "extractors" : {
+        "email" : {
+            "regex" : "([\\w_\\.+-]+(?:@|\\[at\\]|\\(at\\))[\\w-]+(?:\\.|\\(dot\\)|\\[dot\\])[\\w\\.]+)",
+            "location" : "any",
+            "enabled" : true
+        },
+        "mention" : {
+            "regex" : "@([\\w_-]+)",
+            "location" : "text",
+            "enabled" : true
+        },
+        "hash" : {
+            "regex" : "([a-fA-F0-9]{32}(?:[a-fA-F0-9]{8})?(?:[a-fA-F0-9]{16})?(?:[a-fA-F0-9]{8})?(?:[a-fA-F0-9]{32})?(?:[a-fA-F0-9]{32})?)",
+            "location" : "any",
+            "enabled" : false
+        },
+        "js_endpoint" : {
+            "regex" : "['\"](/[^'\"><\\(\\)]+?|[^'\"><\\(\\)]+?/[^'\"><\\(\\)]+?)['\"]",
+            "location" : "js",
+            "enabled" : true
+        },
+        "js_files" : {
+            "regex" : "(?i)<script[^>]*src=['\"]?([^>]*)\\b",
+            "location" : "any",
+            "enabled" : true
+        },
+        "token" : {
+            "regex" : "(?<!value=)['\"]*([0-9a-zA-Z_-]{16,64})",
+            "location" : "any",
+            "enabled" : true
+        }
+
+    }
+
+}

@@ -1,52 +1,29 @@
-import requests
-import math
-import os.path
 import re
-import argparse
-
 import tld
+import math
+import json
+import random
+import requests
 
-from core.colors import info
-from core.config import VERBOSE, BAD_TYPES
-
+from fonetic import count
 from urllib.parse import urlparse
 
+from core.values import var
+from core.colors import bad, info
 
-def regxy(pattern, response, supress_regex, custom):
-    """Extract a string based on regex pattern supplied by user."""
-    try:
-        matches = re.findall(r'%s' % pattern, response)
-        for match in matches:
-            verb('Custom regex', match)
-            custom.add(match)
-    except:
-        supress_regex = True
+def isHTML(url):
+    document = re.search(r'/[^/?]+\.([^/?]+)(?:\?|$)', url)
+    if document:
+        extension = document.group(1)
+        if not re.match(r'(?i)^(html|php|asp|phtml|xml|php)[^\.]*?$', extension):
+            return (False, extension)
+        return (True, extension)
+    else:
+        return (True, '')
 
-
-def is_link(url, processed, files):
-    """
-    Determine whether or not a link should be crawled
-    A url should not be crawled if it
-        - Is a file
-        - Has already been crawled
-
-    Args:
-        url: str Url to be processed
-        processed: list[str] List of urls that have already been crawled
-
-    Returns:
-        bool If `url` should be crawled
-    """
-    if url not in processed:
-        if url.startswith('#') or url.startswith('javascript:'):
-            return False
-        is_file = url.endswith(BAD_TYPES)
-        if is_file:
-            files.add(url)
-            return False
-        return True
-    return False
-
+def verbose(cat, data):
+    if var['verbose']:
+        print(info + ' ' + cat + ' ' + data)
 
 def remove_regex(urls, regex):
     """
@@ -74,50 +51,75 @@ def remove_regex(urls, regex):
 
     return non_matching_urls
 
+def writer(obj, path):
+    kind = str(type(obj)).split('\'')[1]
+    if kind == 'list' or kind == 'tuple':
+        obj = '\n'.join(obj)
+    elif kind == 'dict':
+        obj = json.dumps(obj, indent=4)
+    savefile = open(path, 'w+')
+    savefile.write(str(obj.encode('utf-8').decode('utf-8')))
+    savefile.close()
 
-def writer(datasets, dataset_names, output_dir):
-    """Write the results."""
-    for dataset, dataset_name in zip(datasets, dataset_names):
-        if dataset:
-            filepath = output_dir + '/' + dataset_name + '.txt'
-            with open(filepath, 'w+') as out_file:
-                joined = '\n'.join(dataset)
-                out_file.write(str(joined.encode('utf-8').decode('utf-8')))
-                out_file.write('\n')
+def reader(path, string=False):
+    with open(path, 'r') as f:
+        result = [line.rstrip('\n').encode('utf-8').decode('utf-8') for line in f]
+    if string:
+        return '\n'.join(result)
+    else:
+        return result
 
 
 def timer(diff, processed):
     """Return the passed time."""
     # Changes seconds into minutes and seconds
     minutes, seconds = divmod(diff, 60)
-    try:
-        # Finds average time taken by requests
-        time_per_request = diff / float(len(processed))
-    except ZeroDivisionError:
-        time_per_request = 0
-    return minutes, seconds, time_per_request
+    if processed:
+        try:
+            # Finds average time taken by requests
+            requests_per_second = float(len(processed)/seconds)
+        except:
+            requests_per_second = 0
+        return minutes, seconds, requests_per_second
+    else:
+        return minutes, seconds, 0
+
+
+def is_token(string):
+    if string.isdigit():
+        return True
+    total, good, bad = count(string)
+    if total:
+        bad_percentage = (bad * 100)/total
+        if total >= 5:
+            if bad_percentage > 40:
+                return True
+            else:
+                False
+        else:
+            return True
+    return False
 
 
 def entropy(string):
     """Calculate the entropy of a string."""
     entropy = 0
     for number in range(256):
-        result = float(string.encode('utf-8').count(
-            chr(number))) / len(string.encode('utf-8'))
+        result = float(string.count(
+            chr(number))) / len(string)
         if result != 0:
             entropy = entropy - result * math.log(result, 2)
     return entropy
 
 
-def xml_parser(response):
-    """Extract links from .xml files."""
+def raw_urls(response):
     # Regex for extracting URLs
-    return re.findall(r'<loc>(.*?)</loc>', response)
+    return re.findall(r'https?://[^$\'"`\s\r\n]+', response)
 
 
-def verb(kind, string):
+def log(kind, string):
     """Enable verbose output."""
-    if VERBOSE:
+    if var['verbose']:
         print('%s %s: %s' % (info, kind, string))
 
 
@@ -137,70 +139,76 @@ def extract_headers(headers):
     return sorted_headers
 
 
-def top_level(url, fix_protocol=True):
+def get_tld(url, fix_protocol=True):
     """Extract the top level domain from an URL."""
     ext = tld.get_tld(url, fix_protocol=fix_protocol)
-    toplevel = '.'.join(urlparse(url).netloc.split('.')[-2:]).split(
-        ext)[0] + ext
+    toplevel = '.'.join(urlparse(url).netloc.split('.')[-2:]).split(ext)[0] + ext
     return toplevel
 
+def get_domain(url):
+    """Extract the domain from an URL."""
+    return urlparse(url).netloc
 
-def is_proxy_list(v, proxies):
-    if os.path.isfile(v):
-        with open(v, 'r') as _file:
-            for line in _file:
-                line = line.strip()
-                if re.match(r"((http|socks5):\/\/.)?(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}):(\d{1,5})", line) or \
-                   re.match(r"((http|socks5):\/\/.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}:(\d{1,5})", line):
-                    proxies.append({"http": line,
-                                    "https": line})
-                else:
-                    print("%s ignored" % line)
-        if proxies:
+def stabilize(url):
+    "picks up the best suiting protocol if not present already"
+    if 'http' not in url:
+        try:
+            requests.get('https://%s' % url) # Makes request to the target with http scheme
+            url = 'https://%s' % url
+        except: # if it fails, maybe the target uses https scheme
+            url = 'http://%s' % url
+
+    try:
+        requests.get(url) # Makes request to the target
+    except Exception as e: # if it fails, the target is unreachable
+        if 'ssl' in str(e).lower():
+            pass
+        else:
+            print ('%s Unable to connect to the target.' % bad)
+            quit()
+    return url
+
+def seperator(response):
+    html = '\n'.join(re.findall(r'<[a-zA-z][^>]*?>', response))
+    js = '\n'.join([i.group(1) for i in re.finditer(r'(?m)<script[^>]*?>([.\s\S]+?)</script>', response)])
+    text = re.sub(r'<(script|style)[^>]*?>[\s\S]*?</(script|style)>|<[a-zA-Z][^>]*?>|<!--[\s\S]*?-->|</[a-zA-Z][^>]*?>', '', response)
+    return js, text, html
+
+def in_scope(url):
+    if var['wide']:
+        if get_tld(url) == var['scope']:
+            return True
+    else:
+        if get_domain(url) == var['scope']:
             return True
     return False
 
-
-def proxy_type(v):
-    """ Match IP:PORT or DOMAIN:PORT in a losse manner """
-    proxies = []
-    if re.match(r"((http|socks5):\/\/.)?(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}):(\d{1,5})", v):
-        proxies.append({"http": v,
-                        "https": v})
-        return proxies
-    elif re.match(r"((http|socks5):\/\/.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}:(\d{1,5})", v):
-        proxies.append({"http": v,
-                        "https": v})
-        return proxies
-    elif is_proxy_list(v, proxies):
-        return proxies
+def get_agent():
+    if var['random_agent']:
+        return random.choice(var['user_agents'])
+    elif var['as_google']:
+        return 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'
     else:
-        raise argparse.ArgumentTypeError(
-            "Proxy should follow IP:PORT or DOMAIN:PORT format")
+        return 'Photon (https://github.com/s0md3v/Photon)'
 
+def handle_anchor(parent, child):
+    parsed_parent = urlparse(parent)
+    parsed_child = urlparse(child)
+    if parsed_child.scheme:
+        return child
+    elif (parsed_child.path).startswith('//'):
+        return parsed_child.scheme + ':' + child
+    clean = re.sub(r'https?://' + parsed_parent.netloc, '', parent)
+    without_file = '/'.join(clean.split('/')[:-1])
+    if re.search(r'^(?:/?\.\./)+', child):
+        dots = len(re.findall(r'^(?:/?\.\./)+', child))
+        go_up = ''
+        if without_file:
+            go_up = '/'.join(without_file.rstrip('/').split('/')[:-dots])
+        child = re.sub(r'^(?:/?\.\./)+', '', child).rstrip('/')
+        return parsed_parent.scheme + '://' + parsed_parent.netloc + go_up + '/' + child
+    else:
+        return parsed_parent.scheme + '://' + parsed_parent.netloc + without_file + '/' + child.lstrip('/')
 
-def luhn(purported):
-
-    # sum_of_digits (index * 2)
-    LUHN_ODD_LOOKUP = (0, 2, 4, 6, 8, 1, 3, 5, 7, 9)
-
-    if not isinstance(purported, str):
-        purported = str(purported)
-    try:
-        evens = sum(int(p) for p in purported[-1::-2])
-        odds = sum(LUHN_ODD_LOOKUP[int(p)] for p in purported[-2::-2])
-        return (evens + odds) % 10 == 0
-    except ValueError:  # Raised if an int conversion fails
-        return False
-
-
-def is_good_proxy(pip):
-    try:
-        requests.get('http://example.com', proxies=pip, timeout=3)
-    except requests.exceptions.ConnectTimeout as e:
-        return False
-    except Exception as detail:
-        return False
-
-    return True
-
+def deJSON(data):
+    return data.replace('\\\\', '\\')
