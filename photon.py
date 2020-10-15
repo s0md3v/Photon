@@ -48,6 +48,18 @@ print('''%s      ____  __          __
       (red, white, red, white, red, white, red, white, red, white, red, white,
        red, white, end))
 
+# Test for Internet connectivity
+
+TEST_URL = "http://www.example.com"
+timeout = 10
+
+try:
+    request = requests.get(TEST_URL, timeout=timeout)
+    print("Connected to the Internet")
+except (requests.ConnectionError, requests.Timeout):
+    print("No internet connection.")
+    quit()
+
 try:
     from urllib.parse import urlparse  # For Python 3
 except ImportError:
