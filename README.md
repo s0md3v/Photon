@@ -70,7 +70,7 @@ Still, crawling can be resource intensive but Photon has some tricks up it's sle
 
 #### Docker
 
-Photon can be launched using a lightweight Python-Alpine (103 MB) Docker image.
+Photon can be launched using a slim Debian-based Python (230MB) Docker image.
 
 ```bash
 $ git clone https://github.com/s0md3v/Photon.git
