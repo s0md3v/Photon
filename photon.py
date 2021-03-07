@@ -80,7 +80,7 @@ parser.add_argument('--timeout', help='http request timeout', dest='timeout',
                     type=float)
 parser.add_argument('-p', '--proxy', help='Proxy server IP:PORT or DOMAIN:PORT', dest='proxies',
                     type=proxy_type)
-parser.add_argument('--encoding-error', help='encoding error response parameter', dest='encoding_error',default=['strict'],choices=['backslashreplace','ignore','namereplace','strict','replace','xmlcharrefreplace',])
+parser.add_argument('--encoding-error', help='encoding error response parameter', dest='encoding_error',default='strict',choices=['backslashreplace','ignore','namereplace','strict','replace','xmlcharrefreplace',])
 # Switches
 parser.add_argument('--clone', help='clone the website locally', dest='clone',
                     action='store_true')
