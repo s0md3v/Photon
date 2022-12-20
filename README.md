@@ -36,9 +36,6 @@
   <a href="https://github.com/s0md3v/Photon/projects/1">Roadmap</a>
 </p>
 
-### Sponsored By
-<a href="https://oxylabs.io/?utm_source=s0md3v&utm_medium=cpc&utm_campaign=s0md3v_github_partner&adgroupid=202203014"><img src="https://i.ibb.co/2ZdNfYC/oxylabs.png"/></a>
-
 ### Key Features
 
 #### Data Extraction
