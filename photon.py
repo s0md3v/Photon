@@ -36,6 +36,7 @@ from core.mirror import mirror
 from core.prompt import prompt
 from core.requester import requester
 from core.updater import updater
+from core.metadata import extract_metadata, get_dictionary_by_key_value, get_dictionary_by_key
 from core.utils import (luhn,
                         proxy_type,
                         is_good_proxy,
@@ -80,6 +81,7 @@ parser.add_argument('--timeout', help='http request timeout', dest='timeout',
                     type=float)
 parser.add_argument('-p', '--proxy', help='Proxy server IP:PORT or DOMAIN:PORT', dest='proxies',
                     type=proxy_type)
+parser.add_argument('-m', '--metadata', help='page metadata', dest='metadata')
 
 # Switches
 parser.add_argument('--clone', help='clone the website locally', dest='clone',
@@ -142,6 +144,7 @@ else:
 crawl_level = args.level or 2  # Crawling level
 thread_count = args.threads or 2  # Number of threads
 only_urls = bool(args.only_urls)  # Only URLs mode is off by default
+has_metadata = bool(args.metadata) # Has metadata
 
 # Variables we are gonna use later to store stuff
 keys = set()  # High entropy strings, prolly secret keys
@@ -158,6 +161,7 @@ endpoints = set()  # URLs found from javascript files
 processed = set(['dummy'])  # URLs that have been crawled
 # URLs that belong to the target i.e. in-scope
 internal = set(args.seeds)
+metadata = set()
 
 everything = []
 bad_scripts = set()  # Unclean javascript file urls
@@ -239,6 +243,11 @@ def remove_file(url):
 def extractor(url):
     """Extract details from the response body."""
     response = requester(url, main_url, delay, cook, headers, timeout, host, proxies, user_agents, failed, processed)
+    
+    # Add metadata
+    if has_metadata:
+        metadata.add(extract_metadata(response, url))
+    
     if clone:
         mirror(url, response)
     matches = rhref.findall(response)
