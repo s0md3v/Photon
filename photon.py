@@ -81,7 +81,7 @@ parser.add_argument('--timeout', help='http request timeout', dest='timeout',
                     type=float)
 parser.add_argument('-p', '--proxy', help='Proxy server IP:PORT or DOMAIN:PORT', dest='proxies',
                     type=proxy_type)
-parser.add_argument('-m', '--metadata', help='page metadata', dest='metadata')
+parser.add_argument('-m', '--metadata', help='page metadata', dest='store_true')
 
 # Switches
 parser.add_argument('--clone', help='clone the website locally', dest='clone',
@@ -387,9 +387,9 @@ if not os.path.exists(output_dir): # if the directory doesn't exist
     os.mkdir(output_dir) # create a new directory
 
 datasets = [files, intel, robots, custom, failed, internal, scripts,
-            external, fuzzable, endpoints, keys]
+            external, fuzzable, endpoints, keys, metadata]
 dataset_names = ['files', 'intel', 'robots', 'custom', 'failed', 'internal',
-                 'scripts', 'external', 'fuzzable', 'endpoints', 'keys']
+                 'scripts', 'external', 'fuzzable', 'endpoints', 'keys', 'metadata']
 
 writer(datasets, dataset_names, output_dir)
 # Printing out results
@@ -408,7 +408,7 @@ datasets = {
     'custom': list(custom), 'failed': list(failed), 'internal': list(internal),
     'scripts': list(scripts), 'external': list(external),
     'fuzzable': list(fuzzable), 'endpoints': list(endpoints),
-    'keys': list(keys)
+    'keys': list(keys), 'metadata': list(metadata)
 }
 
 if args.dns:
