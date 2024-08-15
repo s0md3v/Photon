@@ -25,6 +25,8 @@
   </a>
 </p>
 
+Met a CAPTCHA? Try [CapSolver](https://www.capsolver.com) solving solution.
+
 ![demo](https://image.ibb.co/kQSUcz/demo.png)
 
 <p align="center">
