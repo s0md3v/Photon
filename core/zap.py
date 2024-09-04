@@ -22,6 +22,7 @@ def zap(input_url, archive, domain, host, internal, robots, proxies):
             internal.add(url)
     # Makes request to robots.txt
     response = requests.get(input_url + '/robots.txt',
+                            verify=False,
                             proxies=random.choice(proxies)).text
     # Making sure robots.txt isn't some fancy 404 page
     if '<body' not in response:
@@ -43,6 +44,7 @@ def zap(input_url, archive, domain, host, internal, robots, proxies):
             print('%s URLs retrieved from robots.txt: %s' % (good, len(robots)))
     # Makes request to sitemap.xml
     response = requests.get(input_url + '/sitemap.xml',
+                            verify=False,
                             proxies=random.choice(proxies)).text
     # Making sure robots.txt isn't some fancy 404 page
     if '<body' not in response:

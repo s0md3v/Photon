@@ -178,7 +178,7 @@ if main_inp.startswith('http'):
     main_url = main_inp
 else:
     try:
-        requests.get('https://' + main_inp, proxies=random.choice(proxies))
+        requests.get('https://' + main_inp, proxies=random.choice(proxies), verify=False)
         main_url = 'https://' + main_inp
     except:
         main_url = 'http://' + main_inp
