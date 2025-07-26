@@ -190,7 +190,11 @@ internal.add(main_url)
 # Extracts host out of the URL
 host = urlparse(main_url).netloc
 
-output_dir = args.output or host
+# Always use data/** format for Docker compatibility
+if args.output:
+    output_dir = args.output
+else:
+    output_dir = f"data/{host}"
 
 try:
     domain = top_level(main_url)
@@ -375,8 +379,13 @@ diff = (now - then)
 minutes, seconds, time_per_request = timer(diff, processed)
 
 # Step 4. Save the results
+# Ensure the data directory exists for Docker compatibility
+if not args.output:  # Only create data directory structure when using default output
+    data_dir = "data"
+    if not os.path.exists(data_dir):
+        os.makedirs(data_dir)
 if not os.path.exists(output_dir): # if the directory doesn't exist
-    os.mkdir(output_dir) # create a new directory
+    os.makedirs(output_dir) # create a new directory (use makedirs for nested dirs)
 
 datasets = [files, intel, robots, custom, failed, internal, scripts,
             external, fuzzable, endpoints, keys]

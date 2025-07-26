@@ -20,9 +20,6 @@
   <a href="https://github.com/s0md3v/Photon/issues?q=is%3Aissue+is%3Aclosed">
       <img src="https://img.shields.io/github/issues-closed-raw/s0md3v/Photon.svg">
   </a>
-  <a href="https://travis-ci.com/s0md3v/Photon">
-    <img src="https://img.shields.io/travis/com/s0md3v/Photon.svg">
-  </a>
 </p>
 
 ![demo](https://image.ibb.co/kQSUcz/demo.png)
@@ -70,19 +67,21 @@ Still, crawling can be resource intensive but Photon has some tricks up it's sle
 
 #### Docker
 
-Photon can be launched using a lightweight Python-Alpine (103 MB) Docker image.
+Photon can be launched using a lightweight Docker image.
+To view results, you should open the created folder named `data`.
 
+
+**Use the prebuild Docker image:**
 ```bash
-$ git clone https://github.com/s0md3v/Photon.git
-$ cd Photon
-$ docker build -t photon .
-$ docker run -it --name photon photon:latest -u google.com
+docker run -it -v "$PWD/data:/app/data" ghcr.io/s0md3v/photon:latest -u google.com
 ```
 
-To view results, you can either head over to the local docker volume, which you can find by running `docker inspect photon` or by mounting the target loot folder:
-
+**Or build the docker image on your computer:**
 ```bash
-$ docker run -it --name photon -v "$PWD:/Photon/google.com" photon:latest -u google.com
+git clone https://github.com/s0md3v/Photon.git
+cd Photon
+docker build -t photon .
+docker run -it --name photon -v "$PWD/data:/app/data" photon:latest -u google.com
 ```
 
 #### Frequent & Seamless Updates

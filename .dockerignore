@@ -12,6 +12,7 @@ LICENSE.md
 Dockerfile
 .dockerignore
 __pycache__
+data
 
 # IDE
 .vscode
