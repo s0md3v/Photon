@@ -1,0 +1,18 @@
+# Git
+.git
+.gitignore
+.github
+
+# Documentation
+README.md
+CHANGELOG.md
+LICENSE.md
+
+# Docker
+Dockerfile
+.dockerignore
+__pycache__
+
+# IDE
+.vscode
+.idea
