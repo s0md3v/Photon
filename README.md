@@ -81,7 +81,7 @@ docker run -it -v "$PWD/data:/app/data" ghcr.io/s0md3v/photon:latest -u google.c
 git clone https://github.com/s0md3v/Photon.git
 cd Photon
 docker build -t photon .
-docker run -it --name photon -v "$PWD/data:/app/data" photon:latest -u google.com
+docker run -it -v "$PWD/data:/app/data" photon:latest -u google.com
 ```
 
 #### Frequent & Seamless Updates
