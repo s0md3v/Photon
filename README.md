@@ -73,7 +73,7 @@ To view results, you should open the created folder named `data`.
 
 **Use the prebuild Docker image:**
 ```bash
-docker run -it -v "$PWD/data:/app/data" ghcr.io/s0md3v/photon:latest -u google.com
+docker run -it -v "$PWD/data:/app/data" ghcr.io/s0md3v/photon:master -u google.com
 ```
 
 **Or build the docker image on your computer:**
