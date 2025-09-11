@@ -1,8 +1,8 @@
 import os
 import re
 
-from core.colors import run, que, good, green, end, info
-from core.requester import requester
+from photon.core.colors import run, que, good, green, end, info
+from photon.core.requester import requester
 
 
 def updater():
