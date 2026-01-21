@@ -80,7 +80,7 @@ parser.add_argument('--timeout', help='http request timeout', dest='timeout',
                     type=float)
 parser.add_argument('-p', '--proxy', help='Proxy server IP:PORT or DOMAIN:PORT', dest='proxies',
                     type=proxy_type)
-
+parser.add_argument('--encoding-error', help='encoding error response parameter', dest='encoding_error',default='strict',choices=['backslashreplace','ignore','namereplace','strict','replace','xmlcharrefreplace',])
 # Switches
 parser.add_argument('--clone', help='clone the website locally', dest='clone',
                     action='store_true')
@@ -190,6 +190,7 @@ internal.add(main_url)
 host = urlparse(main_url).netloc
 
 output_dir = args.output or host
+encoding_error_response = args.encoding_error
 
 try:
     domain = top_level(main_url)
@@ -240,7 +241,7 @@ def extractor(url):
     """Extract details from the response body."""
     response = requester(url, main_url, delay, cook, headers, timeout, host, proxies, user_agents, failed, processed)
     if clone:
-        mirror(url, response)
+        mirror(url, response,encoding_error_response)
     matches = rhref.findall(response)
     for link in matches:
         # Remove everything after a "#" to deal with in-page anchors
@@ -282,7 +283,7 @@ def extractor(url):
     if api:
         matches = rentropy.findall(response)
         for match in matches:
-            if entropy(match) >= 4:
+            if entropy(match,encoding_error_response) >= 4:
                 verb('Key', match)
                 keys.add(url + ': ' + match)
 
@@ -382,7 +383,7 @@ datasets = [files, intel, robots, custom, failed, internal, scripts,
 dataset_names = ['files', 'intel', 'robots', 'custom', 'failed', 'internal',
                  'scripts', 'external', 'fuzzable', 'endpoints', 'keys']
 
-writer(datasets, dataset_names, output_dir)
+writer(datasets, dataset_names, output_dir,encoding_error_response)
 # Printing out results
 print(('%s-%s' % (red, end)) * 50)
 for dataset, dataset_name in zip(datasets, dataset_names):
@@ -407,7 +408,7 @@ if args.dns:
     from plugins.find_subdomains import find_subdomains
     subdomains = find_subdomains(domain)
     print('%s %i subdomains found' % (info, len(subdomains)))
-    writer([subdomains], ['subdomains'], output_dir)
+    writer([subdomains], ['subdomains'], output_dir,encoding_error_response)
     datasets['subdomains'] = subdomains
     from plugins.dnsdumpster import dnsdumpster
     print('%s Generating DNS map' % run)
