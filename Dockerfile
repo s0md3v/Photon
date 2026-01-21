@@ -12,5 +12,6 @@ RUN pip install -r requirements.txt
 
 VOLUME [ "/Photon" ]
 # ENTRYPOINT ["sh"]
+WORKDIR /Photon
 ENTRYPOINT [ "python", "photon.py" ]
 CMD ["--help"]
