@@ -33,9 +33,6 @@
   <a href="https://github.com/s0md3v/Photon/projects/1">Roadmap</a>
 </p>
 
-**Sponsored By [Thordata](https://www.thordata.com/?ls=github&lk=Photon)**
-<a href="https://www.thordata.com/?ls=github&lk=Photon"><img src="https://github.com/user-attachments/assets/2cfb6f56-3547-4f82-9d47-2eb14ee3f099"/></a>
-
 ### Key Features
 
 #### Data Extraction
