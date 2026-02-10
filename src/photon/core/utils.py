@@ -6,8 +6,8 @@ import argparse
 
 import tld
 
-from core.colors import info
-from core.config import VERBOSE, BAD_TYPES
+from photon.core.colors import info
+from photon.core.config import VERBOSE, BAD_TYPES
 
 from urllib.parse import urlparse
 
