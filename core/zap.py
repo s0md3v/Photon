@@ -6,8 +6,8 @@ from core.utils import verb, xml_parser
 from core.colors import run, good
 from plugins.wayback import time_machine
 
-
-def zap(input_url, archive, domain, host, internal, robots, proxies):
+def zap(input_url, archive, domain, host, internal, robots, proxies,verf):
+    response = ''
     """Extract links from robots.txt and sitemap.xml."""
     if archive:
         print('%s Fetching URLs from archive.org' % run)
@@ -21,8 +21,14 @@ def zap(input_url, archive, domain, host, internal, robots, proxies):
             verb('Internal page', url)
             internal.add(url)
     # Makes request to robots.txt
-    response = requests.get(input_url + '/robots.txt',
-                            proxies=random.choice(proxies)).text
+    try: 
+        response = requests.get(input_url + '/robots.txt',
+                                proxies=random.choice(proxies),
+                                verify=verf).text
+    except requests.exceptions.SSLError as Error:
+        response = requests.get(input_url + '/robots.txt',
+                                proxies=random.choice(proxies),
+                                verify=verf).text
     # Making sure robots.txt isn't some fancy 404 page
     if '<body' not in response:
         # If you know it, you know it
@@ -42,8 +48,14 @@ def zap(input_url, archive, domain, host, internal, robots, proxies):
                     robots.add(url)
             print('%s URLs retrieved from robots.txt: %s' % (good, len(robots)))
     # Makes request to sitemap.xml
-    response = requests.get(input_url + '/sitemap.xml',
-                            proxies=random.choice(proxies)).text
+    try:
+        response = requests.get(input_url + '/sitemap.xml',
+                                proxies=random.choice(proxies),
+                                verify=verf).text
+    except requests.exceptions.SSLError as Error:
+        response = requests.get(input_url + '/sitemap.xml',
+                                proxies=random.choice(proxies),
+                                verify=verf).text
     # Making sure robots.txt isn't some fancy 404 page
     if '<body' not in response:
         matches = xml_parser(response)
