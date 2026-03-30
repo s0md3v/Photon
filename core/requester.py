@@ -59,7 +59,10 @@ def requester(
 
         if 'text/html' in response.headers['content-type'] or \
            'text/plain' in response.headers['content-type']:
-            if response.status_code != '404':
+            # Bug fix: status_code is an int, not a string — '404' comparison
+            # always evaluated to True (i.e. never treated as failed), causing
+            # Photon to process every response including actual 404 pages.
+            if response.status_code != 404:
                 return response.text
             else:
                 response.close()
