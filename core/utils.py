@@ -19,7 +19,7 @@ def regxy(pattern, response, supress_regex, custom):
         for match in matches:
             verb('Custom regex', match)
             custom.add(match)
-    except:
+    except Exception:
         supress_regex = True
 
 
