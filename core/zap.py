@@ -6,8 +6,7 @@ from core.utils import verb, xml_parser
 from core.colors import run, good
 from plugins.wayback import time_machine
 
-
-def zap(input_url, archive, domain, host, internal, robots, proxies):
+def zap(input_url, archive, domain, host, internal, robots, proxies, user_agents):
     """Extract links from robots.txt and sitemap.xml."""
     if archive:
         print('%s Fetching URLs from archive.org' % run)
@@ -21,7 +20,8 @@ def zap(input_url, archive, domain, host, internal, robots, proxies):
             verb('Internal page', url)
             internal.add(url)
     # Makes request to robots.txt
-    response = requests.get(input_url + '/robots.txt',
+    response = requests.get(input_url + '/robots.txt', 
+                            headers = {'user-agent': random.choice(user_agents)},
                             proxies=random.choice(proxies)).text
     # Making sure robots.txt isn't some fancy 404 page
     if '<body' not in response:
@@ -43,8 +43,9 @@ def zap(input_url, archive, domain, host, internal, robots, proxies):
             print('%s URLs retrieved from robots.txt: %s' % (good, len(robots)))
     # Makes request to sitemap.xml
     response = requests.get(input_url + '/sitemap.xml',
+                            headers = {'user-agent': random.choice(user_agents)},
                             proxies=random.choice(proxies)).text
-    # Making sure robots.txt isn't some fancy 404 page
+    # Making sure sitemap.xml isn't some fancy 404 page
     if '<body' not in response:
         matches = xml_parser(response)
         if matches: # if there are any matches

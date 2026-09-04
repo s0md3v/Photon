@@ -306,7 +306,7 @@ def jscanner(url):
 then = time.time()
 
 # Step 1. Extract urls from robots.txt & sitemap.xml
-zap(main_url, args.archive, domain, host, internal, robots, proxies)
+zap(main_url, args.archive, domain, host, internal, robots, proxies, user_agents)
 
 # This is so the level 1 emails are parsed as well
 internal = set(remove_regex(internal, args.exclude))
