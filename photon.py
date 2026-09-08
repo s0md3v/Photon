@@ -16,10 +16,10 @@ from core.colors import good, info, run, green, red, white, end, bad
 
 # Just a fancy ass banner
 print('''%s      ____  __          __
-     / %s__%s \/ /_  ____  / /_____  ____
-    / %s/_/%s / __ \/ %s__%s \/ __/ %s__%s \/ __ \\
+     / %s__%s \\/ /_  ____  / /_____  ____
+    / %s/_/%s / __ \\/ %s__%s \\/ __/ %s__%s \\/ __ \\
    / ____/ / / / %s/_/%s / /_/ %s/_/%s / / / /
-  /_/   /_/ /_/\____/\__/\____/_/ /_/ %sv1.3.2%s\n''' %
+  /_/   /_/ /_/\\____/\\__/\\____/_/ /_/ %sv1.3.2%s\n''' %
       (red, white, red, white, red, white, red, white, red, white, red, white,
        red, white, end))
 
