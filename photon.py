@@ -80,7 +80,7 @@ parser.add_argument('--timeout', help='http request timeout', dest='timeout',
                     type=float)
 parser.add_argument('-p', '--proxy', help='Proxy server IP:PORT or DOMAIN:PORT', dest='proxies',
                     type=proxy_type)
-
+parser.add_argument('--no-cert', help="No check certificate", dest="certificate", action='store_true')
 # Switches
 parser.add_argument('--clone', help='clone the website locally', dest='clone',
                     action='store_true')
@@ -98,6 +98,12 @@ parser.add_argument('--wayback', help='fetch URLs from archive.org as seeds',
                     dest='archive', action='store_true')
 args = parser.parse_args()
 
+#check argument certificate 
+verf = bool
+if args.certificate:
+    verf = False
+else: 
+    verf = True
 
 # If the user has supplied --update argument
 if args.update:
@@ -306,7 +312,7 @@ def jscanner(url):
 then = time.time()
 
 # Step 1. Extract urls from robots.txt & sitemap.xml
-zap(main_url, args.archive, domain, host, internal, robots, proxies)
+zap(main_url, args.archive, domain, host, internal, robots, proxies,verf)
 
 # This is so the level 1 emails are parsed as well
 internal = set(remove_regex(internal, args.exclude))
