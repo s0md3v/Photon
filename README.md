@@ -34,6 +34,9 @@
   <a href="https://github.com/s0md3v/Photon/projects/1">Roadmap</a>
 </p>
 
+### Sponsored By
+<div align="center"><a href="https://proxy-seller.com/?utm_source=github&utm_medium=referral&utm_campaign=partner_promo&utm_term=github"><img width="70%" src="https://github.com/user-attachments/assets/60283daf-3a37-42fe-a4d3-11d4846df33b" /></a></div>
+
 ### Key Features
 
 #### Data Extraction
