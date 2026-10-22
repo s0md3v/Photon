@@ -75,14 +75,14 @@ def remove_regex(urls, regex):
     return non_matching_urls
 
 
-def writer(datasets, dataset_names, output_dir):
+def writer(datasets, dataset_names, output_dir,encoding_error_response):
     """Write the results."""
     for dataset, dataset_name in zip(datasets, dataset_names):
         if dataset:
             filepath = output_dir + '/' + dataset_name + '.txt'
             with open(filepath, 'w+') as out_file:
                 joined = '\n'.join(dataset)
-                out_file.write(str(joined.encode('utf-8').decode('utf-8')))
+                out_file.write(str(joined.encode('utf-8',errors=encoding_error_response).decode('utf-8')))
                 out_file.write('\n')
 
 
@@ -98,12 +98,12 @@ def timer(diff, processed):
     return minutes, seconds, time_per_request
 
 
-def entropy(string):
+def entropy(string,encoding_error_response):
     """Calculate the entropy of a string."""
     entropy = 0
     for number in range(256):
-        result = float(string.encode('utf-8').count(
-            chr(number))) / len(string.encode('utf-8'))
+        result = float(string.encode('utf-8',errors=encoding_error_response).count(
+            chr(number))) / len(string.encode('utf-8',errors=encoding_error_response))
         if result != 0:
             entropy = entropy - result * math.log(result, 2)
     return entropy
