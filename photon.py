@@ -139,7 +139,7 @@ if args.proxies:
 else:
     proxies.append(None)
 
-crawl_level = args.level or 2  # Crawling level
+crawl_level = args.level if args.level is not None else 2  # Crawling level
 thread_count = args.threads or 2  # Number of threads
 only_urls = bool(args.only_urls)  # Only URLs mode is off by default
 
@@ -306,13 +306,17 @@ def jscanner(url):
 then = time.time()
 
 # Step 1. Extract urls from robots.txt & sitemap.xml
-zap(main_url, args.archive, domain, host, internal, robots, proxies)
+if crawl_level > 0:
+    zap(main_url, args.archive, domain, host, internal, robots, proxies)
+else:
+    print('%s Level 0: only the target URL will be fetched' % run)
 
 # This is so the level 1 emails are parsed as well
 internal = set(remove_regex(internal, args.exclude))
 
-# Step 2. Crawl recursively to the limit specified in "crawl_level"
-for level in range(crawl_level):
+# Step 2. Crawl recursively to the limit specified in "crawl_level".
+# Level 0 still fetches the target once; it just doesn't follow any links.
+for level in range(max(crawl_level, 1)):
     # Links to crawl = (all links - already crawled links) - links not to crawl
     links = remove_regex(internal - processed, args.exclude)
     # If links to crawl are 0 i.e. all links have been crawled
@@ -337,9 +341,11 @@ if not only_urls:
             scripts.add(main_url + match)
         elif not match.startswith('http') and not match.startswith('//'):
             scripts.add(main_url + '/' + match)
-    # Step 3. Scan the JavaScript files for endpoints
-    print('%s Crawling %i JavaScript files' % (run, len(scripts)))
-    flash(jscanner, scripts, thread_count)
+    # Step 3. Scan the JavaScript files for endpoints. Level 0 only
+    # inspects the target page, so it must not request linked scripts.
+    if crawl_level > 0:
+        print('%s Crawling %i JavaScript files' % (run, len(scripts)))
+        flash(jscanner, scripts, thread_count)
 
     for url in internal:
         if '=' in url:
