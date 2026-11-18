@@ -139,11 +139,9 @@ def extract_headers(headers):
 
 def top_level(url, fix_protocol=True):
     """Extract the top level domain from an URL."""
-    ext = tld.get_tld(url, fix_protocol=fix_protocol)
-    toplevel = '.'.join(urlparse(url).netloc.split('.')[-2:]).split(
-        ext)[0] + ext
+    res = tld.get_tld(url, fix_protocol=fix_protocol, as_object=True)
+    toplevel = res.domain + '.' + res.tld
     return toplevel
-
 
 def is_proxy_list(v, proxies):
     if os.path.isfile(v):
