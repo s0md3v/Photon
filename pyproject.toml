@@ -1,0 +1,15 @@
+[project]
+dependencies = [ "requests[socks]>=2.25.1", "tld>=0.12.7", "urllib3>=1.26.20" ]
+description = "Incredibly fast crawler designed for OSINT."
+license = "GPL-3.0-only"
+name = "photon"
+readme = "README.md"
+requires-python = ">=3.3.0"
+version = "1.3.0"
+
+[project.scripts]
+photon = "photon:photon"
+
+[build-system]
+build-backend = "uv_build"
+requires = [ "uv_build>=0.8.3,<0.9.0" ]

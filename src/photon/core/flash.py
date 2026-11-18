@@ -1,7 +1,7 @@
 from __future__ import print_function
 import concurrent.futures
 
-from core.colors import info
+from photon.core.colors import info
 
 def flash(function, links, thread_count):
     """Process the URLs and uses a threadpool to execute a function."""
