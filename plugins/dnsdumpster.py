@@ -6,17 +6,13 @@ import requests
 
 def dnsdumpster(domain, output_dir):
     """Query dnsdumpster.com."""
-    response = requests.Session().get('https://dnsdumpster.com/').text
-    csrf_token = re.search(
-        r'name=\"csrfmiddlewaretoken\" value=\"(.*?)\"', response).group(1)
-
-    cookies = {'csrftoken': csrf_token}
     headers = {'Referer': 'https://dnsdumpster.com/'}
-    data = {'csrfmiddlewaretoken': csrf_token, 'targetip': domain}
-    response = requests.Session().post(
-        'https://dnsdumpster.com/', cookies=cookies, data=data, headers=headers)
+    data = {'target': domain}
+    response = requests.post('https://dnsdumpster.com/htmld/', data=data, headers=headers)
 
-    image = requests.get('https://dnsdumpster.com/static/map/%s.png' % domain)
+    match = re.search(r"/dl/maps/"+domain+"-([0-9a-f-]+)", response.text)
+    file_hash = match.group(1)
+    image = requests.get('https://dnsdumpster.com/dl/maps/%s-%s.png' % (domain, file_hash))
     if image.status_code == 200:
         with open('%s/%s.png' % (output_dir, domain), 'wb') as f:
             f.write(image.content)
